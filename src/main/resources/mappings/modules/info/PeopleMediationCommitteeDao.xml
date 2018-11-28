@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.PeopleMediationCommitteeDao">
+    
+	<sql id="peopleMediationCommitteeColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.organization_form AS "organizationForm",
+		a.charge_user AS "chargeUser",
+		a.abbreviation AS "abbreviation",
+		a.address AS "address",
+		a.office_id AS "office.id",
+		a.zip_code AS "zipCode",
+		a.phone AS "phone",
+		a.image_url AS "imageUrl",
+		a.fax_number AS "faxNumber",
+		a.establish_area AS "establishArea",
+		a.establish_time AS "establishTime",
+		a.area_id AS "area.id",
+		a.introduction AS "introduction",
+		a.coordinate AS "coordinate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.administrative_division AS "administrativeDivision",
+		o7.name AS "office.name",
+		a14.name AS "area.name",
+		a15.name AS "belongtowns.name",
+		a.license_Number As "licenseNumber"
+	</sql>
+	
+	<resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+	  <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="name" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="coordinate" column="coordinate" />
+		<result property="personName" column="chargeUser" />
+		<result property="hasPerson" column="hasPerson" />
+		<result property="zipCode" column="zipCode" />
+		<result property="birthday" column="establishTime" />
+		<result property="introduction" column="introduction" />
+		<result property="no" column="licenseNumber" />
+		<result property="id" column="login_id" />
+		<association property="town"  javaType="Area" resultMap="areaMap"/>
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	<sql id="peopleMediationCommitteeJoins">
+		LEFT JOIN sys_office o7 ON o7.name = a.name and o7.del_flag='0'
+		LEFT JOIN sys_area a14 ON a14.id = a.area_id
+		LEFT JOIN sys_area a15 ON a15.id = a.belongtowns
+	</sql>
+    
+	<select id="get" resultType="PeopleMediationCommittee">
+		SELECT 
+			<include refid="peopleMediationCommitteeColumns"/>
+		FROM info_people_mediation_committee a
+		<include refid="peopleMediationCommitteeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="getByNameAdnArea" resultType="PeopleMediationCommittee">
+		SELECT 
+			<include refid="peopleMediationCommitteeColumns"/>
+		FROM info_people_mediation_committee a
+		<include refid="peopleMediationCommitteeJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} and  a.name = #{name} and  a.area_id =#{area.id} and a.belongtowns = #{belongtowns}
+	</select>
+	
+	<select id="getMediationInfo" resultType="PeopleMediationCommittee">
+		SELECT * FROM info_people_mediation_committee a WHERE a.del_flag = #{DEL_FLAG_NORMAL} and  a.name = #{name}  and  a.area_id =#{areaId} and a.belongtowns = #{belongTowns}
+	</select>
+	
+	<select id="findListInfo" resultType="PeopleMediationCommittee">
+		SELECT * FROM info_people_mediation_committee a 
+		<where>
+			 a.del_flag = #{DEL_FLAG_NORMAL} and  a.name = #{name}
+		<if test="area != null and area.id != null and area.id != ''">
+		    AND a.area_id = #{area.id}
+		</if>
+		<if test="belongtowns != null and belongtowns.id != null and belongtowns.id != ''">
+				AND a.belongtowns = #{belongtowns.id}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findList" resultType="PeopleMediationCommittee">
+		SELECT 
+			<include refid="peopleMediationCommitteeColumns"/>
+		FROM info_people_mediation_committee a
+		<include refid="peopleMediationCommitteeJoins"/>
+		left join sys_user_office_info suoi on suoi.login_id=a.office_id 
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+			<!-- 数据范围过滤 -->
+		        ${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PeopleMediationCommittee">
+		SELECT 
+			<include refid="peopleMediationCommitteeColumns"/>
+		FROM info_people_mediation_committee a
+		<include refid="peopleMediationCommitteeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+		<select id="getById" resultMap="agencyResult">
+		SELECT 
+			<include refid="peopleMediationCommitteeColumns"/>
+		FROM info_people_mediation_committee a
+		<include refid="peopleMediationCommitteeJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL} and a.id = #{id}
+	</select>
+	
+		<select id="findListForApi" resultMap="agencyResult">
+		SELECT (SELECT COUNT(*) 
+                  FROM info_people_mediation i10
+                 WHERE i10.del_flag = 0
+                   AND i10.office_id = a.id) hasPerson,suoi.login_id,
+			<include refid="peopleMediationCommitteeColumns"/>
+		FROM info_people_mediation_committee a
+		<include refid="peopleMediationCommitteeJoins"/>
+		left join sys_user_office_info suoi on suoi.info_id=a.id AND suoi.del_flag = '0' AND suoi.type = '1'
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+			   AND a.area_id  in (select  id from  sys_area where id=#{area.id} or parent_id=#{area.id}) 
+			</if>
+			<if test="town != null and town.id != null and town.id != ''">
+			   AND a.belongtowns  in (select  id  from  sys_area where id=#{town.id} or parent_id=#{town.id}) 
+			</if>
+			<if test="officeId != null and officeId!= ''">
+			    AND a.office_id = #{officeId}
+			</if>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="counte" resultType="int"> 
+	SELECT count(*)
+		FROM info_people_mediation_committee a
+		where 0=#{tt}
+	</select>
+	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_people_mediation_committee a
+		<include refid="peopleMediationCommitteeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+			   AND a.area_id  in (select  id from  sys_area where id=#{area.id} or parent_id=#{area.id}) 
+			</if>
+			<if test="town != null and town.id != null and town.id != ''">
+			   AND a.belongtowns  in (select  id  from  sys_area where id=#{town.id} or parent_id=#{town.id}) 
+			</if>
+			<if test="officeId != null and officeId!= ''">
+			    AND a.office_id = #{officeId}
+			</if>
+			
+		</where>
+	</select>
+	<insert id="insert">
+		INSERT INTO info_people_mediation_committee(
+			id,
+			name,
+			organization_form,
+			charge_user,
+			abbreviation,
+			address,
+			office_id,
+			zip_code,
+			phone,
+			image_url,
+			fax_number,
+			establish_area,
+			establish_time,
+			area_id,
+			introduction,
+			coordinate,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			administrative_division,
+			license_Number,
+			belongtowns,
+			charge_user_idCard
+		) VALUES (
+			#{id},
+			#{name},
+			#{organizationForm},
+			#{chargeUser},
+			#{abbreviation},
+			#{address},
+			#{office.id},
+			#{zipCode},
+			#{phone},
+			#{imageUrl},
+			#{faxNumber},
+			#{establishArea},
+			#{establishTime},
+			#{area.id},
+			#{introduction},
+			#{coordinate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{administrativeDivision},
+			#{licenseNumber},
+			#{belongtowns.id},
+			#{chargeUserIdCard}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_people_mediation_committee SET 	
+			name = #{name},
+			organization_form = #{organizationForm},
+			charge_user = #{chargeUser},
+			abbreviation = #{abbreviation},
+			address = #{address},
+			office_id = #{office.id},
+			zip_code = #{zipCode},
+			phone = #{phone},
+			image_url = #{imageUrl},
+			fax_number = #{faxNumber},
+			establish_area = #{establishArea},
+			establish_time = #{establishTime},
+			area_id = #{area.id},
+			introduction = #{introduction},
+			coordinate = #{coordinate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			administrative_division = #{administrativeDivision},
+			license_Number=#{licenseNumber},
+			belongtowns=#{belongtowns.id},
+			charge_user_idCard=#{chargeUserIdCard}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_people_mediation_committee SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	    <update id="batchDelete" parameterType="String" >
+  		UPDATE info_people_mediation_committee SET del_flag = '1' where  id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+	
+</mapper>

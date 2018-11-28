@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.LawAssitanceUserDao">
+    
+    <resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+    <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="office.name" />
+		<result property="personName" column="name" />
+		<!-- <result property="age" column="age" /> -->
+		<result property="sex" column="sexLabel" />
+		<result property="ethnic" column="ethnicLabel" />
+		<result property="no" column="licenseNumber" />
+		<result property="id" column="login_id" />
+		<result property="idCard" column="idCard" />
+		<result property="isMongolian" column="isMongolianLabel" />
+		<result property="agencyAddress" column="address" />
+		<result property="birthday" column="birthday" />
+		<result property="agencyPhone" column="phone" />
+		<result property="education" column="education" />
+		<result property="politicalFace" column="politicalFace" />
+		<result property="introduction" column="introduction" />
+		<result property="imageUrl" column="image" />
+		<result property="evaluation" column="evaluation" />
+		<result property="isAidLawyer" column="isAidLawyer" />
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	
+	<sql id="lawAssitanceUserColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.image AS "image",
+		a.age AS "age",
+		a.nation AS "nation",
+		a.office_id AS "office.id",
+		o.name AS "office.name",
+		a.license_number AS "licenseNumber",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.area AS "area.id",
+		a7.name AS "area.name",
+		a.phone AS "phone",
+		a.address AS "address",
+		a.birthday AS "birthday",
+		a.id_card AS 'idCard',
+		a.introduction AS "introduction",
+		a.education As "education",
+		a.political_face As "politicalFace",
+		a.sex AS "sex",
+		a.is_mongolian AS "isMongolian",
+		a.evaluation AS "evaluation",
+		a.role AS "role",
+		a.is_aid_lawyer AS "isAidLawyer",
+		d4.login_id AS "login_id"
+	</sql>
+	
+	<sql id="lawAssitanceUserJoins">
+	   LEFT JOIN sys_area a7 ON a7.id = a.area
+	   LEFT JOIN sys_office o ON o.id = a.office_id
+	   LEFT JOIN  sys_user_office_info d4 on a.id=d4.info_id
+	</sql>
+    
+	<select id="get" resultType="LawAssitanceUser">
+		SELECT 
+			<include refid="lawAssitanceUserColumns"/>
+		FROM info_law_assitance_user a
+		<include refid="lawAssitanceUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LawAssitanceUser">
+		SELECT 
+			<include refid="lawAssitanceUserColumns"/>
+		FROM info_law_assitance_user a
+		<include refid="lawAssitanceUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area = #{area.id}
+			</if>
+			<if test="office != null and office.id != null and office.id != ''">
+				AND a.office_id = #{office.id}
+			</if>
+		       <!-- 数据范围过滤 -->
+		       ${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="LawAssitanceUser">
+		SELECT 
+			<include refid="lawAssitanceUserColumns"/>
+		FROM info_law_assitance_user a
+		<include refid="lawAssitanceUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO info_law_assitance_user(
+			id,
+			name,
+			image,
+			age,
+			nation,
+			office_id,
+			license_number,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			area,
+			phone,
+			address,
+			birthday,
+			id_card,
+			introduction,
+			political_face,
+			education,
+			sex,
+			is_mongolian,
+			role,
+			is_aid_lawyer
+		) VALUES (
+			#{id},
+			#{name},
+			#{image},
+			#{age},
+			#{nation},
+			#{office.id},
+			#{licenseNumber},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{area.id},
+			#{phone},
+			#{address},
+			#{birthday},
+			#{idCard},
+			#{introduction},
+			#{politicalFace},
+			#{education},
+			#{sex},
+			#{isMongolian},
+			#{role},
+			#{isAidLawyer}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_law_assitance_user SET 	
+			name = #{name},
+			image = #{image},
+			age = #{age},
+			nation = #{nation},
+			office_id = #{office.id},
+			license_number = #{licenseNumber},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			area=#{area.id},
+			birthday =#{birthday},
+			introduction=#{introduction},
+			political_face =#{politicalFace},
+			education=#{education},
+			sex=#{sex},
+			role=#{role},
+			id_card=#{idCard},
+			is_mongolian=#{isMongolian},
+			is_aid_lawyer=#{isAidLawyer}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_law_assitance_user SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<select id="getById" resultMap="agencyResult">
+		SELECT 
+			<include refid="lawAssitanceUserColumns"/>
+	          , d1.label AS "sexLabel",d2.label AS "ethnicLabel",d3.label AS "isMongolianLabel"
+		FROM info_law_assitance_user a
+		<include refid="lawAssitanceUserJoins"/>
+		LEFT JOIN  sys_dict d1 on a.sex=d1.`value` and d1.type='sex'  and d1.language_type='CN'
+		LEFT JOIN  sys_dict d2 on a.nation=d2.`value` and d2.type='ethnic'  and d2.language_type='CN'
+		LEFT JOIN  sys_dict d3 on a.is_mongolian=d3.`value` and d3.type='yes_no' and d3.language_type='CN'
+		WHERE a.id = #{id}
+	</select>
+	<select id="findListForApi" resultMap="agencyResult">
+		SELECT 
+			<include refid="lawAssitanceUserColumns"/>
+	            , d1.label AS "sexLabel",d2.label AS "ethnicLabel",d3.label AS "isMongolianLabel"
+		FROM info_law_assitance_user a
+		<include refid="lawAssitanceUserJoins"/>
+		LEFT JOIN  sys_dict d1 on a.sex=d1.`value` and d1.type='sex'  and d1.language_type='CN'
+		LEFT JOIN  sys_dict d2 on a.nation=d2.`value` and d2.type='ethnic'  and d2.language_type='CN'
+		LEFT JOIN  sys_dict d3 on a.is_mongolian=d3.`value` and d3.type='yes_no' and d3.language_type='CN'
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND( a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or  o.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or  d2.label LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					)
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+			  and	a.area=#{area.id}
+			</if>
+			<if test="isMongolian != null and isMongolian != ''  and isMongolian != '暂无'">
+				and a.is_mongolian=#{isMongolian}
+			</if>
+			<if test="evaluation != null and evaluation != '' and evaluation != '暂无'">
+			    AND a.evaluation = #{evaluation}
+			</if>
+			<if test="isAidLawyer != null and isAidLawyer != '' and isAidLawyer != '暂无'">
+			    AND a.is_aid_lawyer = #{isAidLawyer}
+			</if>
+			<if test="officeId != null and officeId!= ''">
+			    AND a.office_id = #{officeId}
+			</if>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_law_assitance_user a
+		<include refid="lawAssitanceUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="area != null and area.id != null and area.id != ''">
+				a.area=#{area.id}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 批量删除律师信息 -->
+    <update id="batchDelete" parameterType="String" >
+  		UPDATE info_law_assitance_user SET del_flag = '1' where id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+	
+	<select id="personIdCard" resultType="String">
+		SELECT id_card FROM info_law_assitance_user a 
+		<where>
+			id_card = #{idCard}
+		</where>
+	</select>
+	
+	<!-- 修改评价值 -->
+    <update id="evaluationUpdate">
+		UPDATE info_law_assitance_user SET 
+			evaluation = #{evaluation}
+		WHERE id = (select info_id from sys_user_office_info where login_id = #{id}
+		<if test="remark!='' ">
+			and remark= #{remark}
+		</if>
+		)
+	</update>
+</mapper>

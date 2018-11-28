@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.act.dao.ActDao">
+    
+	<update id="updateProcInsIdByBusinessId">
+		UPDATE ${businessTable} SET 
+			proc_ins_id = #{procInsId}
+		WHERE id = #{businessId}
+	</update>
+	
+	
+	<insert id="insertApplyToHiTask">
+		INSERT INTO act_hi_taskinst(
+			ID_,
+			PROC_DEF_ID_,
+			TASK_DEF_KEY_,
+			PROC_INST_ID_,
+			EXECUTION_ID_,
+			NAME_,
+			ASSIGNEE_,
+			START_TIME_,
+			CLAIM_TIME_,
+			END_TIME_,
+			DURATION_,
+			DELETE_REASON_,
+			PRIORITY_
+		) VALUES (
+			#{id},
+			#{procDefId},
+			#{taskDefKey},
+			#{procInstId},
+			#{executionId},
+			#{name},
+			#{assignee},
+			#{startTime},
+			#{claimTime},
+			#{endTime},
+			#{duration},
+			#{deleteReason},
+			#{priority}
+		)
+	</insert>
+	
+	<!-- 综合查询 -->
+	<select id="getArchives" resultType="Act">
+		SELECT 
+			t.id as taskId,
+			t.title as title,
+			t.beginDate as beginDate, 
+			t.procInsId as procInsId,
+			IFNULL(ru.NAME_,"已完成") as status,
+			t.procDefKey as procDefKey,
+			t.assignee as assignee,
+			u.name as assigneeName
+		FROM (
+			<if test="procDefKey == 'legal_aid' or procDefKey=='' or procDefKey== null">
+					SELECT 
+						a.id as id,
+						a.case_title as title,
+						a.create_date as beginDate,
+						"legal" as procDefKey,
+						a.proc_ins_id as procInsId,
+						a.legal_person_id as assignee
+					FROM oa_legal_aid a
+					WHERE (a.year_no is not null and a.year_no !="") 
+					<if test="status == null or status=='' ">
+						
+					</if>
+					<if test="status == 1 ">
+						 and  a.archiving="0" 
+					</if>
+					<if test="status == 2 ">
+						 and  a.archiving="1"  
+					</if>
+			</if>
+			<if test="procDefKey == '' or procDefKey== null ">
+				UNION
+			</if>
+			<if test="procDefKey == 'people_mediation' or procDefKey=='' or procDefKey== null">
+						SELECT 
+							p.id as id,
+							p.case_title as title,
+							p.create_date as beginDate,
+							"mediation" as procDefKey,
+							p.proc_ins_id as procInsId,
+							p.mediator as assignee
+						FROM oa_people_mediation_apply p
+						JOIN oa_people_mediation_accept_register r on p.PROC_INS_ID = r.PROC_INS_ID
+					<if test="status == null or status=='' ">
+						LEFT JOIN act_ru_task t on p.PROC_INS_ID = t.PROC_INST_ID_ and t.TASK_DEF_KEY_!='mediation_dengji'
+						WHERE 
+						p.proc_ins_id !="" and p.proc_ins_id is not null and p.status="1" 
+					</if>
+					<if test="status == 1 ">
+						JOIN act_ru_task t  on p.PROC_INS_ID = t.PROC_INST_ID_ and t.TASK_DEF_KEY_!='mediation_dengji'
+						WHERE 
+						p.proc_ins_id !="" and p.proc_ins_id is not null and p.status="1"
+					</if>
+					<if test="status == 2 ">
+						JOIN oa_dossier d  on p.PROC_INS_ID = d.PROC_INS_ID
+						where  
+						p.proc_ins_id !="" and p.proc_ins_id is not null  and p.status="1" and d.status="1"
+					</if>
+			</if>
+		)t
+		LEFT JOIN sys_user u on u.id = t.assignee
+		LEFT JOIN act_ru_task ru on ru.PROC_INST_ID_ = t.procInsId
+		<where>
+			1=1
+			<if test="title != null and title !='' ">
+				and t.title like  concat('%',#{title},'%')			
+			</if>
+			<if test="assigneeName != null and assigneeName !='' ">
+			 	and u.name like  concat('%',#{assigneeName},'%')		
+			 	
+			</if>
+			<if test="beginDate != null and beginDate!='' ">
+				<![CDATA[ AND DATE_FORMAT(t.beginDate,'%Y-%m-%d') >= #{beginDate}]]>
+			</if>
+			<if test="endDate != null and endDate !='' ">
+				<![CDATA[ AND DATE_FORMAT(t.beginDate,'%Y-%m-%d') <= #{endDate} ]]>
+			</if>
+		</where>
+		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY t.beginDate DESC
+			</otherwise>
+		</choose>
+		
+	</select>
+
+	<!-- 根据任务id查询评论内容 -->
+	<select id="getCommentsByTaskId" resultType="String">
+		SELECT 
+		    t.MESSAGE_
+		FROM
+		    act_hi_comment t
+		WHERE
+		    t.TASK_ID_ = #{taskId};
+	</select>
+		<!-- 更新流程数据 -->
+	<update id="updateTask">
+		UPDATE act_hi_taskinst SET 
+			ASSIGNEE_ = #{assignee},
+			CLAIM_TIME_ = #{claimTime}
+		WHERE PROC_INST_ID_ = #{procInstId} and TASK_DEF_KEY_ = #{taskDefKey}
+	</update>
+	
+	<!-- 更新流程act_hi_actinst数据 -->
+	<update id="updateActinst">
+		UPDATE act_hi_actinst  
+		  <trim prefix="set" suffixOverrides=",">  
+			<if test="taskId != null and taskId !='' ">
+			 TASK_ID_=#{taskId},		
+			</if>
+		  <if test="assignee != null and assignee !='' ">
+			 ASSIGNEE_ = #{assignee},
+			</if>
+		  <if test="endTime != null and endTime !='' ">
+			END_TIME_ = #{endTime},
+			</if>
+		  <if test="duraTion != null and duraTion !='' ">
+			 DURATION_ = #{duraTion},
+			</if>
+			   </trim>
+		WHERE PROC_INST_ID_ = #{procInstId} and ACT_ID_ = #{actId}
+	</update>
+	
+	<!-- 查询开始时间 -->
+	<select id="selectActinst">
+		select 
+			START_TIME_ 
+		from act_hi_actinst
+		WHERE PROC_INST_ID_ = #{procInstId} and ACT_ID_ = #{actId}
+	</select>
+	
+	<insert id="insertActhicomment">
+		INSERT INTO act_hi_comment(
+			ID_,
+			TYPE_,
+			TIME_,
+			USER_ID_,
+			TASK_ID_,
+			PROC_INST_ID_,
+			ACTION_,
+			MESSAGE_,
+			FULL_MSG_
+		) VALUES (
+			#{id},
+			#{type},
+			#{time},
+			#{assignee},
+			#{taskId},
+			#{procInstId},
+			#{action},
+			#{message},
+			#{fallmsg}
+		)
+	</insert>
+</mapper>

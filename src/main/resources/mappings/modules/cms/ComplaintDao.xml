@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.cms.dao.ComplaintDao">
+    
+	<sql id="complaintColumns">
+		a.id AS "id",
+		a.content AS "content",
+		c.name AS "name",
+		a.title AS "title",
+		a.phone AS "phone",
+		a.ip AS "ip",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag",
+		a.is_inquiries AS "isInquiries",
+		a.inquiries_count AS "inquiriesCount",
+		a.is_comment AS "isComment",
+		a.sex AS "sex",
+		a.remarks AS "remarks",
+		a.no AS "no",
+		a.no_organization as "organization.id",
+		a.area as "area.id",
+		a.such_complaints as "suchComplaints",
+		a.class_worker AS "classWorker",
+		a.noarea as "noarea.id",
+		a.notown as "notown.id",
+		a.anonymous as "anonymous",
+		a.no_number as "nonumber",
+		a.statistic_num As "statisticNum",
+		b.*
+	</sql>
+	<resultMap id="complaintResult" type="com.thinkgem.jeesite.modules.cms.entity.Complaint">
+			<id property="id" column="id" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="name" column="name" />
+		<result property="phone" column="phone" />
+		<result property="createBy.id" column="createBy.id" />
+		<result property="createDate" column="createDate" />
+		<result property="delFlag" column="delFlag" />
+		<result property="isComment" column="isComment" />
+		<result property="sex" column="sex" />
+		<result property="no" column="no" />
+		<result property="isInquiries" column="isInquiries" />
+		<result property="organization.id" column="organization.id" />
+		<result property="suchComplaints" column="suchComplaints" />
+		<result property="classWorker" column="classWorker" />
+		<result property="nonumber" column="nonumber" />
+		 <result property="noarea.id" column="noarea.id" />
+		<result property="notown.id" column="notown.id" />
+		<result property="anonymous" column="anonymous" />
+		<result property="nonumber" column="nonumber" /> 
+		<result property="statisticNum" column="statisticNum" />
+		<collection property="commentList" ofType="com.thinkgem.jeesite.modules.cms.entity.GuestbookComment" javaType="list">
+			<id property="id" column="commentId" />
+			<result property="createUser.id" column="commentCreate" />
+			<result property="createUser.name" column="create_name" />
+			<result property="createUser.photo" column="create_photo" />
+			<result property="content" column="commentContent" />
+			<result property="delFlag" column="commentDelFlag" />
+			<result property="createDate" column="commentCreateDate" />
+			<result property="commentType" column="commentType" />
+			<result property="guestbookId" column="guestbookId" />
+			<result property="thumbsUpTrue" column="thumbsUpTrue" />
+			<result property="thumbsUpFalse" column="thumbsUpFalse" />
+			<result property="isEvaluate" column="isEvaluate" />
+			 <collection property="guestbookCommentReList" ofType="com.thinkgem.jeesite.modules.cms.entity.GuestbookCommentRe" javaType="list">
+				<id property="id" column="re_id" />
+				<result property="commentId" column="commentIds" />
+				<result property="createUser.id" column="re_commentCreate" />
+				<result property="createUser.name" column="re_create_name" />
+				<result property="content" column="re_commentContent" />
+				<result property="delFlag" column="re_commentDelFlag" />
+				<result property="createDate" column="re_commentCreateDate" />
+				<result property="commentType" column="re_commentType" />
+				<result property="guestbookId" column="complaintId" />
+				<result property="createUser.photo" column="re_create_photo" />
+			</collection> 
+		</collection>
+	</resultMap>	
+	<sql id="complaintJoins">
+			 left join   
+		 (select c.id as "commentId",c.is_evaluate as "isEvaluate",c.guestbook_id as "guestbookId",c.create_by as "commentCreate",c.content as "commentContent",
+			c.del_flag as "commentDelFlag",c.create_date as "commentCreateDate",c.comment_type as "commentType",
+			c.thumbs_up_true AS "thumbsUpTrue",c.thumbs_up_false As "thumbsUpFalse",
+			d.name As "create_name",d.photo As "create_photo",r.id As "re_id",r.create_by as "re_commentCreate",e.name as "re_create_name" ,e.photo as "re_create_photo" ,
+			r.content as "re_commentContent",r.del_flag as "re_commentDelFlag",r.create_date as "re_commentCreateDate" ,r.comment_type as "re_commentType",
+			r.comment_id AS "commentIds" ,r.guestbook_id as "complaintId"
+			from  cms_guestbook_comment c left join 
+		  sys_user  d on c.create_by=d.id  LEFT JOIN  cms_guestbook_comment_re r  
+		  on c.id=r.comment_id
+		  LEFT JOIN sys_user e on e.id=r.create_by  
+		 ) b on b.guestbookId=a.id
+		 left join sys_user c on c.id=a.create_by 
+	</sql>
+    
+	<select id="get" resultMap="complaintResult">
+		SELECT 
+			<include refid="complaintColumns"/>
+		FROM cms_complaint a
+		<include refid="complaintJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="findList" resultType="Complaint">
+	SELECT 
+		a.id AS "id",
+		a.content AS "content",
+		a.name as "name",
+		a.area as "area.id",
+		a.town_area as "townarea.id",
+		a.noarea as "noarea。id",
+		a.notown as "notown.id",
+		a.title AS "title",
+		a.phone AS "phone",
+		a.ip AS "ip",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag",
+		a.is_inquiries AS "isInquiries",
+		a.inquiries_count AS "inquiriesCount",
+		a.is_comment AS "isComment",
+		a.sex AS "sex",
+		a.remarks AS "remarks",
+		a.no AS "no",
+		a.such_complaints as "suchComplaints",
+		a.statistic_num As "statisticNum",
+		a.class_worker as "classWorker"
+	FROM cms_complaint a
+	<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+			<if test="beginDate!= null and beginDate !=''">
+		and a. create_date<![CDATA[>=]]>  DATE_FORMAT(#{beginDate}, '%Y-%m-%d') 
+		 </if>
+		<if test="endDate!= null and endDate !=''">
+		and a.create_date<![CDATA[<=]]> DATE_FORMAT(#{endDate}, '%Y-%m-%d') 
+		 </if> 
+		 <if test="suchComplaints != null and suchComplaints!=''">
+		 and a.such_complaints=#{suchComplaints}
+		 </if>
+		 <if test="classWorker != null and classWorker!=''">
+		 and a.class_worker=#{classWorker}
+		 </if>
+	</where>
+	<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			GROUP BY a.id
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- <select id="findList" resultType="Complaint">
+		SELECT 
+			<include refid="complaintColumns"/>
+		FROM cms_complaint a
+		<include refid="complaintJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	 -->
+	<select id="findAllList" resultType="Complaint">
+		SELECT 
+			<include refid="complaintColumns"/>
+		FROM cms_complaint a
+		<include refid="complaintJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			GROUP BY a.id
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!--已投诉未投诉建议列表  -->
+	<select id="findUserComplaintList" resultMap="complaintResult">
+		SELECT 
+			<include refid="complaintColumns"/>
+		FROM cms_complaint a
+		<include refid="complaintJoins"/>
+		<where>
+			a.del_flag =0
+			<if test="isComment != null and isComment != ''">
+				AND a.is_comment=#{isComment}
+			</if>
+			<if test="createBy != null and createBy != '' and createBy.id!=null and createBy.id!=''">
+				AND a.create_by=#{createBy.id}
+			</if>
+			<if test="beginDate!= null and beginDate !=''">
+		and a. create_date<![CDATA[>=]]>  DATE_FORMAT(#{beginDate}, '%Y-%m-%d') 
+		 </if>
+		<if test="endDate!= null and endDate !=''">
+		and a.create_date<![CDATA[<=]]> DATE_FORMAT(#{endDate}, '%Y-%m-%d') 
+		 </if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			GROUP BY a.id
+				ORDER BY a.create_date desc
+			</otherwise>
+		</choose>
+		
+	</select>
+	<select id="findUserIsInquiriesComplaintList" resultMap="complaintResult">
+		SELECT 
+			<include refid="complaintColumns"/>
+		FROM cms_complaint a
+		<include refid="complaintJoins"/>
+		<where>
+			a.del_flag =0
+			<if test="createBy != null and createBy != '' and createBy.id!=null and createBy.id!=''">
+				AND b.re_commentCreate=#{createBy.id}
+			</if>
+			<if test="beginDate!= null and beginDate !=''">
+		and a. create_date<![CDATA[>=]]>  DATE_FORMAT(#{beginDate}, '%Y-%m-%d') 
+		 </if>
+		<if test="endDate!= null and endDate !=''">
+		and a.create_date<![CDATA[<=]]> DATE_FORMAT(#{endDate}, '%Y-%m-%d') 
+		 </if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			GROUP BY a.id
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+<!--  	<insert id="insert">
+	     INSERT INTO cms_complaint
+	     <trim prefix="(" suffix=")" suffixOverrides="," >
+	        id,
+	        <if test="title != null and title != ''">
+			title,
+			</if>
+			<if test="content != null and content != ''">
+			content,
+			</if>
+			<if test="name != null and name != ''">
+			name,
+			</if>
+			<if test="phone != null and phone != ''">
+			phone,
+			</if>
+			<if test="createBy != null and createBy != ''">
+			create_by,
+			</if>
+			<if test="createDate != null and createDate != ''">
+			create_date,
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+			del_flag,
+			</if>
+			<if test="area != null and area != '' and area.id!=null and  area.id!=''">
+			area,
+			</if>
+			<if test="townarea != null and townarea != '' and townarea.id!=null and  townarea.id!=''">
+			town_area,
+			</if>
+			<if test="noarea != null and noarea != '' and noarea.id!=null and  noarea.id!=''">
+			noarea,
+			</if>
+			<if test="notown != null and notown != '' and notown.id!=null and  notown.id!=''">
+			notown,
+			</if>
+			<if test="anonymous != null and anonymous != ''">
+			anonymous,
+			</if>
+			<if test="sex != null and sex != ''">
+			sex,
+			</if>
+			<if test="remarks != null and remarks != ''">
+			remarks,
+			</if>
+			<if test="no != null and no != '' ">
+			no,
+			</if>
+	     </trim>
+	     <trim prefix="values (" suffix=")" suffixOverrides="," >
+	     #{id},
+	        <if test="title != null and title != ''">
+			#{title},
+			</if>
+			<if test="content != null and content != ''">
+			#{content},
+			</if>
+			<if test="name != null and name != ''">
+			#{name},
+			</if>
+			<if test="phone != null and phone != ''">
+			#{phone},
+			</if>
+			<if test="createBy != null and createBy != ''">
+			#{createBy.id},
+			</if>
+			<if test="createDate != null and createDate != ''">
+			#{createDate},
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+			#{delFlag},
+			</if>
+			<if test="area != null and area != '' and area.id!=null and  area.id!=''">
+			#{area.id},
+			</if>
+			<if test="noarea != null and noarea != '' and noarea.id!=null and  noarea.id!=''">
+			#{noarea.id},
+			</if>
+			<if test="townarea != null and townarea != '' and townarea.id!=null and  townarea.id!=''">
+			#{townarea.id},
+			</if>
+			<if test="notown != null and notown != '' and notown.id!=null and  notown.id!=''">
+			#{notown.id},
+			</if>
+			<if test="anonymous != null and anonymous != ''">
+			#{anonymous},
+			</if>
+			<if test="sex != null and sex != ''">
+			#{sex},
+			</if>
+			<if test="remarks != null and remarks != ''">
+			#{remarks},
+			</if>
+			<if test="no != null and no != '' ">
+			#{no},
+			</if>	    
+	     </trim>
+	</insert>  -->
+ 	<insert id="insert">
+	 INSERT INTO cms_complaint (id,
+	 title,
+	 content,
+	 phone,
+	 ip,
+	 name,
+	 sex,
+	 create_by,
+	 create_date,
+	 area,
+	 town_area,
+	 is_inquiries,
+	 inquiries_count,
+	 is_comment,
+	 remarks,
+	 no,
+	 anonymous,
+	 noarea,
+	 notown,
+	 no_organization,
+	 such_complaints,
+	 class_worker,
+	 no_number)
+	 VALUES (
+	 #{id},
+	 #{title},
+	 #{content},
+	 #{phone},
+	 #{ip},
+	 #{name},
+	 #{sex},
+	 #{createBy.id},
+	 #{createDate},
+	#{area.id},
+	#{townarea.id},
+	#{isInquiries},
+	 #{inquiriesCount},
+	 #{isComment},
+	 #{remarks},
+	  #{no},
+	 #{anonymous},
+	 #{noarea.id},
+	 #{notown.id},
+	 #{organization.id},
+	 #{suchComplaints},
+	 #{classWorker},
+	 #{nonumber})
+	</insert> 
+	<update id="update">
+			UPDATE cms_complaint 
+		 <set> 
+		     <if test="delFlag!=null and delFlag!=''"> 
+		     del_flag = #{delFlag},
+		     </if>
+		     <if test="isInquiries!=null and isInquiries!=''"> 
+		     is_inquiries = #{isInquiries},
+		     </if>
+		     <if test="inquiriesCount!=null and inquiriesCount!=''"> 
+		    inquiries_count = #{inquiriesCount},
+		     </if>
+		     <if test="isComment!=null and isComment!=''"> 
+		     is_comment = #{isComment},
+		     </if>
+		 </set>
+		WHERE id = #{id}
+	</update>
+	<update id="delete">
+		UPDATE cms_complaint SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 全盟各旗县法律援助中心接受投诉数量与处理投诉数量对比图 -->
+	<select id="countComplaintComment" parameterType="ComplaintCount" resultType="ComplaintCount">
+		SELECT 
+		    DATE_FORMAT(t.create_date, #{datePattern}) year,
+		    count(*) count
+		FROM
+		    cms_complaint t
+		WHERE
+		    t.del_flag = 0
+		    <!-- 限定机构 -->
+		    <choose>
+		    	<when test="type == 4">
+		    	<!-- 限定为调委会 -->
+		        AND t.no_organization IN (SELECT 
+		            o.id
+		        FROM
+		            sys_office o
+		        WHERE
+		            o.del_flag = 0 AND o.type = 4)
+		    	</when>
+		    	<when test="type == 5">
+		    	<!-- 限定为法律援助机构 -->
+		        AND t.no_organization IN (SELECT 
+		            o.id
+		        FROM
+		            sys_office o
+		        WHERE
+		            o.del_flag = 0 AND o.type = 5)
+		    	</when>
+		    	<otherwise></otherwise>
+		    </choose>
+		    <!-- 限定地区为锡盟和锡盟下级 -->
+		        AND t.noarea IN (SELECT 
+		            a.id
+		        FROM
+		            sys_area a
+		        WHERE
+		            a.del_flag = 0
+		                AND (a.id = '5' OR a.parent_id = '5'))
+		    <!-- 为了包含选中的结束日期 -->
+		    <![CDATA[ AND DATE_FORMAT(t.create_date,#{datePattern}) >= #{beginDate}
+		    	AND DATE_FORMAT(t.create_date,#{datePattern}) <= #{endDate} ]]>
+		    <!-- 根据地区查询 -->
+		    <if test="area.id != null and area.id !=''">
+		    	AND t.noarea = #{area.id}
+		    </if>
+		    <!-- 如果选择受理，就只查受理的，否则就查全部的 -->
+		    <if test="isComment == 1">
+		        AND t.is_comment = '1'
+		    </if>
+		GROUP BY DATE_FORMAT(t.create_date, #{datePattern})
+		ORDER BY DATE_FORMAT(t.create_date, #{datePattern}) ASC
+	</select>
+	
+	<!-- 大屏统计(折线图): 各旗县律师收到投诉数量 -->
+	<select id="countComplaintLawOffice" parameterType="ComplaintCount" resultType="ComplaintCount">
+		SELECT 
+		    IFNULL(a.id, '') 'area.id',
+		    IFNULL(t.count, 0) count,
+		    a.name 'area.name'
+		FROM
+		    sys_area a
+		        LEFT JOIN
+		    (
+			SELECT 
+			    c.noarea area_id, COUNT(*) count
+			FROM
+			    cms_complaint c
+			WHERE
+			    c.del_flag = 0
+		    <!-- 限定机构 -->
+		    <choose>
+		    	<when test="type == 'LawOffice'">
+		    	<!-- 限定为律师事务所 -->
+		        AND c.no_organization IN (SELECT 
+		            o.id
+		        FROM
+		            sys_office o
+		        WHERE
+		            o.del_flag = 0 AND o.parent_id = #{OFFICE_LAWYER_OFFICE})
+		    	</when>
+		    	<when test="type == 4">
+		    	<!-- 限定为调委会 -->
+		        AND t.no_organization IN (SELECT 
+		            o.id
+		        FROM
+		            sys_office o
+		        WHERE
+		            o.del_flag = 0 AND o.type = 4)
+		    	</when>
+		    	<when test="type == 5">
+		    	<!-- 限定为法律援助机构 -->
+		        AND t.no_organization IN (SELECT 
+		            o.id
+		        FROM
+		            sys_office o
+		        WHERE
+		            o.del_flag = 0 AND o.type = 5)
+		    	</when>
+		    	<otherwise></otherwise>
+		    </choose>
+		    <!-- 限定地区为锡盟和锡盟下级 -->
+		        AND c.noarea IN (SELECT 
+		            a.id
+		        FROM
+		            sys_area a
+		        WHERE
+		            a.del_flag = 0
+		                AND (a.id = '5' OR a.parent_id = '5'))
+		    <!-- 为了包含选中的结束日期 -->
+		    <![CDATA[ AND DATE_FORMAT(c.create_date,#{datePattern}) >= #{beginDate}
+		    	AND DATE_FORMAT(c.create_date,#{datePattern}) <= #{endDate} ]]>
+		    <!-- 如果选择受理，就只查受理的，否则就查全部的 -->
+		    <if test="isComment == 1">
+		        AND c.is_comment = '1'
+		    </if>
+			GROUP BY c.noarea
+			) t ON t.area_id = a.id
+		WHERE
+		    a.del_flag = 0 AND a.parent_id = '5'
+		ORDER BY a.code
+	</select>
+	
+	<!-- 统计接口访问数量 -->
+	<update id="statisticNum">
+		UPDATE cms_complaint SET 
+			statistic_num = statistic_num+1
+		WHERE id = #{id}
+	</update>
+	
+	<select id="countComplaintComment1" parameterType="ComplaintCount" resultType="ComplaintCount">
+		SELECT 
+			a.YEAR, 	
+			IFNULL(t.count,0) as "count",
+			IFNULL(a.id,'') as "area.id",
+			a.name as "area.name"
+		FROM
+			(
+				SELECT 
+					a.id,
+					a.CODE,
+					a.NAME,
+					m.YEAR
+				FROM
+					sys_area a,
+					(${sqlMap.dsf}) m
+				WHERE 
+					a.del_flag = 0
+					AND (
+						a.id = '5' or a.parent_id = '5'
+					 )
+				order by a.code
+			)a
+		LEFT JOIN (
+				SELECT 
+				    DATE_FORMAT(t.create_date, #{datePattern}) year,
+				    count(*) count,
+				    t.noarea
+				FROM
+				    cms_complaint t
+				WHERE
+				    t.del_flag = 0
+				    <!-- 限定机构 -->
+				    <choose>
+				    	<when test="type == 4">
+				    	<!-- 限定为调委会 -->
+				        AND t.no_organization IN (SELECT 
+				            o.id
+				        FROM
+				            sys_office o
+				        WHERE
+				            o.del_flag = 0 AND o.type = 4)
+				    	</when>
+				    	<when test="type == 5">
+				    	<!-- 限定为法律援助机构 -->
+				        AND t.no_organization IN (SELECT 
+				            o.id
+				        FROM
+				            sys_office o
+				        WHERE
+				            o.del_flag = 0 AND o.type = 5)
+				    	</when>
+				    	<otherwise></otherwise>
+				    </choose>
+				    <!-- 限定地区为锡盟和锡盟下级 -->
+				        AND t.noarea IN (SELECT 
+				            a.id
+				        FROM
+				            sys_area a
+				        WHERE
+				            a.del_flag = 0
+				                AND (a.id = '5' OR a.parent_id = '5'))
+				    <!-- 为了包含选中的结束日期 -->
+				    <![CDATA[ AND DATE_FORMAT(t.create_date,#{datePattern}) >= #{beginDate}
+				    	AND DATE_FORMAT(t.create_date,#{datePattern}) <= #{endDate} ]]>
+				    <!-- 根据地区查询 -->
+				    <if test="area.id != null and area.id !=''">
+				    	AND t.noarea = #{area.id}
+				    </if>
+				    <!-- 如果选择受理，就只查受理的，否则就查全部的 -->
+				    <if test="isComment == 1">
+				        AND t.is_comment = '1'
+				    </if>
+				GROUP BY DATE_FORMAT(t.create_date, #{datePattern})
+		)t
+		ON a.id = t.noarea 
+		and a.year = t.year
+		ORDER BY a.code,a.YEAR
+	</select>
+</mapper>

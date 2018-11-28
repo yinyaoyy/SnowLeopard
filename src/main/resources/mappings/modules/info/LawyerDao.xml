@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.LawyerDao">
+    
+    <resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+    <resultMap type="Office" id="OfficeMap1">  
+        <id property="id" column="lawOffice.id" />  
+        <result property="name" column="lawOffice.name" />  
+    </resultMap>
+    <resultMap type="Office" id="officeMap">  
+        <id property="id" column="office.id" />  
+        <result property="name" column="office.name" />  
+    </resultMap>
+    <resultMap id="lawyerResult" type="Lawyer">
+		<id property="id" column="id" />
+		<result property="name"           column="name"           />
+		<result property="imageUrl"       column="imageUrl"       />
+		<result property="sex"            column="sex"            />
+		<result property="birthday"       column="birthday"            />
+		<result property="ethnic"         column="ethnic"         />
+		<result property="politicalFace"  column="politicalFace"  />
+		<result property="education"      column="education"      />
+		<result property="practisingTime" column="practisingTime" />
+		<result property="expertise"      column="expertise"      />
+		<result property="licenseNumber"  column="licenseNumber"  />
+		<result property="licenseType"    column="licenseType"    />
+		<result property="licenseStatus"  column="age"  />
+		<result property="age"  column="licenseStatus"  />
+		<result property="role"  column="role"  />
+		<association property="lawOffice"  javaType="Office" resultMap="OfficeMap1"/> 
+		<association property="office"  javaType="Office" resultMap="officeMap"/>
+	</resultMap>
+    <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="personName" column="name" />
+		<result property="agencyName" column="lawOffice.name" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="coordinate" column="coordinate" />
+		<result property="id" column="login_id" />
+		<result property="no" column="licenseNumber" />
+		<result property="isAidLawyer" column="isAidLawyer" />
+		<result property="isMongolian" column="isMongolian" />
+		<result property="ethnic" column="ethnicLabel" />
+		<result property="sex" column="sexLabel" />
+		<result property="idCard" column="idCard" />
+		<result property="type" column="type" />
+		<result property="politicalFace" column="politicalFace" />
+		<result property="isAidLawyer" column="licenseType" />
+		<result property="education" column="education" />
+		<result property="status" column="status" />
+		<result property="introduction" column="introduction" />
+		<result property="businessExpertise" column="expertise" />
+		<result property="mainOrgans" column="office.name" />
+		<result property="evaluation" column="evaluation" />
+		<result property="roleId"  column="roleName"  />
+		<!-- <result property="age" column="age" /> -->
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	<sql id="lawyer">
+	a.id AS "id",
+		a.name AS "name",
+		a.image_url AS "imageUrl",
+		a.sex  AS "sex",
+		a.age AS "age",
+		d1.label AS "sexLabel",
+		a.ethnic AS "ethnic",
+		d3.label AS "ethnicLabel",
+		a.birthday AS "birthday",
+		a.political_face AS "politicalFace",
+		a.education AS "education",
+		a.practising_time AS "practisingTime",
+		a.expertise AS "expertise",
+		a.law_office_id AS "lawOffice.id",
+		a.license_number AS "licenseNumber",
+		a.license_type AS "licenseType",
+		a.license_status AS "licenseStatus",
+		a.office_id AS "office.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.id_card AS 'idCard',
+		a.phone AS "phone",
+		a.evaluation AS "evaluation",
+		a.is_mongolian AS "isMongolian",
+		a.role AS "role",
+		o15.name AS "office.name",
+		o.name AS "lawOffice.name",
+		a.area_id AS "area.id",
+		area.name AS "area.name"
+	</sql>
+	<sql id="lawyerColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.image_url AS "imageUrl",
+		a.sex  AS "sex",
+		a.age AS "age",
+		d1.label  AS "sexLabel",
+		a.birthday AS "birthday",
+		a.political_face AS "politicalFace",
+		a.education AS "education",
+		a.practising_time AS "practisingTime",
+		a.expertise AS "expertise",
+		a.law_office_id AS "lawOffice.id",
+		a.license_number AS "licenseNumber",
+		<!-- a.license_type AS "licenseType", -->
+		case when 
+		a.license_type = '3'
+		then '是'
+        ELSE '否'
+		end licenseType,
+		a.license_status AS "licenseStatus",
+		a.office_id AS "office.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.id_card AS 'idCard',
+		a.evaluation AS "evaluation",
+		a.role AS "role",
+		o.name AS "office.name",
+		a.area_id AS "area.id",
+		area.name AS "area.name",
+		d2.label AS "isMongolian",
+		a.ethnic AS "ethnic",
+		d3.label AS "ethnicLabel",
+		d4.label AS "type",
+		d.address AS "address",
+		a.phone AS "phone",
+		d5.label AS "status",
+		a.introduction AS "introduction",
+		d6.label AS "roleName"
+	</sql>
+	<sql id="lawyerJoins">
+		LEFT JOIN sys_office o ON  a.law_office_id = o.id
+		LEFT JOIN sys_area area ON area.id = o.area_id
+		LEFT JOIN sys_office o15 ON o15.id =a.office_id
+		LEFT JOIN sys_user_office_info suoi  ON suoi.info_id = a.id
+		LEFT JOIN sys_dict d1 on a.sex=d1.`value` and d1.type='sex' and d1.language_type='CN'
+        LEFT JOIN sys_dict d2 on a.is_mongolian=d2.`value` and d2.type='yes_no' and d2.language_type='CN'
+        LEFT JOIN  sys_dict d3 on a.ethnic=d3.`value` and d3.type='ethnic'  and d3.language_type='CN'
+        LEFT JOIN  sys_dict d4 on a.license_type=d4.`value` and d4.type='lawyer_license_type'  and d4.language_type='CN'
+	    LEFT JOIN sys_dict d5 on a.license_status=d5.`value` and d5.type='lawyer_license_status' and d5.language_type='CN'
+	    LEFT JOIN  sys_dict d6 on a.role=d6.`value` and d6.type='info_role_type'  and d6.language_type='CN'
+	</sql>
+	<select id="findListForApi" resultMap="agencyResult">
+	    SELECT 
+			<include refid="lawyerColumns"/>,d.officeName AS "lawOffice.name",suoi.login_id
+		FROM info_lawyer a
+		LEFT JOIN (select c.login_id,b.address,b.name AS "officeName"  from info_low_office b 
+             LEFT JOIN sys_user_office_info c on b.id = c.info_id) d
+             on a.law_office_id = d.login_id 
+        LEFT JOIN sys_user_office_info suoi  ON suoi.info_id = a.id
+        LEFT JOIN sys_office o on a.office_id = o.id 
+        LEFT JOIN sys_area area ON area.id = a.area_id
+        LEFT JOIN sys_dict d1 on a.sex=d1.`value` and d1.type='sex' and d1.language_type='CN'
+        LEFT JOIN sys_dict d2 on a.is_mongolian=d2.`value` and d2.type='yes_no' and d2.language_type='CN'
+        LEFT JOIN sys_dict d3 on a.ethnic=d3.`value` and d3.type='ethnic'  and d3.language_type='CN'
+        LEFT JOIN sys_dict d4 on a.license_type=d4.`value` and d4.type='lawyer_license_type'  and d4.language_type='CN'
+	    LEFT JOIN sys_dict d5 on a.license_status=d5.`value` and d5.type='lawyer_license_status' and d5.language_type='CN'
+	    LEFT JOIN  sys_dict d6 on a.role=d6.`value` and d6.type='info_role_type'  and d6.language_type='CN'
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND (a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or  d.officeName LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					)
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+			<if test="isMongolian != null and isMongolian != '' and isMongolian != '暂无'">
+			   AND a.is_mongolian= #{isMongolian}
+			</if>
+			<if test="isAidLawyer != null and isAidLawyer != '' and isAidLawyer != '暂无' and isAidLawyer == 3">
+			   AND a.license_type= '3'
+			</if>
+			<if test="isAidLawyer != null and isAidLawyer != '' and isAidLawyer != '暂无' and isAidLawyer != 3">
+			   AND a.license_type in ('1','2')
+			</if>
+			<if test="evaluation != null and evaluation != '' and evaluation != '暂无'">
+			    AND a.evaluation = #{evaluation}
+			</if>
+			<if test="officeId != null and officeId!= '' and evaluation != '暂无'">
+			    AND a.law_office_id = #{officeId}
+			</if>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="get" resultType="Lawyer">
+		SELECT 
+			<include refid="lawyerColumns"/>,d.name AS "lawOffice.name"
+		FROM info_lawyer a
+		LEFT JOIN  sys_office d on a.law_office_id = d.id 
+        LEFT JOIN sys_office o on a.office_id = o.id 
+        LEFT JOIN sys_area area ON area.id = a.area_id
+        LEFT JOIN sys_dict d1 on a.sex=d1.`value` and d1.type='sex' and d1.language_type='CN'
+        LEFT JOIN sys_dict d2 on a.is_mongolian=d2.`value` and d2.type='yes_no' and d2.language_type='CN'
+        LEFT JOIN sys_dict d3 on a.ethnic=d3.`value` and d3.type='ethnic'  and d3.language_type='CN'
+        LEFT JOIN sys_dict d4 on a.license_type=d4.`value` and d4.type='lawyer_license_type'  and d4.language_type='CN'
+	    LEFT JOIN sys_dict d5 on a.license_status=d5.`value` and d5.type='lawyer_license_status' and d5.language_type='CN'
+	    LEFT JOIN  sys_dict d6 on a.role=d6.`value` and d6.type='info_role_type'  and d6.language_type='CN'
+	    where a.id=#{id}
+	</select>
+	
+	<select id="findList" resultType="Lawyer">
+		SELECT 
+			<include refid="lawyer"/>
+		FROM info_lawyer a
+		<include refid="lawyerJoins"/>
+		JOIN sys_area a11 ON a11.id = a.area_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="lawOffice != null and lawOffice.id != null and lawOffice.id != ''">
+				AND a.law_office_id=#{lawOffice.id}
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id=#{area.id}
+			</if>
+			<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+    
+	<select id="getInfo" resultMap="agencyResult">
+		SELECT 
+			<include refid="lawyerColumns"/>,d.officeName AS "lawOffice.name",suoi.login_id
+		FROM info_lawyer a
+		LEFT JOIN (select c.login_id,b.address,b.name AS "officeName"  from info_low_office b 
+             LEFT JOIN sys_user_office_info c on b.id = c.info_id) d
+             on a.law_office_id = d.login_id 
+        LEFT JOIN sys_user_office_info suoi  ON suoi.info_id = a.id
+        LEFT JOIN sys_office o on a.office_id = o.id 
+        LEFT JOIN sys_area area ON area.id = a.area_id
+        LEFT JOIN sys_dict d1 on a.sex=d1.`value` and d1.type='sex' and d1.language_type='CN'
+        LEFT JOIN sys_dict d2 on a.is_mongolian=d2.`value` and d2.type='yes_no' and d2.language_type='CN'
+        LEFT JOIN sys_dict d3 on a.ethnic=d3.`value` and d3.type='ethnic'  and d3.language_type='CN'
+        LEFT JOIN sys_dict d4 on a.license_type=d4.`value` and d4.type='lawyer_license_type'  and d4.language_type='CN'
+	    LEFT JOIN sys_dict d5 on a.license_status=d5.`value` and d5.type='lawyer_license_status' and d5.language_type='CN'
+	    LEFT JOIN  sys_dict d6 on a.role=d6.`value` and d6.type='info_role_type'  and d6.language_type='CN'
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getInfoByIdCard" resultType="Lawyer">
+		SELECT * FROM info_lawyer a WHERE a.id_card = #{idCard}
+	</select>
+	
+	
+	
+	
+	
+	
+	<select id="findAllList" resultType="Lawyer">
+		SELECT 
+			<include refid="lawyerColumns"/>
+		FROM info_lawyer a
+		<include refid="lawyerJoins"/>
+		<!-- JOIN sys_area a11 ON a11.id = a.area_id -->
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO info_lawyer(
+			id,
+			name,
+			image_url,
+			sex,
+			age,
+			birthday,
+			ethnic,
+			political_face,
+			education,
+			practising_time,
+			expertise,
+			law_office_id,
+			license_number,
+			license_type,
+			license_status,
+			office_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			id_card,
+			is_mongolian,
+			phone,
+			introduction,
+			area_id,
+			role
+		) VALUES (
+			#{id},
+			#{name},
+			#{imageUrl},
+			#{sex},
+			#{age},
+			#{birthday},
+			#{ethnic},
+			#{politicalFace},
+			#{education},
+			#{practisingTime},
+			#{expertise},
+			#{lawOffice.id},
+			#{licenseNumber},
+			#{licenseType},
+			#{licenseStatus},
+			#{office.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{idCard},
+			#{isMongolian},
+			#{phone},
+			#{introduction},
+			#{area.id},
+			#{role}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_lawyer SET 	
+			name = #{name},
+			image_url = #{imageUrl},
+			sex = #{sex},
+			birthday = #{birthday},
+			ethnic = #{ethnic},
+			political_face = #{politicalFace},
+			education = #{education},
+			practising_time = #{practisingTime},
+			expertise = #{expertise},
+			law_office_id = #{lawOffice.id},
+			license_number = #{licenseNumber},
+			license_type = #{licenseType},
+			license_status = #{licenseStatus},
+			office_id = #{office.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			id_card = #{idCard},
+			is_mongolian = #{isMongolian},
+			phone = #{phone},
+
+			introduction = #{introduction},
+			area_id= #{area.id},
+			role=#{role}
+			
+
+			
+
+		WHERE id = #{id}
+	</update>
+	
+	
+	
+	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_lawyer a
+		<include refid="lawyerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="licenseType !=null and licenseType != ''">
+			AND a.license_type = #{licenseType}
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+		</where>
+	</select>
+	
+	<update id="delete">
+		UPDATE info_lawyer SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!-- 批量删除律师信息 -->
+    <update id="batchDelete" parameterType="String" >
+  		UPDATE info_lawyer SET del_flag = '1' where  id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+	
+	<!-- 接口:大屏查询律师信息 -->
+	<select id="findListForApiBigScreen" parameterType="com.thinkgem.jeesite.api.chart.entity.LawyerVo"
+		resultType="com.thinkgem.jeesite.api.chart.entity.LawyerVo">
+		SELECT 
+			<include refid="lawyerColumns"/>
+			<!-- 增加受理案件数量 -->
+			,(
+			SELECT 
+			    COUNT(*)
+			FROM
+			    oa_legal_aid l,
+			    sys_user_office_info u
+			WHERE
+			    l.del_flag = 0 AND u.del_flag = 0
+			        AND l.lawyer_id = u.login_id
+			        AND u.info_id = a.id
+			) acceptCount
+		FROM info_lawyer a
+		<include refid="lawyerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area.id != null and area.id != ''">
+				AND a.law_office_id in (
+				    select o.id from info_low_office o 
+				     where o.del_flag=#{DEL_FLAG_NORMAL} and o.area_id = #{area.id }
+				)
+			</if>
+			
+			<if test="licenseType !=null and licenseType != ''">
+			AND a.license_type = #{licenseType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 修改评价值 -->
+    <update id="evaluationUpdate">
+		UPDATE info_lawyer SET 
+			evaluation = #{evaluation}
+		WHERE id = (select info_id from sys_user_office_info where login_id = #{id}
+		<if test="remark!='' ">
+			and remark= #{remark}
+		</if>
+		)
+	</update>
+</mapper>

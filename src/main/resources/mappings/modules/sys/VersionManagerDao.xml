@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.sys.dao.VersionManagerDao">
+    
+	<sql id="versionManagerColumns">
+		a.id AS "id",
+		a.version AS "version",
+		a.represent AS "represent",
+		a.ios_url AS "iosUrl",
+		a.android_url AS "androidUrl",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	<resultMap id="versionManagerResult" type="VersionManager">
+		<id property="id" column="id" />
+		<result property="version"           column="version"           />
+		<result property="represent"       column="represent"       />
+		<result property="ios_url"            column="iosUrl"            />
+		<result property="android_url"            column="androidUrl"            />
+	</resultMap>
+	<sql id="versionManagerJoins">
+	</sql>
+    
+	<select id="get" resultType="VersionManager">
+		SELECT 
+			<include refid="versionManagerColumns"/>
+		FROM sys_version_manager a
+		<include refid="versionManagerJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="VersionManager">
+		SELECT 
+			<include refid="versionManagerColumns"/>
+		FROM sys_version_manager a
+		<include refid="versionManagerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			<if test="represent==200">
+			  and  a.android_url is not null
+			</if>
+			<if test="represent==300">
+			and   a.ios_url is not null
+			</if>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.version DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="VersionManager">
+		SELECT 
+			<include refid="versionManagerColumns"/>
+		FROM sys_version_manager a
+		<include refid="versionManagerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_version_manager(
+			id,
+			version,
+			represent,
+			ios_url,
+			android_url,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{version},
+			#{represent},
+			#{iosUrl},
+			#{androidUrl},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_version_manager SET 	
+			version = #{version},
+			represent = #{represent},
+			ios_url = #{iosUrl},
+			android_url = #{androidUrl},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sys_version_manager SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

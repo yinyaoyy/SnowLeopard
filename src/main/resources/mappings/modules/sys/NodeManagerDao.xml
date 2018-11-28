@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.sys.dao.NodeManagerDao">
+    
+	<sql id="nodeManagerColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.proc_def_key AS "procDefKey",
+		a.task_def_key AS "taskDefKey",
+		a.pc_url AS "pcUrl",
+		a.ios_url AS "iosUrl",
+		a.android_url AS "androidUrl",
+		a.version AS "version",
+		a.sort AS "sort",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="nodeManagerJoins">
+	</sql>
+    
+	<select id="get" resultType="NodeManager">
+		SELECT 
+			<include refid="nodeManagerColumns"/>
+		FROM sys_node_manager a
+		<include refid="nodeManagerJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="NodeManager">
+		SELECT 
+			<include refid="nodeManagerColumns"/>
+		FROM sys_node_manager a
+		<include refid="nodeManagerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="procDefKey != null and procDefKey != ''">
+				AND a.proc_def_key = #{procDefKey}
+			</if>
+			<if test="taskDefKey != null and taskDefKey != ''">
+				AND a.task_def_key = #{taskDefKey}
+			</if>
+			<if test="version != null and version != ''">
+				AND a.version = #{version}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.proc_def_key,a.sort, a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="NodeManager">
+		SELECT 
+			<include refid="nodeManagerColumns"/>
+		FROM sys_node_manager a
+		<include refid="nodeManagerJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findNewVersion" resultType="java.lang.String">
+		select  distinct  version from  sys_node_manager 
+		where proc_def_key=#{procDefKey}
+		ORDER BY  version DESC  limit 1
+	</select>
+	<insert id="insert">
+		INSERT INTO sys_node_manager(
+			id,
+			name,
+			proc_def_key,
+			task_def_key,
+			pc_url,
+			ios_url,
+			android_url,
+			version,
+			sort,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{procDefKey},
+			#{taskDefKey},
+			#{pcUrl},
+			#{iosUrl},
+			#{androidUrl},
+			#{version},
+			#{sort},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_node_manager SET 	
+			name = #{name},
+			proc_def_key = #{procDefKey},
+			task_def_key = #{taskDefKey},
+			pc_url = #{pcUrl},
+			ios_url = #{iosUrl},
+			android_url = #{androidUrl},
+			version = #{version},
+			sort = #{sort},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sys_node_manager SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

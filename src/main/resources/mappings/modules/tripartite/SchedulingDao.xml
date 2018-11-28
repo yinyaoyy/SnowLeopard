@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.tripartite.dao.SchedulingDao">
+    
+	<sql id="tripartiteTaskEntityColumns">
+		a.id AS 'id',
+		p.value AS 'systemUrl',
+		p.description AS 'systemDesc',
+		a.value AS 'apiUrl',
+		a.description AS 'apiName',
+		a.is_pause AS 'isPause',
+		a.method AS 'method',
+		a.service_name AS 'beanName'
+	</sql>
+	
+	<sql id="tripartiteTaskEntityJoins">
+		LEFT JOIN sys_tripartite_system_config p
+			   ON p.del_flag = '0'
+		      AND a.parent_id = p.id
+	</sql>
+    
+	<select id="get" resultType="com.thinkgem.jeesite.tripartite.entity.TripartiteTaskEntity">
+		SELECT 
+			<include refid="tripartiteTaskEntityColumns"/>
+		FROM sys_tripartite_system_config a
+		<include refid="tripartiteTaskEntityJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.thinkgem.jeesite.tripartite.entity.TripartiteTaskEntity">
+		SELECT 
+			<include refid="tripartiteTaskEntityColumns"/>
+		FROM sys_tripartite_system_config a
+		<include refid="tripartiteTaskEntityJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="parent != null and parent.id != null and parent.id != ''">
+				AND a.parent_id = #{parent.id}
+			</if>
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+			<if test="value != null and value != ''">
+				AND a.value LIKE
+					<if test="dbName == 'oracle'">'%'||#{value}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{value}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{value},'%')</if>
+			</if>
+			<if test="description != null and description != ''">
+				AND a.description LIKE
+					<if test="dbName == 'oracle'">'%'||#{description}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{description}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{description},'%')</if>
+			</if>
+			<if test="isPause != null and isPause != ''">
+				AND a.is_pause = #{isPause}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 王鹏 2018年7月2日18:11:52
+	 * 默认的插入数据方法
+	 * 自动生成id和importDate，其他需通过配置或其他方式处理 -->
+	<insert id="insert" parameterType="java.util.Map">
+		INSERT INTO ${table} (id
+		<foreach collection="columns" item="col">
+			,${col}
+		</foreach>
+			,importDate
+		) VALUES 
+		<foreach collection="list" item="maps" index="index" separator=",">
+		(uuid2()
+		<foreach collection="maps" item="val" index="key">
+			,#{val}
+		</foreach>
+		,now())
+		</foreach>
+	</insert>
+</mapper>

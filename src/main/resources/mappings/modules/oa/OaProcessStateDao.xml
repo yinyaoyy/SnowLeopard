@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.oa.dao.OaProcessStateDao">
+    
+    <sql id="oaProcessStateColumns">
+		a.id AS "id",
+		a.PROC_INS_ID AS "procInsId",
+		a.title AS "title",
+		a.type AS "type",
+		a.state AS "state",
+		a.applicant_name AS "applicantName",
+		a.comment AS "comment",
+		a.case_type AS "caseType",
+		a.case_area AS "caseArea",
+		a.handle_date AS "handleDate",
+		a.contractor AS "contractor",
+		a.severity AS "severity"
+	</sql>
+	
+	<sql id="oaProcessStateJoins">
+    </sql>
+    
+    <select id="get" resultType="OaProcessState">
+		SELECT 
+			<include refid="oaProcessStateColumns"/>
+		FROM oa_process_state a
+		<include refid="oaProcessStateJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getById" resultType="String">
+		SELECT 
+			id
+		FROM oa_process_state a
+		<include refid="oaProcessStateJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getByProcInsId" resultType="OaProcessState">
+		SELECT 
+		a.id AS "id",
+		a.PROC_INS_ID AS "procInsId",
+		a.title AS "title",
+		a.type AS "type",
+		a.state AS "state",
+		a.applicant_name AS "applicantName",
+		a.comment AS "comment",
+		a.case_type AS "caseType",
+		a.case_area AS "caseArea",
+		a.handle_date AS "handleDate",
+		a.contractor AS "contractor",
+		a.severity AS "severity",
+		a.create_date as "createDate",
+		a.create_by as "createBy.id"
+		FROM oa_process_state a
+		<include refid="oaProcessStateJoins"/>
+		WHERE a.PROC_INS_ID = #{procInsId}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_process_state(
+			id, 
+			PROC_INS_ID,
+			title,
+			type,
+			state,
+			comment,
+			applicant_name,
+			case_type,
+			case_area,
+			handle_date,
+			contractor,
+			severity,
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date, 
+			remarks, 
+			del_flag
+		) VALUES (
+			#{id}, 
+			#{procInsId},
+			#{title}, 
+			#{type}, 
+			#{state},
+			#{comment}, 
+			#{applicantName},
+			#{caseType},
+			#{caseArea},
+			#{handleDate},
+			#{contractor},
+			#{severity},
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_process_state SET 
+			state = #{state},
+			<if test="comment != null and comment != ''">
+				comment = #{comment},
+			</if>
+			<if test="updateBy != null and updateBy.id != null and updateBy.id != ''">
+				update_by = #{updateBy.id},
+			</if> 
+			<if test="updateDate != null and updateDate !=''">
+				update_date = #{updateDate}, 
+			</if>
+			<if test="caseType != null and caseType !=''">
+				case_type = #{caseType}, 
+			</if>
+			<if test="caseArea != null and caseArea !=''">
+				case_area = #{caseArea},
+			</if>
+			<if test="handleDate != null">
+				handle_date = #{handleDate}, 
+			</if>
+			<if test="contractor != null">
+				contractor = #{contractor}, 
+			</if>
+			<if test="severity != null">
+				severity = #{severity}, 
+			</if>
+			remarks = #{remarks}
+		WHERE PROC_INS_ID = #{procInsId}
+	</update>
+		
+	<update id="delete">
+		UPDATE oa_process_state SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="end">
+		UPDATE oa_process_state SET 
+			is_destroy = '1'
+		WHERE PROC_INS_ID = #{procInsId}
+	</update>
+	
+	<select id="getByIsDestroy" resultType="String">
+		SELECT 
+			is_destroy
+		FROM oa_process_state
+		WHERE PROC_INS_ID = #{procInsId}
+	</select>
+	
+	<select id="comprehensiveQueryForApi" parameterType="com.thinkgem.jeesite.api.act.entity.ProcessStateVo" resultType="com.thinkgem.jeesite.api.act.entity.ProcessStateVo">
+		SELECT 
+			a.title as "title",
+			a.create_date as "applyDate",
+			a.case_area as "caseArea.id",
+			a.case_type as "caseType",
+			a.state as "state",
+			u1.name as "applyUser",
+			u.mobile as "phone",
+			a1.name as "caseArea.name",
+			a.proc_ins_id as "procInsId",
+			a.id as "id",
+			a.type as "type"
+		FROM
+			oa_process_state a 
+		LEFT JOIN
+			sys_user u ON  u.id = a.create_by
+		LEFT JOIN
+			sys_area a1 ON a1.id = a.case_area
+		LEFT JOIN
+			sys_user u1 on u1.id = a.create_by
+		LEFT JOIN
+			sys_user u2 on u2.id = a.contractor
+		<where>
+			a.type !='3'
+			<if test="type!=null and type!='' ">
+				and a.type=#{type}
+			</if>
+			<if test="caseType!=null and caseType!='' ">
+				and a.case_type=#{caseType}
+			</if>
+			<if test="state!=null and state!='' ">
+				and a.state=#{state}
+			</if>
+			<if test="caseArea!=null and caseArea.id != null and  caseArea.id!='' ">
+				and a.case_area=#{caseArea.id}
+			</if>
+			<if test="title!=null and title!='' ">
+				and a.title=#{title}
+			</if>
+			<if test="severity!=null and severity!='' ">
+				and a.severity=#{severity}
+			</if>
+			<if test="contractor!=null and contractor!='' ">
+				and u2.contractor '%'||#{contractor}||'%'
+			</if>
+			<if test="applyUser!=null and applyUser!='' ">
+				and u.name like '%'||#{applyUser}||'%'
+			</if>
+			<if test="applyBeginDate!=null">
+				<![CDATA[ AND DATE_FORMAT(a.create_date,'%Y-%m-%d') >= #{applyBeginDate}]]>
+			</if>
+			<if test="applyEndDate!=null">
+				<![CDATA[ AND DATE_FORMAT(a.create_date,'%Y-%m-%d') <= #{applyEndDate}]]>
+			</if>
+			<if test="acceptBeginDate!=null">
+				<![CDATA[ AND DATE_FORMAT(a.handle_date,'%Y-%m-%d') >= #{acceptBeginDate}]]>
+			</if>
+			<if test="acceptEndDate!=null">
+				<![CDATA[ AND DATE_FORMAT(a.handle_date,'%Y-%m-%d') <= #{acceptEndDate}]]>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="comprehensiveQueryCountForApi" parameterType="com.thinkgem.jeesite.api.act.entity.ProcessStateVo" resultType="int">
+		SELECT 
+			count(a.id)
+		FROM
+			oa_process_state a 
+		LEFT JOIN
+			sys_user u ON  u.id = a.create_by
+		LEFT JOIN
+			sys_area a1 ON a1.id = a.case_area
+		LEFT JOIN
+			sys_user u1 on u1.id = a.create_by
+		LEFT JOIN
+			sys_user u2 on u2.id = a.contractor
+		<where>
+			a.type != '3'
+			<if test="type!=null and type!='' ">
+				and a.type=#{type}
+			</if>
+			<if test="caseType!=null and caseType!='' ">
+				and a.case_type=#{caseType}
+			</if>
+			<if test="state!=null and state!='' ">
+				and a.state=#{state}
+			</if>
+			<if test="caseArea!=null and caseArea.id != null and  caseArea.id!='' ">
+				and a.case_area=#{caseArea.id}
+			</if>
+			<if test="title!=null and title!='' ">
+				and a.title=#{title}
+			</if>
+			<if test="severity!=null and severity!='' ">
+				and a.severity=#{severity}
+			</if>
+			<if test="contractor!=null and contractor!='' ">
+				and u2.contractor '%'||#{contractor}||'%'
+			</if>
+			<if test="applyUser!=null and applyUser!='' ">
+				and u.name like '%'||#{applyUser}||'%'
+			</if>
+			<if test="applyBeginDate!=null">
+				<![CDATA[ AND DATE_FORMAT(a.create_date,'%Y-%m-%d') >= #{applyBeginDate}]]>
+			</if>
+			<if test="applyEndDate!=null">
+				<![CDATA[ AND DATE_FORMAT(a.create_date,'%Y-%m-%d') <= #{applyEndDate}]]>
+			</if>
+			<if test="acceptBeginDate!=null">
+				<![CDATA[ AND DATE_FORMAT(a.handle_date,'%Y-%m-%d') >= #{acceptBeginDate}]]>
+			</if>
+			<if test="acceptEndDate!=null">
+				<![CDATA[ AND DATE_FORMAT(a.handle_date,'%Y-%m-%d') <= #{acceptEndDate}]]>
+			</if>
+		</where>
+	</select>
+	
+	<!-- 统计分析 -->
+	<select id="statisticsAnalysis" parameterType="com.thinkgem.jeesite.api.act.entity.ProcessStateVo" resultType="com.thinkgem.jeesite.api.act.entity.ProcessStateVo">
+		SELECT 
+			s.case_area as "caseArea.id", 
+			count(s.id) as "count",
+			s.type as "type",
+			s.case_type as "caseType",
+			a.name as "caseArea.name"  
+		FROM
+			oa_process_state s
+		LEFT JOIN 
+			sys_area a 
+		ON  a.id = s.case_area
+		WHERE s.type != '3' and 
+			<![CDATA[DATE_FORMAT(s.create_date,'%Y-%m-%d') >= #{applyBeginDate} AND DATE_FORMAT(s.create_date,'%Y-%m-%d') <= #{applyEndDate}]]>
+		<if test="type==0 ">
+			GROUP BY  s.case_area 
+		</if>
+		<if test="type==1 ">
+			GROUP BY  s.type
+		</if>
+		<if test="type==2 ">
+			GROUP BY s.case_type
+		</if>
+	</select>
+	
+	<!-- 承办人一共办理了多少案件的统计 -->
+	<select id="contractorQuery" parameterType="com.thinkgem.jeesite.api.act.entity.ProcessStateVo" resultType="com.thinkgem.jeesite.api.act.entity.ProcessStateVo">
+		SELECT 
+			s.case_area as "caseArea.id", 
+			count(s.id) as "count",
+			s.type as "type",
+			s.case_type as "caseType",
+			a.name as "caseArea.name"  
+		FROM
+			oa_process_state s
+		LEFT JOIN 
+			sys_area a 
+		ON  a.id = s.case_area
+		WHERE s.type != '3' and 
+			<![CDATA[DATE_FORMAT(s.create_date,'%Y-%m-%d') >= #{applyBeginDate} AND DATE_FORMAT(s.create_date,'%Y-%m-%d') <= #{applyEndDate}]]>
+		<if test="type==0 ">
+			GROUP BY  s.case_area 
+		</if>
+		<if test="type==1 ">
+			GROUP BY  s.type
+		</if>
+		<if test="type==2 ">
+			GROUP BY s.case_type
+		</if>
+	</select>
+	
+</mapper>

@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.oa.dao.act.OaPeopleMediationAcceptRegisterDao">
+    
+	<sql id="oaPeopleMediationAcceptRegisterColumns">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.case_source AS "caseSource",
+		a.hasMongol AS "hasMongol",
+		a.case_rank AS "caseRank",
+		a.case_county AS "caseCounty.id",
+		a.case_town AS "caseTown.id",
+		a.case_time AS "caseTime",
+		a.case_area AS "caseArea",
+		a.case_involveCount AS "caseInvolveCount",
+		a.case_type AS "caseType",
+		a.dispute_situation AS "disputeSituation",
+		a.case_file AS "caseFile",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.overThreshold as "overThreshold"
+	</sql>
+	<sql id="oaPeopleMediationApplyColumns">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.case_source AS "caseSource",
+		a.hasMongol AS "hasMongol",
+		a.case_rank AS "caseRank",
+		a.case_county AS "caseCounty.id",
+		a.case_town AS "caseTown.id",
+		a.case_time AS "caseTime",
+		a.case_area AS "caseArea",
+		a.case_involveCount AS "caseInvolveCount",
+		a.case_type AS "caseType",
+		a.dispute_situation AS "disputeSituation",
+		a.case_file AS "caseFile",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.overThreshold as "overThreshold",
+		p.id AS "oaPeopleMediationApply.id",
+		p.proc_ins_id AS "oaPeopleMediationApply.procInsId",
+		p.year AS "oaPeopleMediationApply.year",
+		p.year_no AS "oaPeopleMediationApply.yearNo",
+		p.accuser_name AS "oaPeopleMediationApply.accuserName",
+		p.accuser_idcard AS "oaPeopleMediationApply.accuserIdcard",
+		p.accuser_sex AS "oaPeopleMediationApply.accuserSex",
+		p.accuser_birthday AS "oaPeopleMediationApply.accuserBirthday",
+		p.accuser_ethnic AS "oaPeopleMediationApply.accuserEthnic",
+		p.accuser_county AS "oaPeopleMediationApply.accuserCounty.id",
+		p.accuser_town AS "oaPeopleMediationApply.accuserTown.id",
+		p.accuser_occupation AS "oaPeopleMediationApply.accuserOccupation",
+		p.accuser_domicile AS "oaPeopleMediationApply.accuserDomicile",
+		p.accuser_address AS "oaPeopleMediationApply.accuserAddress",
+		p.accuser_post_code AS "oaPeopleMediationApply.accuserPostCode",
+		p.accuser_phone AS "oaPeopleMediationApply.accuserPhone",
+		p.defendant_name AS "oaPeopleMediationApply.defendantName",
+		p.defendant_idcard AS "oaPeopleMediationApply.defendantIdcard",
+		p.defendant_sex AS "oaPeopleMediationApply.defendantSex",
+		p.defendant_birthday AS "oaPeopleMediationApply.defendantBirthday",
+		p.defendant_ethnic AS "oaPeopleMediationApply.defendantEthnic",
+		p.defendant_county AS "oaPeopleMediationApply.defendantCounty.id",
+		p.defendant_town AS "oaPeopleMediationApply.defendantTown.id",
+		p.defendant_occupation AS "oaPeopleMediationApply.defendantOccupation",
+		p.defendant_domicile AS "oaPeopleMediationApply.defendantDomicile",
+		p.defendant_address AS "oaPeopleMediationApply.defendantAddress",
+		p.defendant_post_code AS "oaPeopleMediationApply.defendantPostCode",
+		p.defendant_phone AS "oaPeopleMediationApply.defendantPhone",
+		p.case_title AS "oaPeopleMediationApply.caseTitle",
+		p.case_situation AS "oaPeopleMediationApply.caseSituation",
+		p.case_file AS "oaPeopleMediationApply.caseFile",
+		p.mediator as "oaPeopleMediationApply.mediator.id",
+		p.qrcode AS "oaPeopleMediationApply.qrcode",
+		o10.id as "oaPeopleMediationApply.peopleMediationCommittee.id",
+		a5.name AS "oaPeopleMediationApply.accuserCounty.name",
+		a6.name AS "oaPeopleMediationApply.accuserTown.name",
+		a7.name AS "oaPeopleMediationApply.defendantCounty.name",
+		a8.name AS "oaPeopleMediationApply.defendantTown.name",
+		u9.name AS "oaPeopleMediationApply.mediator.name",
+		o10.name AS "oaPeopleMediationApply.peopleMediationCommittee.name",
+		a11.name AS "oaPeopleMediationApply.caseCounty.name",
+		a12.name AS "oaPeopleMediationApply.caseTown.name",
+		p.case_county AS "oaPeopleMediationApply.caseCounty.id",
+		p.case_town AS "oaPeopleMediationApply.caseTown.id",
+		p.case_type AS "oaPeopleMediationApply.caseType"
+	</sql>
+	<sql id="oaPeopleMediationAcceptRegisterJoins"></sql>
+	<sql id="oaPeopleMediationApplyJoins">
+		LEFT JOIN sys_area a5 ON a5.id = p.accuser_county
+		LEFT JOIN sys_area a6 ON a6.id = p.accuser_town
+		LEFT JOIN sys_area a7 ON a7.id = p.defendant_county
+		LEFT JOIN sys_area a8 ON a8.id = p.defendant_town
+		LEFT JOIN sys_user u9 ON u9.id = p.mediator
+		LEFT JOIN sys_office o10 ON o10.id= p.people_mediation_committee
+		LEFT JOIN sys_area a11 ON a11.id =  p.case_county
+		LEFT JOIN sys_area a12 ON a12.id =  p.case_town
+
+	</sql>
+    
+	<select id="getDataByProInsId" resultType="OaPeopleMediationApply">
+
+	</select>
+	
+	<resultMap id="getDateFromAccept" type="oaPeopleMediationAcceptRegister">
+		<id column="id" property="id" />
+		<result column="proc_ins_id" property="procInsId"/>
+		<association property="oaPeopleMediationApply" javaType="oaPeopleMediationApply">
+			<id column="oaPeopleMediationApply.id" property="id" />
+			<result column="oaPeopleMediationApply.procInsId" property="procInsId"/>
+			<result column="oaPeopleMediationApply.accuserName" property="accuserName"/>
+		</association>
+	</resultMap>
+
+	<select id="get" resultType="OaPeopleMediationAcceptRegister">
+		select 
+		<include refid="oaPeopleMediationApplyColumns"/>
+		from oa_people_mediation_apply p
+		left join oa_people_mediation_accept_register a
+		on p.proc_ins_id=a.proc_ins_id 
+		<include refid="oaPeopleMediationApplyJoins"/>
+		where p.proc_ins_id= 
+		(SELECT  ap.PROC_INS_ID as pid 
+		FROM oa_people_mediation_apply ap
+		WHERE ap.id = #{id})
+	</select>
+
+	<!-- <select id="get" resultType="OaPeopleMediationAcceptRegister">
+		SELECT 
+			<include refid="oaPeopleMediationAcceptRegisterColumns"/>
+			<include refid="oaPeopleMediationApplyColumns"/>
+		FROM oa_people_mediation_accept_register a -->
+		<!-- <include refid="oaPeopleMediationAcceptRegisterJoins"/> -->
+		<!-- right join oa_people_mediation_apply p
+		on p.id = a.applyId 
+		WHERE a.id = #{id} and a.proc_ins_id = #{procInsId}
+	</select> -->
+	
+	<select id="findList" resultType="OaPeopleMediationAcceptRegister">
+		SELECT 
+			<include refid="oaPeopleMediationAcceptRegisterColumns"/>
+		FROM oa_people_mediation_accept_register a
+		<include refid="oaPeopleMediationAcceptRegisterJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaPeopleMediationAcceptRegister">
+		SELECT 
+			<include refid="oaPeopleMediationAcceptRegisterColumns"/>
+		FROM oa_people_mediation_accept_register a
+		<include refid="oaPeopleMediationAcceptRegisterJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_people_mediation_accept_register(
+			id,
+			proc_ins_id,
+			case_area,
+			case_time,
+			case_type,
+			hasMongol,
+			case_town,
+			case_county,
+			case_rank,
+			case_source,
+			dispute_situation,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			case_involveCount,
+			case_file,
+			overThreshold
+		) VALUES (
+			#{id},
+			#{act.procInsId},
+			#{caseArea},
+			#{caseTime},
+			#{caseType},
+			#{hasMongol},
+			#{caseTown.id},
+			#{caseCounty.id},
+			#{caseRank},
+			#{caseSource},
+			#{disputeSituation},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{caseInvolveCount},
+			#{caseFile},
+			#{overThreshold}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_people_mediation_accept_register SET 	
+			proc_ins_id = #{act.procInsId},
+			case_area = #{caseArea},
+			case_time = #{caseTime},
+			case_type = #{caseType},
+			hasMongol = #{hasMongol},
+			case_town = #{caseTown.id},
+			case_county = #{caseCounty.id},
+			case_rank = #{caseRank},
+			case_source = #{caseSource},
+			dispute_situation = #{disputeSituation},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			case_involveCount = #{caseInvolveCount},
+			case_file = #{caseFile},
+			overThreshold = #{overThreshold}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_people_mediation_accept_register SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据年度旗县严重等级统计
+	 * 年度旗县严重等级数量(柱状) -->
+	<select id="countByYearCaseRank" parameterType="OaPeopleMediationAcceptRegisterCount" resultType="OaPeopleMediationAcceptRegisterCount">
+		SELECT 
+		    a.id 'area.id',
+		    IFNULL(t.count, 0) count,
+		    a.name 'area.name',
+			IFNULL(t.case_rank, '') caseRank
+			<!-- 根据日期统计 -->
+			<if test="groupByDate =='true'">
+			, t.countDate
+			</if>
+		FROM
+		    sys_area a
+		        LEFT JOIN
+		    (SELECT 
+		            t.accuser_county area_id,
+		            COUNT(*) count, 
+		            r.case_rank
+			    	<!-- 根据日期统计 -->
+			    	<if test="groupByDate =='true'">
+			    	, date_format(t.create_date,#{datePattern}) countDate
+			    	</if>
+		    FROM
+		        oa_people_mediation_apply t
+		    LEFT JOIN oa_people_mediation_accept_register r ON r.del_flag = 0
+		        AND t.PROC_INS_ID = r.PROC_INS_ID
+		    WHERE
+		        t.del_flag = 0 AND t.status = 1
+		        <![CDATA[ 
+		        AND date_format(t.create_date,#{datePattern}) >= #{beginDate}
+		        AND date_format(t.create_date,#{datePattern}) <= #{endDate}
+		         ]]> 
+		        <if test="caseRank != null and caseRank !=''">
+		        AND r.case_rank = #{caseRank}
+		        </if>
+		    GROUP BY t.accuser_county , r.case_rank
+		    	<!-- 根据日期统计 -->
+		    	<if test="groupByDate =='true'">
+		    	, date_format(t.create_date,#{datePattern})
+		    	</if>
+		    	) t ON t.area_id = a.id
+		WHERE
+		    a.del_flag = 0 AND a.parent_id = '5'
+		ORDER BY a.code, t.case_rank
+	</select>
+</mapper>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.appmange.dao.SysRoleAppMenuDao">
+
+    <sql id="sysRoleAppMenuColumns">
+		a.id AS "id",
+		a.role_id AS "roleId",
+		a.app_menu_id AS "appMenuId"
+	</sql>
+
+    <sql id="sysRoleAppMenuJoins">
+    </sql>
+
+    <select id="get" resultType="SysRoleAppMenu">
+        SELECT
+        <include refid="sysRoleAppMenuColumns"/>
+        FROM sys_role_app_menu a
+        <include refid="sysRoleAppMenuJoins"/>
+        WHERE a.id = #{id}
+    </select>
+    <!--根据应用id查找-->
+    <select id="findByAppMenuId" resultType="SysRoleAppMenu">
+        SELECT
+        <include refid="sysRoleAppMenuColumns"/>
+        FROM sys_role_app_menu a
+        <include refid="sysRoleAppMenuJoins"/>
+        WHERE a.app_menu_id = #{appMenuId}
+    </select>
+
+    <!--根据应用id和角色id查找-->
+    <select id="findByAppMenuIdAndRoleId" resultType="SysRoleAppMenu" parameterType="SysRoleAppMenu">
+        SELECT
+        <include refid="sysRoleAppMenuColumns"/>
+        FROM sys_role_app_menu a
+        <include refid="sysRoleAppMenuJoins"/>
+        WHERE a.app_menu_id = #{appMenuId}
+        and a.role_id = #{roleId}
+    </select>
+
+    <!--根据角色ids查找-->
+    <select id="findByRoleIdS" resultType="SysRoleAppMenu" parameterType="java.util.List">
+        SELECT
+        <include refid="sysRoleAppMenuColumns"/>
+        FROM sys_role_app_menu a
+        <include refid="sysRoleAppMenuJoins"/>
+        WHERE a.role_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </select>
+
+    <select id="findList" resultType="SysRoleAppMenu">
+        SELECT
+        <include refid="sysRoleAppMenuColumns"/>
+        FROM sys_role_app_menu a
+        <include refid="sysRoleAppMenuJoins"/>
+        <where>
+
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="SysRoleAppMenu">
+        SELECT
+        <include refid="sysRoleAppMenuColumns"/>
+        FROM sys_role_app_menu a
+        <include refid="sysRoleAppMenuJoins"/>
+        <where>
+
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+		INSERT INTO sys_role_app_menu(
+			id,
+			role_id,
+			app_menu_id
+		) VALUES (
+			#{id},
+			#{roleId},
+			#{appMenuId}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE sys_role_app_menu SET 	
+			role_id = #{roleId},
+			app_menu_id = #{appMenuId}
+		WHERE id = #{id}
+	</update>
+
+    <update id="delete">
+		DELETE FROM sys_role_app_menu
+		WHERE id = #{id}
+	</update>
+
+</mapper>

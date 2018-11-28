@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.StarLevelDao">
+    
+	<sql id="starLevelColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.evaluation AS "evaluation",
+		o2.name AS "area.name"
+	</sql>
+	
+	<!-- 律师 -->
+	<select id="findListByLawyer" resultType="StarLevel">
+		SELECT 
+			<include refid="starLevelColumns"/>
+				,a.area_id AS "area.id",a.law_office_id AS "office.id",o1.name AS "office.name",ifnull(e.evaluation_num,0) as "evaluationNum"
+		FROM info_lawyer a
+		LEFT JOIN sys_office o1 ON o1.id = a.law_office_id
+		LEFT JOIN sys_area o2 ON o2.id = a.area_id
+        left join (select count(*) as evaluation_num,d.id as login_id from cms_guestbook_evaluate b,sys_user_office_info c,info_lawyer d where b.be_evaluated_user = c.login_id and c.info_id = d.id) e on e.login_id = a.id
+		<where>
+			a.del_flag= '0'
+			<if test="areaId != null and areaId.length>0">
+				and a.area_id in
+				<foreach collection="areaId" index="index" item="areaId" open="(" separator="," close=")">   
+	            	#{areaId}   
+	        	</foreach>
+        	</if>
+        	<if test="officeId != null and officeId.length>0">
+        		and a.law_office_id in
+				<foreach collection="officeId" index="index" item="officeId" open="(" separator="," close=")">   
+	            	#{officeId}   
+	        	</foreach>
+        	</if>
+        	<if test="evaluation != null and evaluation != ''">
+        		and a.evaluation = #{evaluation}
+        	</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.evaluation DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 公证员 -->
+	<select id="findListByNotaryMeber" resultType="StarLevel">
+		SELECT 
+			<include refid="starLevelColumns"/>
+				,o2.id AS "area.id",a.notary_agency_id AS "office.id",o1.name AS "office.name",ifnull(e.evaluation_num,0) as "evaluationNum"
+		FROM info_notary_member a
+		LEFT JOIN sys_office o1 ON o1.id = a.notary_agency_id
+		LEFT JOIN sys_area o2 ON o2.id = (select area_id from sys_office where id = a.notary_agency_id)
+        left join (select count(*) as evaluation_num,d.id as login_id from cms_guestbook_evaluate b,sys_user_office_info c,info_notary_member d where b.be_evaluated_user = c.login_id and c.info_id = d.id) e on e.login_id = a.id
+		<where>
+			a.del_flag= '0'
+			<if test="areaId != null and areaId.length>0">
+				AND a.notary_agency_id in (
+				    select s.login_id from info_notary_agency ina left join sys_user_office_info s on s.info_id=ina.id
+				     where ina.del_flag='0' and ina.area_id in
+				     	<foreach collection="areaId" index="index" item="areaId" open="(" separator="," close=")">   
+			            	#{areaId}   
+			        	</foreach>
+					)
+        	</if>
+        	<if test="officeId != null and officeId.length>0">
+        		and a.notary_agency_id in
+				<foreach collection="officeId" index="index" item="officeId" open="(" separator="," close=")">   
+	            	#{officeId}   
+	        	</foreach>
+        	</if>
+        	<if test="evaluation != null and evaluation != ''">
+        		and a.evaluation = #{evaluation}
+        	</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.evaluation DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 基层法律服务者 -->
+	<select id="findListByLegalServicePerson" resultType="StarLevel">
+		SELECT 
+			<include refid="starLevelColumns"/>
+				,o2.id AS "area.id",a.legal_office_id AS "office.id",o1.name AS "office.name",ifnull(e.evaluation_num,0) as "evaluationNum"
+		FROM info_legal_service_person a
+		LEFT JOIN sys_office o1 ON o1.id = a.legal_office_id
+		LEFT JOIN sys_area o2 ON o2.id = (select area_id from sys_office where id = a.legal_office_id)
+        left join (select count(*) as evaluation_num,d.id as login_id from cms_guestbook_evaluate b,sys_user_office_info c,info_legal_service_person d where b.be_evaluated_user = c.login_id and c.info_id = d.id) e on e.login_id = a.id
+		<where>
+			a.del_flag='0'
+			<if test="areaId != null and areaId.length>0">
+				AND a.legal_office_id in (
+				      select suoi.login_id from info_legal_service_office o  left join sys_user_office_info  suoi on o.id=suoi.info_id
+				     where o.del_flag='0' and o.area_id in
+				     <foreach collection="areaId" index="index" item="areaId" open="(" separator="," close=")">   
+		            	#{areaId}   
+		        	 </foreach>
+				)
+        	</if>
+        	<if test="officeId != null and officeId.length>0">
+        		and a.legal_office_id in
+				<foreach collection="officeId" index="index" item="officeId" open="(" separator="," close=")">   
+	            	#{officeId}   
+	        	</foreach>
+        	</if>
+        	<if test="evaluation != null and evaluation != ''">
+        		and a.evaluation = #{evaluation}
+        	</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.evaluation DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 司法所工作人员 -->
+	<select id="findListByJudiciaryUser" resultType="StarLevel">
+		SELECT 
+			<include refid="starLevelColumns"/>
+				,a.area_id AS "area.id",a.office_id AS "office.id",o1.name AS "office.name",ifnull(e.evaluation_num,0) as "evaluationNum"
+		FROM info_judiciary_user a
+		LEFT JOIN sys_office o1 ON o1.id = a.office_id
+		LEFT JOIN sys_area o2 ON o2.id = a.area_id
+        left join (select count(*) as evaluation_num,d.id as login_id from cms_guestbook_evaluate b,sys_user_office_info c,info_judiciary_user d where b.be_evaluated_user = c.login_id and c.info_id = d.id) e on e.login_id = a.id
+		<where>
+			a.del_flag='0'
+			<if test="areaId != null and areaId.length>0">
+				a.area_id in
+			    <foreach collection="areaId" index="index" item="areaId" open="(" separator="," close=")">   
+	            	#{areaId}   
+	        	</foreach>
+        	</if>
+        	<if test="officeId != null and officeId.length>0">
+        		and a.office_id in
+				<foreach collection="officeId" index="index" item="officeId" open="(" separator="," close=")">   
+	            	#{officeId}   
+	        	</foreach>
+        	</if>
+        	<if test="evaluation != null and evaluation != ''">
+        		and a.evaluation = #{evaluation}
+        	</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.evaluation DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 法援 -->
+	<select id="findListByLawAssitanceUser" resultType="StarLevel">
+		SELECT 
+			<include refid="starLevelColumns"/>
+				,a.area AS "area.id",a.office_id AS "office.id",o1.name AS "office.name",ifnull(e.evaluation_num,0) as "evaluationNum"
+		FROM info_law_assitance_user a
+		LEFT JOIN sys_office o1 ON o1.id = a.office_id
+		LEFT JOIN sys_area o2 ON o2.id = a.area
+        left join (select count(*) as evaluation_num,d.id as login_id from cms_guestbook_evaluate b,sys_user_office_info c,info_law_assitance_user d where b.be_evaluated_user = c.login_id and c.info_id = d.id) e on e.login_id = a.id
+		<where>
+			a.del_flag='0'
+			<if test="areaId != null and areaId.length>0">
+				a.area in
+			    <foreach collection="areaId" index="index" item="areaId" open="(" separator="," close=")">   
+	            	#{areaId}   
+	        	</foreach>
+        	</if>
+        	<if test="officeId != null and officeId.length>0">
+        		and a.office_id in
+				<foreach collection="officeId" index="index" item="officeId" open="(" separator="," close=")">   
+	            	#{officeId}   
+	        	</foreach>
+        	</if>
+        	<if test="evaluation != null and evaluation != ''">
+        		and a.evaluation = #{evaluation}
+        	</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.evaluation DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 调解员 -->
+	<select id="findListByPeopleMediation" resultType="StarLevel">
+		SELECT 
+			<include refid="starLevelColumns"/>
+				,a.area_id AS "area.id",a.office_id AS "office.id",o1.name AS "office.name",ifnull(e.evaluation_num,0) as "evaluationNum"
+		FROM info_people_mediation a
+		LEFT JOIN sys_office o1 ON o1.id = a.office_id
+		LEFT JOIN sys_area o2 ON o2.id = a.area_id
+        left join (select count(*) as evaluation_num,d.id as login_id from cms_guestbook_evaluate b,sys_user_office_info c,info_people_mediation d where b.be_evaluated_user = c.login_id and c.info_id = d.id) e on e.login_id = a.id
+		<where>
+			a.del_flag='0'
+			<if test="areaId != null and areaId.length>0">
+				a.area_id in
+			    <foreach collection="areaId" index="index" item="areaId" open="(" separator="," close=")">   
+	            	#{areaId}   
+	        	</foreach>
+        	</if>
+        	<if test="officeId != null and officeId.length>0">
+        		and a.office_id in
+				<foreach collection="officeId" index="index" item="officeId" open="(" separator="," close=")">   
+	            	#{officeId}   
+	        	</foreach>
+        	</if>
+        	<if test="evaluation != null and evaluation != ''">
+        		and a.evaluation = #{evaluation}
+        	</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.evaluation DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 地区查询 -->
+	<select id="findListByArea" resultType="StarLevel">
+		select q.name AS "area.name",ifnull(d.evaluationNum,0) as "evaluationNum",ifnull(d.evaluation,0) as "evaluation" from sys_area q
+		left join (
+		select count(*) as evaluationNum,round(ifnull(sum(prescription)/count(*),0)) as evaluation,c.area_id from cms_guestbook_evaluate a,sys_user_role_office b,sys_office c 
+		where a.be_evaluated_user = b.user_id and b.office_id = c.id 
+		<if test="evaluation != null and evaluation != ''">
+			and a.prescription = #{evaluation} 
+		</if>
+		<if test="officeId != null and officeId.length>0">
+       		and c.id in
+			<foreach collection="officeId" index="index" item="officeId" open="(" separator="," close=")">   
+            	#{officeId}   
+        	</foreach>
+       	</if>
+		group by c.area_id
+		) d on d.area_id = q.id where 
+		<choose>
+			<when test="areaId != null and areaId.length>0">
+				q.id in
+			    <foreach collection="areaId" index="index" item="areaId" open="(" separator="," close=")">   
+	            	#{areaId}   
+	        	</foreach>
+			</when>
+			<otherwise>
+				q.parent_id in('4','5')
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY evaluation DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 机构查询 -->
+	<select id="findListByOffice" resultType="StarLevel">
+		select q.name AS "office.name",f.name AS "area.name",ifnull(d.evaluationNum,0) as "evaluationNum",ifnull(d.evaluation,0) as "evaluation" from sys_office q
+		left join sys_area f on f.id = q.area_id
+		left JOIN (
+		select count(*) as evaluationNum,round(ifnull(sum(prescription)/count(*),0)) as evaluation,b.office_id from cms_guestbook_evaluate a,sys_user_role_office b
+		where a.be_evaluated_user = b.user_id 
+		<if test="evaluation != null and evaluation != ''">
+			and a.prescription = #{evaluation} 
+		</if>
+		group by b.office_id
+		) d on d.office_id = q.id where 
+		<choose>
+			<when test="areaId != null and areaId.length>0">
+				q.area_id in
+			    <foreach collection="areaId" index="index" item="areaId" open="(" separator="," close=")">   
+	            	#{areaId}   
+	        	</foreach>
+			</when>
+			<otherwise>
+				q.area_id in(select id from sys_area where parent_id in('4','5'))
+			</otherwise>
+		</choose>
+		<if test="officeId != null and officeId.length>0">
+       		and q.id in
+			<foreach collection="officeId" index="index" item="officeId" open="(" separator="," close=")">   
+            	#{officeId}   
+        	</foreach>
+       	</if>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY evaluation DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 查询地区 -->
+	<select id="area" resultType="String">
+		select name from sys_area where id = #{id}
+	</select>
+	
+	<!-- 查询机构 -->
+	<select id="office" resultType="String">
+		select name from sys_office where id = #{id}
+	</select>
+</mapper>

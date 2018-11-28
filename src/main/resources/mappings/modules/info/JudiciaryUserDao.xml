@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.JudiciaryUserDao">
+    
+	<sql id="judiciaryUserColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.sex AS "sex",
+		a.phone AS "phone",
+		a.ethnic AS "ethnic",
+		a.idcard AS "idcard",
+		a.role_id AS "roleId",
+		a.practising_time AS "practisingTime",
+		a.is_people_mediation AS "isPeopleMediation",
+		a.image_url AS "imageUrl",
+		a.office_id AS "office.id",
+		a.political_face AS "politicalFace",
+		a.area_id AS "area.id",
+		a.town_id AS "town.id",
+		a.introduction AS "introduction",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.is_mongolian AS "isMongolian",
+		a.evaluation AS "evaluation",
+		o.name AS "office.name",
+		a13.name AS "area.name",
+		a14.name AS "town.name",
+		a15.label AS "roleName"
+	</sql>
+	<resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+    <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="office.name" />
+		<result property="personName" column="name" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="id" column="login_id" />
+		<result property="sex" column="sexLabel" />
+		<result property="ethnic" column="ethnicLabel" />
+		<result property="introduction" column="introduction" />
+		<result property="politicalFace" column="politicalFace" />
+		<result property="isMongolian" column="isMongolianLabel" />
+		<result property="roleId" column="roleName" />
+		<result property="idCard" column="idcard" />
+		<result property="evaluation" column="evaluation" />
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	<sql id="judiciaryUserJoins">
+		LEFT JOIN sys_office o ON o.id = a.office_id
+		LEFT JOIN sys_area a13 ON a13.id = a.area_id
+		LEFT JOIN sys_area a14 ON a14.id = a.town_id
+		LEFT JOIN  sys_dict a15 on a.role_id=a15.`value` and a15.type='info_role_type' and a15.language_type='CN'
+		LEFT JOIN sys_user_office_info d4 on a.id=d4.info_id
+	</sql>
+    
+	<select id="get" resultType="JudiciaryUser">
+		SELECT 
+			<include refid="judiciaryUserColumns"/>
+		FROM info_judiciary_user a
+		<include refid="judiciaryUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="findList" resultType="JudiciaryUser">
+		SELECT 
+			<include refid="judiciaryUserColumns"/>
+		FROM info_judiciary_user a
+		<include refid="judiciaryUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="office != null and office.id != null and office.id != ''">
+				AND a.office_id = #{office.id}
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+			<if test="town != null and town.id != null and town.id != ''">
+				AND a.town_id = #{town.id}
+			</if>
+			<if test=" idcard != null and idcard != ''">
+				AND a.idcard = #{idcard}
+			</if>
+				<!-- 数据范围过滤 -->
+		        ${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="JudiciaryUser">
+		SELECT 
+			<include refid="judiciaryUserColumns"/>
+		FROM info_judiciary_user a
+		<include refid="judiciaryUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="getById" resultMap="agencyResult">
+		SELECT 
+			<include refid="judiciaryUserColumns"/>
+			,s.login_id,p1.address,d1.label AS "sexLabel",d2.label AS "ethnicLabel",d3.label AS "isMongolianLabel"
+		FROM info_judiciary_user a
+		<include refid="judiciaryUserJoins"/>
+		left join sys_user_office_info s on s.login_id=a.office_id
+		left join info_judiciary p1 on p1.id=s.info_id
+		LEFT JOIN  sys_dict d1 on a.sex=d1.`value` and d1.type='sex' and d1.language_type='CN'
+		LEFT JOIN  sys_dict d2 on a.ethnic=d2.`value` and d2.type='ethnic'  and d2.language_type='CN'
+		LEFT JOIN  sys_dict d3 on a.is_mongolian=d3.`value` and d3.type='yes_no' and d3.language_type='CN'
+		WHERE a.id = #{id}
+	</select>
+	<select id="findListForApi" resultMap="agencyResult">
+		SELECT 
+			<include refid="judiciaryUserColumns"/>
+			,s.login_id,p1.address,d1.label AS "sexLabel",d2.label AS "ethnicLabel",d3.label AS "isMongolianLabel"
+		FROM info_judiciary_user a
+		<include refid="judiciaryUserJoins"/>
+		left join sys_user_office_info s on s.login_id=a.office_id
+		left join info_judiciary p1 on p1.id=s.info_id 
+		LEFT JOIN  sys_dict d1 on a.sex=d1.`value` and d1.type='sex'  and d1.language_type='CN'
+		LEFT JOIN  sys_dict d2 on a.ethnic=d2.`value` and d2.type='ethnic' and d2.language_type='CN'
+		LEFT JOIN  sys_dict d3 on a.is_mongolian=d3.`value` and d3.type='yes_no' and d3.language_type='CN'
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND( a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or  o.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or  d2.label LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					)
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				   AND a.area_id = #{area.id}
+			    </if>
+			<if test="town !=null and town.id!= null and town.id != ''">
+				 AND a.town_id = #{town.id}
+			</if>
+			<if test="isMongolian!= null and isMongolian != '' and isMongolian != '暂无'">
+				 AND a.is_mongolian = #{isMongolian}
+			</if>
+			<if test="evaluation != null and evaluation != '' and evaluation != '暂无'">
+			    AND a.evaluation = #{evaluation}
+			</if>
+			<if test="officeId != null and officeId!= '' and evaluation != '暂无'">
+			    AND a.office_id = #{officeId}
+			</if>
+			
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+  <select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_judiciary_user a
+		<include refid="judiciaryUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="area != null and area.id != null and area.id != ''">
+				   AND a.area_id = #{area.id}
+			</if>
+		</where>
+	</select>
+	<insert id="insert">
+		INSERT INTO info_judiciary_user(
+			id,
+			name,
+			sex,
+			phone,
+			ethnic,
+			idcard,
+			role_id,
+			practising_time,
+			is_people_mediation,
+			image_url,
+			office_id,
+			political_face,
+			area_id,
+			town_id,
+			introduction,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			is_mongolian
+		) VALUES (
+			#{id},
+			#{name},
+			#{sex},
+			#{phone},
+			#{ethnic},
+			#{idcard},
+			#{roleId},
+			#{practisingTime},
+			#{isPeopleMediation},
+			#{imageUrl},
+			#{office.id},
+			#{politicalFace},
+			#{area.id},
+			#{town.id},
+			#{introduction},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{isMongolian}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_judiciary_user SET 	
+			name = #{name},
+			sex = #{sex},
+			phone = #{phone},
+			ethnic = #{ethnic},
+			idcard = #{idcard},
+			role_id = #{roleId},
+			practising_time = #{practisingTime},
+			is_people_mediation = #{isPeopleMediation},
+			image_url = #{imageUrl},
+			office_id = #{office.id},
+			political_face = #{politicalFace},
+			area_id = #{area.id},
+			town_id = #{town.id},
+			introduction = #{introduction},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			is_mongolian =#{isMongolian}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_judiciary_user SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+  <update id="batchDelete" parameterType="String" >
+  		UPDATE info_judiciary_user SET del_flag = '1' where  id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+	
+	<!-- 修改评价值 -->
+    <update id="evaluationUpdate">
+		UPDATE info_judiciary_user SET 
+			evaluation = #{evaluation}
+		WHERE id = (select info_id from sys_user_office_info where login_id = #{id}
+		<if test="remark!='' ">
+			and remark= #{remark}
+		</if>
+		)
+	</update>	
+</mapper>

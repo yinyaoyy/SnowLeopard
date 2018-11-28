@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.cms.dao.GuestbookEvaluateDao">
+    <resultMap type="User" id="createByMap">  
+        <id property="id" column="createBy.id" />  
+        <result property="name" column="createBy.name" /> 
+        <result property="photo" column="createBy.photo" /> 
+    </resultMap>
+    <resultMap id="guestbookEvaluateResult" type="com.thinkgem.jeesite.modules.cms.entity.GuestbookEvaluate">
+		<id property="id" column="id" />
+		<result property="commentId"      column="commentId"      />
+		<result property="prescription"   column="prescription"   />
+		<result property="proposal"       column="proposal"       />
+		<result property="createDate"     column="createDate"     />
+		<result property="type"           column="type"           />
+		<association property="createBy"  javaType="User" resultMap="createByMap"/> 
+	</resultMap>
+	<sql id="guestbookEvaluateColumns">
+		a.id AS "id",
+		a.comment_id AS "commentId",
+		a.prescription AS "prescription",
+		<!-- 
+		a.effectiveness AS "effectiveness",
+		a.dissatisfaction AS "dissatisfaction", -->
+		a.proposal AS "proposal",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.be_evaluated_user AS "beEvaluatedUser.id",
+		b.label AS "type"
+	</sql>
+	
+	<sql id="guestbookEvaluateJoins">
+	   LEFT JOIN  sys_dict b on a.type=b.`value` and b.type='evaluate_type'
+	   LEFT JOIN  sys_user c on a.create_by=c.id
+	</sql>
+	<select id="get" resultType="GuestbookEvaluate">
+		SELECT 
+			<include refid="guestbookEvaluateColumns"/>
+		FROM cms_guestbook_evaluate a
+		<include refid="guestbookEvaluateJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultMap="guestbookEvaluateResult">
+		SELECT 
+			<include refid="guestbookEvaluateColumns"/>
+			,c.name AS "createBy.name",c.photo AS "createBy.photo"
+		FROM cms_guestbook_evaluate a
+		<include refid="guestbookEvaluateJoins"/>
+		<where>
+			<if test="beEvaluatedUser != null and beEvaluatedUser != '' and beEvaluatedUser.id!=null and beEvaluatedUser.id!=''">
+				AND a.be_evaluated_user=#{beEvaluatedUser.id}
+			</if>
+			<if test="prescription != null and prescription != ''">
+				AND a.prescription=#{prescription}
+			</if>
+			<if test="type != null and type != ''">
+				AND a.type=#{type}
+			</if>
+			<if test="beginDate != null and beginDate != ''">
+			 <![CDATA[   and DATE_FORMAT(a.create_date, '%Y-%m-%d %H:%T:%s')>= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %H:%T:%s')   ]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+			 <![CDATA[   and DATE_FORMAT(a.create_date, '%Y-%m-%d %H:%T:%s')<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d %H:%T:%s')   ]]>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="GuestbookEvaluate">
+		SELECT 
+			<include refid="guestbookEvaluateColumns"/>
+		FROM cms_guestbook_evaluate a
+		<include refid="guestbookEvaluateJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<select id="getEvaluatedByUser" resultType="java.lang.Integer">
+		select round(ifnull(sum(count)/count(*),0)) from 
+		(select prescription AS "count"  from  cms_guestbook_evaluate 
+		<where>
+			<if test="beEvaluatedUser != null and beEvaluatedUser != '' and beEvaluatedUser.id!=null and beEvaluatedUser.id!=''">
+				AND be_evaluated_user=#{beEvaluatedUser.id}
+			</if>
+		</where>
+		) a
+	</select>
+	<insert id="insert">
+		INSERT INTO cms_guestbook_evaluate(
+			id,
+			comment_id,
+			prescription,
+			<!-- 
+			effectiveness,
+			dissatisfaction,-->
+			proposal,
+			create_by,
+			create_date,
+			be_evaluated_user,
+			type
+		) VALUES (
+			#{id},
+			#{commentId},
+			#{prescription},
+			<!-- 
+			#{effectiveness},
+			#{dissatisfaction},-->
+			#{proposal},
+			#{createBy.id},
+			#{createDate},
+			#{beEvaluatedUser.id},
+			#{type}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cms_guestbook_evaluate SET 	
+			comment_id = #{commentId},
+			prescription = #{prescription},
+			<!-- 
+			effectiveness = #{effectiveness},
+			dissatisfaction = #{dissatisfaction},-->
+			proposal = #{proposal},
+			create_date = #{createDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cms_guestbook_evaluate
+		WHERE id = #{id}
+	</update>
+</mapper>

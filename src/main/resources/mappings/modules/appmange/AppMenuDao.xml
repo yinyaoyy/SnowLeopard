@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.appmange.dao.AppMenuDao">
+    
+	<sql id="appMenuColumns">
+		a.id AS "id",
+		a.app_type AS "appType",
+		a.title AS "title",
+		a.icon AS "icon",
+		a.sort AS "sort",
+		a.href AS "href",
+		a.target AS "target",
+		a.is_show AS "isShow",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks"
+	</sql>
+	
+	<sql id="appMenuJoins">
+	</sql>
+    <!--根据应用id查找-->
+	<select id="findByIdsAndShow" resultType="AppMenu" parameterType="java.util.List">
+		SELECT
+		<include refid="appMenuColumns"/>
+		FROM app_menu a
+		<include refid="appMenuJoins"/>
+		<where>
+			a.del_flag = "0"
+			AND a.is_show = "1"
+			<if test="list != null and list.size &gt; 0">
+				AND a.id in
+				<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+					#{item.appMenuId}
+				</foreach>
+			</if>
+		</where>
+	</select>
+
+	<select id="get" resultType="AppMenu">
+		SELECT
+			<include refid="appMenuColumns"/>
+		FROM app_menu a
+		<include refid="appMenuJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="AppMenu">
+		SELECT 
+			<include refid="appMenuColumns"/>
+		FROM app_menu a
+		<include refid="appMenuJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="appType != null and appType != ''">
+				AND a.app_type = #{appType}
+			</if>
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+			<if test="href != null and href != ''">
+				AND a.href = #{href}
+			</if>
+			<if test="isShow != null and isShow != ''">
+				AND a.is_show = #{isShow}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="AppMenu">
+		SELECT 
+			<include refid="appMenuColumns"/>
+		FROM app_menu a
+		<include refid="appMenuJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO app_menu(
+			id,
+			app_type,
+			title,
+			icon,
+			sort,
+			href,
+			target,
+			is_show,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			remarks
+		) VALUES (
+			#{id},
+			#{appType},
+			#{title},
+			#{icon},
+			#{sort},
+			#{href},
+			#{target},
+			#{isShow},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{remarks}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE app_menu SET 	
+			app_type = #{appType},
+			title = #{title},
+			icon = #{icon},
+			sort = #{sort},
+			href = #{href},
+			target = #{target},
+			is_show = #{isShow},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE app_menu SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

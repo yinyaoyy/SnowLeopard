@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.InfoJudicialAuthenticationDao">
+	<resultMap type="Area" id="areaMap">
+		<id property="id" column="area.id" />
+		<result property="name" column="area.name" />
+	</resultMap>
+	<resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="name" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="img" />
+		<result property="coordinate" column="coordinate" />
+		<result property="hasPerson" column="hasPerson" />
+		<result property="no" column="practiceLicenseNum" />
+		<result property="agencyAddress" column="address" />
+		<result property="fax" column="fax" />
+		<result property="zipCode" column="zipCode" />
+		<result property="personName" column="chargePerson" />
+		<result property="businessExpertise" column="businessExpertise" />
+		<result property="teamSize" column="teamSize" />
+		<result property="scopeOfBussess" column="scopeOfBusiness" />
+		<result property="introduction" column="introduction" />
+		<result property="id" column="login_id" />
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+
+	<sql id="infoJudicialAuthenticationColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.address AS "address",
+		a.phone AS "phone",
+		a.worktime AS "worktime",
+		a.sort AS "sort",
+		a.license_number AS "licenseNumber",
+		a.license_herf AS "licenseHerf",
+		a.introduction AS "introduction",
+		a.area AS "area.id",
+		a10.name AS "area.name",
+		a.is_show AS "isShow",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.log AS "log",
+		a.coordinate AS "coordinate",
+		a.founding_time AS "foundingTime",
+		a.business_expertise AS "businessExpertise",
+		a.person_in_charge AS "personInCharge",
+		a.person_in_charge_herf AS "personInChargeHerf",
+		a.team_size AS "teamSize",
+		a.practice_license AS "practiceLicense",
+		a.practice_license_num AS "practiceLicenseNum",
+		a.practice_license_expiry_time AS "practiceLicenseExpiryTime",
+		a.occupational_state AS "occupationalState",
+		a.scope_of_business AS "scopeOfBusiness",
+		a.official_web_address AS "officialWebAddress",
+		a.unified_code AS "unifiedCode",
+		a.fax AS "fax",
+		a.zip_code AS "zipCode",
+		a.effective_date AS "effectiveDate",
+		a.deadline AS "deadline",
+		a.first_registration AS "firstRegistration",
+		a.certificate_authority AS "certificateAuthority",
+		a.certificate_date AS "certificateDate",
+		a.entrust_management AS "entrustManagement",
+		a.registered_authority AS "registeredAuthority",
+		a.institutional_nature AS "institutionalNature",
+		a.legal_person_sex AS "legalPersonSex",
+		a.legal_person_mobile AS "legalPersonMobile",
+		a.charge_person AS "chargePerson",
+		a.charge_person_sex AS "chargePersonSex",
+		a.charge_person_mobile AS "chargePersonMobile",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks",
+		suoi.login_id AS "login_id"
+	</sql>
+	
+	<sql id="infoJudicialAuthenticationJoins">
+		LEFT JOIN sys_area a10 ON a10.id = a.area
+		left join sys_user_office_info suoi on suoi.info_id=a.id AND suoi.del_flag = '0'
+	</sql>
+    
+	<select id="get" resultType="InfoJudicialAuthentication">
+		SELECT 
+			<include refid="infoJudicialAuthenticationColumns"/>
+		FROM info_judicial_authentication a
+		<include refid="infoJudicialAuthenticationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="getInfo" resultMap="agencyResult">
+		SELECT 
+			<include refid="infoJudicialAuthenticationColumns"/>
+		FROM info_judicial_authentication a
+		<include refid="infoJudicialAuthenticationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="InfoJudicialAuthentication">
+		SELECT 
+			<include refid="infoJudicialAuthenticationColumns"/>
+		FROM info_judicial_authentication a
+		LEFT JOIN sys_area a10 ON a10.id = a.area
+		left join sys_office o on o.name = a.name
+		left join sys_user_office_info suoi on suoi.login_id=o.id AND suoi.del_flag = '0'
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area = #{area.id}
+			</if>
+			<if test="isShow != null and isShow != ''">
+				AND a.is_show = #{isShow}
+			</if>
+			<if test="personInCharge != null and personInCharge != ''">
+				AND a.person_in_charge = #{personInCharge}
+			</if>
+			<if test="occupationalState != null and occupationalState != ''">
+				AND a.occupational_state = #{occupationalState}
+			</if>
+			<!-- 数据范围过滤 -->
+		        ${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="InfoJudicialAuthentication">
+		SELECT 
+			<include refid="infoJudicialAuthenticationColumns"/>
+		FROM info_judicial_authentication a
+		<include refid="infoJudicialAuthenticationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO info_judicial_authentication(
+			id,
+			name,
+			address,
+			phone,
+			worktime,
+			sort,
+			license_number,
+			license_herf,
+			introduction,
+			area,
+			is_show,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			log,
+			coordinate,
+			founding_time,
+			business_expertise,
+			person_in_charge,
+			person_in_charge_herf,
+			team_size,
+			practice_license,
+			practice_license_num,
+			practice_license_expiry_time,
+			occupational_state,
+			scope_of_business,
+			official_web_address,
+			unified_code,
+			fax,
+			zip_code,
+			effective_date,
+			deadline,
+			first_registration,
+			certificate_authority,
+			certificate_date,
+			entrust_management,
+			registered_authority,
+			institutional_nature,
+			legal_person_sex,
+			legal_person_mobile,
+			charge_person,
+			charge_person_sex,
+			charge_person_mobile,
+			del_flag,
+			remarks
+		) VALUES (
+			#{id},
+			#{name},
+			#{address},
+			#{phone},
+			#{worktime},
+			#{sort},
+			#{licenseNumber},
+			#{licenseHerf},
+			#{introduction},
+			#{area.id},
+			#{isShow},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{log},
+			#{coordinate},
+			#{foundingTime},
+			#{businessExpertise},
+			#{personInCharge},
+			#{personInChargeHerf},
+			#{teamSize},
+			#{practiceLicense},
+			#{practiceLicenseNum},
+			#{practiceLicenseExpiryTime},
+			#{occupationalState},
+			#{scopeOfBusiness},
+			#{officialWebAddress},
+			#{unifiedCode},
+			#{fax},
+			#{zipCode},
+			#{effectiveDate},
+			#{deadline},
+			#{firstRegistration},
+			#{certificateAuthority},
+			#{certificateDate},
+			#{entrustManagement},
+			#{registeredAuthority},
+			#{institutionalNature},
+			#{legalPersonSex},
+			#{legalPersonMobile},
+			#{chargePerson},
+			#{chargePersonSex},
+			#{chargePersonMobile},
+			#{delFlag},
+			#{remarks}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_judicial_authentication SET 	
+			name = #{name},
+			address = #{address},
+			phone = #{phone},
+			worktime = #{worktime},
+			sort = #{sort},
+			license_number = #{licenseNumber},
+			license_herf = #{licenseHerf},
+			introduction = #{introduction},
+			area = #{area.id},
+			is_show = #{isShow},
+			log = #{log},
+			coordinate = #{coordinate},
+			founding_time = #{foundingTime},
+			business_expertise = #{businessExpertise},
+			person_in_charge = #{personInCharge},
+			person_in_charge_herf = #{personInChargeHerf},
+			team_size = #{teamSize},
+			practice_license = #{practiceLicense},
+			practice_license_num = #{practiceLicenseNum},
+			practice_license_expiry_time = #{practiceLicenseExpiryTime},
+			occupational_state = #{occupationalState},
+			scope_of_business = #{scopeOfBusiness},
+			official_web_address = #{officialWebAddress},
+			unified_code = #{unifiedCode},
+			fax = #{fax},
+			zip_code = #{zipCode},
+			effective_date = #{effectiveDate},
+			deadline = #{deadline},
+			first_registration = #{firstRegistration},
+			certificate_authority = #{certificateAuthority},
+			certificate_date = #{certificateDate},
+			entrust_management = #{entrustManagement},
+			registered_authority = #{registeredAuthority},
+			institutional_nature = #{institutionalNature},
+			legal_person_sex = #{legalPersonSex},
+			legal_person_mobile = #{legalPersonMobile},
+			charge_person = #{chargePerson},
+			charge_person_sex = #{chargePersonSex},
+			charge_person_mobile = #{chargePersonMobile},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_judicial_authentication SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+<!--统计区域内司法鉴定所数量-->
+    <select id="countByAreaId" parameterType="com.thinkgem.jeesite.modules.info.entity.InfoJudicialAuthentication" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM info_judicial_authentication a
+        WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+        <if test="area.id != null and area.id != ''">
+        AND a.area = #{area.id}
+        </if>
+    </select>
+
+    <!--根据鉴定所的名称查找鉴定所-->
+    <select id="findByName" parameterType="java.lang.String" resultType="InfoJudicialAuthentication">
+        SELECT
+        <include refid="infoJudicialAuthenticationColumns"/>
+        FROM info_judicial_authentication a
+          <include refid="infoJudicialAuthenticationJoins"/>
+        WHERE a.del_flag = '0'
+        AND a.name = #{name}
+    </select>
+    
+		<select id="findListForApi" resultMap="agencyResult">
+		SELECT (SELECT count(*) 
+		          FROM info_forensic_personnel i6 
+                 WHERE i6.del_flag = 0 
+                   AND i6.judicial_authentication_id = a.id) hasPerson,
+			<include refid="infoJudicialAuthenticationColumns"/>
+		FROM info_judicial_authentication a
+		<include refid="infoJudicialAuthenticationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area = #{area.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

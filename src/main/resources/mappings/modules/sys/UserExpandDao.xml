@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.sys.dao.UserExpandDao">
+    <!--  用于用户登陆信息返回-->
+     <sql id="userColumns">
+    	a.id as "id",
+    	a.qq as "qq",
+    	a.we_chat as "weChat",
+    	a.other_links as "otherLinks",
+    	a.school_info as "schoolinfo",
+    	a.major as "major",
+    	a.education as "education",
+    	a.industryCategory as "industryCategory",
+    	a.sex as "sex"
+    </sql> 
+	<sql id="userExpandColumns">
+		a.id AS "id",
+		a.qq AS "qq",
+		a.we_chat AS "weChat",
+		a.other_links AS "otherLinks",
+		a.school_info AS "schoolInfo",
+		a.major AS "major",
+		a.education AS "education",
+		a.sex AS "sex",
+		a.identity_type AS "identityType",
+		a.prepare_type AS "prepareType",
+		a.ethnic AS "ethnic",
+		a.native_place AS "nativePlace",
+		a.degree AS "degree",
+		a.political_face AS "politicalFace",
+		a.birth_place AS "birthPlace",
+		a.join_time AS "joinTime",
+		a.used_name AS "usedName",
+		a.startwork_time AS "startworkTime",
+		a.is_series AS "isSeries",
+		a.public_officials_registration_time AS "publicOfficialsRegistrationTime",
+		a.graduation_time AS "graduationTime",
+		a.profession_category AS "professionCategory",
+		a.is_high AS "isHigh",
+		a.contribution AS "contribution",
+		a.job_category AS "jobCategory",
+		a.job_level AS "jobLevel",
+		a.now_worktime AS "nowWorktime",
+		a.now_doc_number AS "nowDocNumber",
+		a.serve_samejob_time AS "serveSamejobTime",
+		a.serve_samedoc_number_time AS "serveSamedocNumberTime",
+		a.salary_source AS "salarySource",
+		a.person_status AS "personStatus",
+		a.column_marking AS "columnMarking",
+		a.column_date AS "columnDate",
+		a.column_doc_number AS "columnDocNumber",
+		a.column_channel AS "columnChannel",
+		a.layoffs_sign AS "layoffsSign",
+		a.column_source AS "columnSource",
+		a.layoffs_time AS "layoffsTime",
+		a.layoffs_channel AS "layoffsChannel",
+		a.layoffs_doc_number AS "layoffsDocNumber",
+		a.layoffs_go AS "layoffsGo",
+		a.introduction AS "introduction",
+		a.reward_punishment AS "rewardPunishment",
+		a.learn_traing AS "learnTraing",
+		a.user_img AS "userImg"
+	</sql>
+	<!-- 根据编号获得用户信息子表数据 -->
+	<!-- <select id="get" resultType="UserExpand">
+		SELECT
+			<include refid="userExpandColumns"/>
+		FROM user_expand a
+		WHERE a.id = #{id}
+	</select> -->
+	<select id="get" resultType="UserExpand">
+		SELECT 
+			<include refid="userExpandColumns"/>
+		FROM user_expand a
+		<!-- <include refid="userExpandJoins"/> -->
+		WHERE a.id = #{id}
+	</select>
+	<select id="getUserExpand" resultType="UserExpand">
+		SELECT
+			<include refid="userColumns"/>
+		FROM user_expand a
+		WHERE a.id = #{id}
+	</select>
+	<!-- 插入用户 -->
+	<!-- <insert id="insert">
+		INSERT INTO user_expand(
+			id, 
+			qq,
+	    	we_chat,
+	    	other_links,
+	    	school_info,
+	    	major,
+	    	education
+		) VALUES (
+			#{id}, 
+			#{qq}, 
+			#{weChat}, 
+			#{otherLinks}, 
+			#{schoolInfo}, 
+			#{major}, 
+			#{education}
+		)
+	</insert> -->
+	<insert id="insert">
+		INSERT INTO user_expand(
+			id,
+			qq,
+			we_chat,
+			other_links,
+			school_info,
+			major,
+			education,
+			sex,
+			identity_type,
+			prepare_type,
+			ethnic,
+			native_place,
+			degree,
+			political_face,
+			birth_place,
+			join_time,
+			used_name,
+			startwork_time,
+			is_series,
+			public_officials_registration_time,
+			graduation_time,
+			profession_category,
+			is_high,
+			contribution,
+			job_category,
+			job_level,
+			now_worktime,
+			now_doc_number,
+			serve_samejob_time,
+			serve_samedoc_number_time,
+			salary_source,
+			person_status,
+			column_marking,
+			column_date,
+			column_doc_number,
+			column_channel,
+			layoffs_sign,
+			column_source,
+			layoffs_time,
+			layoffs_channel,
+			layoffs_doc_number,
+			layoffs_go,
+			introduction,
+			reward_punishment,
+			learn_traing,
+			user_img
+		) VALUES (
+			#{id},
+			#{qq},
+			#{weChat},
+			#{otherLinks},
+			#{schoolInfo},
+			#{major},
+			#{education},
+			#{sex},
+			#{identityType},
+			#{prepareType},
+			#{ethnic},
+			#{nativePlace},
+			#{degree},
+			#{politicalFace},
+			#{birthPlace},
+			#{joinTime},
+			#{usedName},
+			#{startworkTime},
+			#{isSeries},
+			#{publicOfficialsRegistrationTime},
+			#{graduationTime},
+			#{professionCategory},
+			#{isHigh},
+			#{contribution},
+			#{jobCategory},
+			#{jobLevel},
+			#{nowWorktime},
+			#{nowDocNumber},
+			#{serveSamejobTime},
+			#{serveSamedocNumberTime},
+			#{salarySource},
+			#{personStatus},
+			#{columnMarking},
+			#{columnDate},
+			#{columnDocNumber},
+			#{columnChannel},
+			#{layoffsSign},
+			#{columnSource},
+			#{layoffsTime},
+			#{layoffsChannel},
+			#{layoffsDocNumber},
+			#{layoffsGo},
+			#{introduction},
+			#{rewardPunishment},
+			#{learnTraing},
+			#{userImg}
+		)
+	</insert>
+	<!-- 更新群众用户 -->
+	<update id="updateQz">
+		UPDATE user_expand a  
+		<trim prefix="set" suffixOverrides=",">
+		<if test="qq !=null and qq!=''">
+			    a.qq = #{qq}, 
+			</if>
+			<if test="weChat !=null and weChat !=''">
+			a.we_chat = #{weChat}, 
+			</if>
+			<if test="otherLinks !=null and otherLinks!=''">
+			a.other_links = #{otherLinks},
+			</if>
+			<if test="schoolInfo !=null and schoolInfo !=''"> 
+			a.school_info = #{schoolInfo}, 
+			</if>
+			<if test="major !=null and major !=''">
+			a.major = #{major}, 
+			   </if>
+			   <if test="education !=null and education !=''">
+			a.education = #{education},
+			   </if>
+			    <if test="sex !=null and sex !=''">
+			a.sex = #{sex},
+			   </if>
+			   </trim>
+		WHERE id = #{id}
+	</update> 
+	<update id="update">
+		UPDATE user_expand SET 	
+			qq = #{qq},
+			we_chat = #{weChat},
+			other_links = #{otherLinks},
+			school_info = #{schoolInfo},
+			major = #{major},
+			education = #{education},
+			sex = #{sex},
+			identity_type = #{identityType},
+			prepare_type = #{prepareType},
+			ethnic = #{ethnic},
+			native_place = #{nativePlace},
+			degree = #{degree},
+			political_face = #{politicalFace},
+			birth_place = #{birthPlace},
+			join_time = #{joinTime},
+			used_name = #{usedName},
+			startwork_time = #{startworkTime},
+			is_series = #{isSeries},
+			public_officials_registration_time = #{publicOfficialsRegistrationTime},
+			graduation_time = #{graduationTime},
+			profession_category = #{professionCategory},
+			is_high = #{isHigh},
+			contribution = #{contribution},
+			job_category = #{jobCategory},
+			job_level = #{jobLevel},
+			now_worktime = #{nowWorktime},
+			now_doc_number = #{nowDocNumber},
+			serve_samejob_time = #{serveSamejobTime},
+			serve_samedoc_number_time = #{serveSamedocNumberTime},
+			salary_source = #{salarySource},
+			person_status = #{personStatus},
+			column_marking = #{columnMarking},
+			column_date = #{columnDate},
+			column_doc_number = #{columnDocNumber},
+			column_channel = #{columnChannel},
+			layoffs_sign = #{layoffsSign},
+			column_source = #{columnSource},
+			layoffs_time = #{layoffsTime},
+			layoffs_channel = #{layoffsChannel},
+			layoffs_doc_number = #{layoffsDocNumber},
+			layoffs_go = #{layoffsGo},
+			introduction = #{introduction},
+			reward_punishment = #{rewardPunishment},
+			learn_traing = #{learnTraing},
+			user_img = #{userImg}
+		WHERE id = #{id}
+	</update>
+</mapper>

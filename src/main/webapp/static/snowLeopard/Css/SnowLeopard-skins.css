@@ -1,0 +1,101 @@
+.page-body.skin-own-gray .settings-pane {
+  background: #222222;
+  color: #CCCCCC;
+}
+.page-body.skin-own-gray .settings-pane > a[data-toggle="settings-pane"] {
+  color: #CCCCCC;
+}
+.page-body.skin-own-gray .settings-pane > a[data-toggle="settings-pane"]:hover {
+  color: #FFF;
+}
+.page-body.skin-own-gray .settings-pane .user-info .user-details h3 a {
+  color: #ffffff;
+}
+.page-body.skin-own-gray .settings-pane .user-info .user-details .user-title {
+  color: rgba(255, 255, 255, 0.65);
+}
+.page-body.skin-own-gray .settings-pane .links-block.left-sep {
+  border-left: 1px solid #222222;
+}
+.page-body.skin-own-gray .settings-pane .links-block h4 {
+  color: #ffffff;
+}
+.page-body.skin-own-gray .settings-pane .links-block h4 span {
+  display: inline-block;
+  border-bottom: 1px solid #e61636;
+}
+.page-body.skin-own-gray .settings-pane .links-block h4 a {
+  color: #ffffff;
+}
+.page-body.skin-own-gray .settings-pane .links-block h4 a:hover {
+  color: #CCCCCC;
+}
+.page-body.skin-own-gray .settings-pane .links-block ul li a {
+  color: #CCCCCC;
+}
+.page-body.skin-own-gray .settings-pane .links-block ul li a:hover {
+  color: #ffffff;
+}
+.page-body.skin-own-gray .sidebar-menu {
+  background: #19344f;
+}
+.page-body.skin-own-gray .sidebar-menu .logo-env {
+  border-bottom: 2px solid #cccccc;
+}
+.page-body.skin-own-gray .sidebar-menu .logo-env .settings-icon a {
+  color: #CCCCCC;
+}
+.page-body.skin-own-gray .sidebar-menu .logo-env .settings-icon a:hover {
+  color: #ffffff;
+}
+.page-body.skin-own-gray .sidebar-menu .main-menu a {
+  color: #dbedff;
+  font-size: 15px;
+}
+.page-body.skin-own-gray .sidebar-menu .main-menu a:hover {
+  color: #ffffff;
+}
+.page-body.skin-own-gray .sidebar-menu .main-menu li.active > a {
+  color: #ffffff;
+}
+.page-body.skin-own-gray .sidebar-menu .main-menu li.has-sub > a:before {
+  color: #ffffff;
+}
+.page-body.skin-own-gray .sidebar-menu .ps-scrollbar-x-rail .ps-scrollbar-x,
+.page-body.skin-own-gray .sidebar-menu .ps-scrollbar-y-rail .ps-scrollbar-y {
+  background-color: #CCCCCC;
+}
+@media screen and (min-width: 768px) {
+  .page-body.skin-own-gray .sidebar-menu.collapsed + .main-content .user-info-navbar .user-info-menu a[data-toggle="sidebar"] {
+    color: #606161;
+  }
+  .page-body.skin-own-gray .sidebar-menu.collapsed .main-menu > li.active,
+  .page-body.skin-own-gray .sidebar-menu.collapsed .main-menu > li li.active {
+    background-color: #1a1a1a;
+  }
+  .page-body.skin-own-gray .sidebar-menu.collapsed .main-menu > li > ul {
+    background: #222222;
+  }
+}
+.page-body.skin-own-gray .page-loading-overlay {
+  background-color: #222222;
+}
+.page-body.skin-own-gray .iframe-content .nav.nav-tabs > li {
+  background-color: #eeeeee;
+}
+.page-body.skin-own-gray .iframe-content .nav.nav-tabs > li > a {
+  color: #222;
+}
+.page-body.skin-own-gray .iframe-content .nav.nav-tabs > li .close {
+  color: #CCCCCC;
+}
+.page-body.skin-own-gray .iframe-content .nav.nav-tabs > li.active {
+  background: #3f92e0;
+}
+.page-body.skin-own-gray .iframe-content .nav.nav-tabs > li.active > a {
+  color: #FFFFFF;
+  background-color: transparent;
+}
+.page-body.skin-own-gray .iframe-content .nav.nav-tabs > li.active .close {
+  color: #FFFFFF;
+}

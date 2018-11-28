@@ -1,0 +1,1056 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.oa.dao.act.OaPeopleMediationApplyDao">
+    
+	<sql id="oaPeopleMediationApplyColumns">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.year AS "year",
+		a.year_no AS "yearNo",
+		a.accuser_name AS "accuserName",
+		a.accuser_idcard AS "accuserIdcard",
+		a.accuser_sex AS "accuserSex",
+		a.accuser_birthday AS "accuserBirthday",
+		a.accuser_ethnic AS "accuserEthnic",
+		a.accuser_county AS "accuserCounty.id",
+		a.accuser_town AS "accuserTown.id",
+		a.accuser_occupation AS "accuserOccupation",
+		a.accuser_domicile AS "accuserDomicile",
+		a.accuser_address AS "accuserAddress",
+		a.accuser_post_code AS "accuserPostCode",
+		a.accuser_phone AS "accuserPhone",
+		a.defendant_name AS "defendantName",
+		a.defendant_IdCard AS "defendantIdcard",
+		a.defendant_sex AS "defendantSex",
+		a.defendant_birthday AS "defendantBirthday",
+		a.defendant_ethnic AS "defendantEthnic",
+		a.defendant_county AS "defendantCounty.id",
+		a.defendant_town AS "defendantTown.id",
+		a.defendant_occupation AS "defendantOccupation",
+		a.defendant_domicile AS "defendantDomicile",
+		a.defendant_address AS "defendantAddress",
+		a.defendant_post_code AS "defendantPostCode",
+		a.defendant_phone AS "defendantPhone",
+		a.case_title AS "caseTitle",
+		a.case_situation AS "caseSituation",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.mediator AS "mediator.id",
+		o10.id as "peopleMediationCommittee.id",
+		a.case_file as "caseFile",
+		a.status as "status",
+		a.is_evaluate AS "isEvaluate",
+		a.qrcode AS "qrcode",
+		a5.name AS "accuserCounty.name",
+		a6.name AS "accuserTown.name",
+		a7.name AS "defendantCounty.name",
+		a8.name AS "defendantTown.name",
+		u9.name AS "mediator.name",
+		o10.name AS "peopleMediationCommittee.name",
+		a.case_county AS "caseCounty.id",
+		a.case_town AS "caseTown.id",
+		a.case_type AS "caseType",
+		a10.name as "caseCounty.name",
+		a11.name as "caseTown.name"
+	</sql>
+	
+	<sql id="oaPeopleMediationApplyJoins">
+		LEFT JOIN sys_area a5 ON a5.id = a.accuser_county
+		LEFT JOIN sys_area a6 ON a6.id = a.accuser_town
+		LEFT JOIN sys_area a7 ON a7.id = a.defendant_county
+		LEFT JOIN sys_area a8 ON a8.id = a.defendant_town
+		LEFT JOIN sys_user u9 ON u9.id = a.mediator
+		LEFT JOIN sys_office o10 ON o10.id = a.people_mediation_committee
+		LEFT JOIN sys_area a10 ON a10.id = a.case_county
+		LEFT JOIN sys_area a11 ON a11.id = a.case_town
+	</sql>
+    
+	<select id="get" resultType="OaPeopleMediationApply">
+		SELECT 
+			<include refid="oaPeopleMediationApplyColumns"/>
+		FROM oa_people_mediation_apply a
+		<include refid="oaPeopleMediationApplyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getApi" resultType="OaPeopleMediationApply">
+		SELECT 
+			<include refid="oaPeopleMediationApplyColumns"/>,u10.prescription AS "guestbookEvaluate.prescription",u10.id AS "guestbookEvaluate.id",u10.proposal AS "guestbookEvaluate.proposal"
+		FROM oa_people_mediation_apply a
+		<include refid="oaPeopleMediationApplyJoins"/>
+		LEFT JOIN  cms_guestbook_evaluate u10 ON u10.comment_id = a.id
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaPeopleMediationApply">
+		SELECT 
+			<include refid="oaPeopleMediationApplyColumns"/>
+		FROM oa_people_mediation_apply a
+		<include refid="oaPeopleMediationApplyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaPeopleMediationApply">
+		SELECT 
+			<include refid="oaPeopleMediationApplyColumns"/>
+		FROM oa_people_mediation_apply a
+		<include refid="oaPeopleMediationApplyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_people_mediation_apply(
+			id,
+			proc_ins_id,
+			year,
+			year_no,
+			accuser_name,
+			accuser_idcard,
+			accuser_sex,
+			accuser_birthday,
+			accuser_ethnic,
+			accuser_county,
+			accuser_town,
+			accuser_occupation,
+			accuser_domicile,
+			accuser_address,
+			accuser_post_code,
+			accuser_phone,
+			defendant_name,
+			defendant_idcard,
+			defendant_sex,
+			defendant_birthday,
+			defendant_ethnic,
+			defendant_county,
+			defendant_town,
+			defendant_occupation,
+			defendant_domicile,
+			defendant_address,
+			defendant_post_code,
+			defendant_phone,
+			case_title,
+			case_situation,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			mediator,
+			people_mediation_committee,
+			case_file,
+			status,
+			case_type,
+			case_town,
+			case_county
+		) VALUES (
+			#{id},
+			#{act.procInsId},
+			#{year},
+			#{yearNo},
+			#{accuserName},
+			#{accuserIdcard},
+			#{accuserSex},
+			#{accuserBirthday},
+			#{accuserEthnic},
+			#{accuserCounty.id},
+			#{accuserTown.id},
+			#{accuserOccupation},
+			#{accuserDomicile},
+			#{accuserAddress},
+			#{accuserPostCode},
+			#{accuserPhone},
+			#{defendantName},
+			#{defendantIdcard},
+			#{defendantSex},
+			#{defendantBirthday},
+			#{defendantEthnic},
+			#{defendantCounty.id},
+			#{defendantTown.id},
+			#{defendantOccupation},
+			#{defendantDomicile},
+			#{defendantAddress},
+			#{defendantPostCode},
+			#{defendantPhone},
+			#{caseTitle},
+			#{caseSituation},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{mediator.id},
+			#{peopleMediationCommittee.id},
+			#{caseFile},
+			#{status},
+			#{caseType},
+			#{caseTown.id},
+			#{caseCounty.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_people_mediation_apply SET 
+		<if test="act != null and act.procInsId != null and act.procInsId != ''">	
+			proc_ins_id = #{act.procInsId},
+		</if>
+		<if test="year != null and year != ''">
+			year = #{year},
+		</if>
+		<if test="yearNo != null and yearNo != ''">
+			year_no = #{yearNo},
+		</if>
+		<if test="accuserName != null and accuserName != ''">
+			accuser_name = #{accuserName},
+		</if>
+		<if test="accuserIdcard != null and accuserIdcard != ''">
+			accuser_idcard = #{accuserIdcard},
+		</if>
+		<if test="accuserSex != null and accuserSex != ''">
+			accuser_sex = #{accuserSex},
+		</if>
+		<if test="accuserBirthday != null">
+			accuser_birthday = #{accuserBirthday},
+		</if>
+		<if test="accuserEthnic != null and accuserEthnic != ''">
+			accuser_ethnic = #{accuserEthnic},
+		</if>
+		<if test="accuserCounty != null and accuserCounty.id != null and accuserCounty.id != ''">
+			accuser_county = #{accuserCounty.id},
+		</if>
+		<if test="accuserTown != null and accuserTown.id != null and accuserTown.id != ''">
+			accuser_town = #{accuserTown.id},
+		</if>
+		<if test="accuserOccupation != null and accuserOccupation != ''">
+			accuser_occupation = #{accuserOccupation},
+		</if>
+		<if test="accuserDomicile != null and accuserDomicile != ''">
+			accuser_domicile = #{accuserDomicile},
+		</if>
+		<if test="accuserAddress != null and accuserAddress != ''">
+			accuser_address = #{accuserAddress},
+		</if>
+		<if test="accuserPostCode != null and accuserPostCode != ''">
+			accuser_post_code = #{accuserPostCode},
+		</if>
+		<if test="accuserPhone != null and accuserPhone != ''">
+			accuser_phone = #{accuserPhone},
+		</if>
+		<if test="defendantName != null and defendantName != ''">
+			defendant_name = #{defendantName},
+		</if>
+		<if test="defendantIdcard != null and defendantIdcard != '' and defendantIdcard.indexOf('*')==-1">
+			defendant_idcard = #{defendantIdcard},
+		</if>
+		<if test="defendantSex != null and defendantSex != ''">
+			defendant_sex = #{defendantSex},
+		</if>
+		<if test="defendantBirthday != null">
+			defendant_birthday = #{defendantBirthday},
+		</if>
+		<if test="defendantEthnic != null and defendantEthnic != ''">
+			defendant_ethnic = #{defendantEthnic},
+		</if>
+		<if test="defendantCounty != null and defendantCounty.id != null and defendantCounty.id != ''">
+			defendant_county = #{defendantCounty.id},
+		</if>
+		<if test="defendantTown != null and defendantTown.id != null and defendantTown.id != ''">
+			defendant_town = #{defendantTown.id},
+		</if>
+		<if test="defendantOccupation != null and defendantOccupation != ''">
+			defendant_occupation = #{defendantOccupation},
+		</if>
+		<if test="defendantDomicile != null and defendantDomicile != ''">
+			defendant_domicile = #{defendantDomicile},
+		</if>
+		<if test="defendantAddress != null and defendantAddress != ''">
+			defendant_address = #{defendantAddress},
+		</if>
+		<if test="defendantPostCode != null and defendantPostCode != ''">
+			defendant_post_code = #{defendantPostCode},
+		</if>
+		<if test="defendantPhone != null and defendantPhone != ''">
+			defendant_phone = #{defendantPhone},
+		</if>
+		<if test="caseTitle != null and caseTitle != ''">
+			case_title = #{caseTitle},
+		</if>
+		<if test="caseSituation != null and caseSituation != ''">
+			case_situation = #{caseSituation},
+		</if>
+		<if test="mediator != null and mediator.id != null and mediator.id != ''">
+			mediator = #{mediator.id},
+		</if>
+		<if test="peopleMediationCommittee != null and peopleMediationCommittee.id != null and peopleMediationCommittee.id != ''">
+			people_mediation_committee =#{peopleMediationCommittee.id},
+		</if>
+		<if test="caseFile != null and caseFile != ''">
+			case_file =#{caseFile},
+		</if>
+		<if test="status != null and status != ''">
+			status =#{status},
+		</if>
+		<if test="caseType != null and caseType != ''">
+			case_type =#{caseType},
+		</if>
+		<if test="caseTown != null and caseTown.id != null and caseTown.id != ''">
+			case_town =#{caseTown.id},
+		</if>
+		<if test="caseCounty != null and caseCounty.id !=null and caseCounty.id != ''">
+			case_county =#{caseCounty.id},
+		</if>
+		<if test="qrcode != null and qrcode != ''">
+			qrcode =#{qrcode},
+		</if>
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_people_mediation_apply SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 获取目前年份最大的序号并加1 -->
+	<select id="selectYearNo" resultType="int">
+		select ifnull(max(year_no),0)+1 from oa_people_mediation_apply where year = DATE_FORMAT(now(),'%Y')
+	</select>
+	
+	<update id="updateSelective">
+		UPDATE oa_people_mediation_apply SET
+		<!-- <if test="caseFile != null and caseFile != ''">
+			case_file = #{caseFile},
+		</if>
+		<if test="lawOffice != null and lawOffice.id != null and lawOffice.id != ''">
+			law_office_id = #{lawOffice.id}	,
+		</if>
+		<if test="lawyer != null and lawyer.id != null and lawyer.id != ''">
+			lawyer_id = #{lawyer.id}	,
+		</if>
+		<if test="legalOffice != null and legalOffice.id != null and legalOffice.id != ''">
+			legal_office_id = #{legalOffice.id}	,
+		</if>
+		<if test="legalPerson != null and legalPerson.id != null and legalPerson.id != ''">
+			legal_person_id = #{legalPerson.id}	,
+		</if>
+		<if test="thirdPartyScore != null and thirdPartyScore != ''">
+			third_party_score = #{thirdPartyScore}	,
+		</if>
+		<if test="thirdPartyEvaluation != null and thirdPartyEvaluation != ''">
+			third_party_evaluation = #{thirdPartyEvaluation}	,
+		</if>
+		<if test="receiveSubsidy != null and receiveSubsidy != ''">
+			receive_subsidy = #{receiveSubsidy}	,
+		</if>
+ -->			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 根据年份区域统计 
+	 * 年度旗县调解案件占比 -->
+	<select id="countByYearArea" parameterType="OaPeopleMediationApplyCount" resultType="OaPeopleMediationApplyCount">
+		SELECT 
+		    a.id 'area.id',
+		    IFNULL(t.count, 0) count,
+		    a.name 'area.name'
+		FROM
+		    sys_area a
+		        LEFT JOIN
+		    (SELECT 
+		            t.case_county area_id,
+		            COUNT(*) count
+		    FROM
+		        oa_people_mediation_apply t
+		    WHERE
+		        t.del_flag = 0 AND t.status = 1
+		        <![CDATA[ 
+		        AND date_format(t.create_date,#{datePattern}) >= #{beginDate}
+		        AND date_format(t.create_date,#{datePattern}) <= #{endDate}
+		         ]]> 
+		    GROUP BY t.case_county) t ON t.area_id = a.id
+		WHERE
+		    a.del_flag = 0 AND a.parent_id = '5'
+		ORDER BY a.code
+	</select>
+	
+	<!-- 大屏统计: 按区域统计时间段内法援申请数量
+		* 全盟各旗县人民调解案件申请数量占比图
+		* 各旗县人民调解案件数量占比 -->
+	<select id="countAreaPeopleMediation" parameterType="OaPeopleMediationApplyCount" resultType="OaPeopleMediationApplyCount">
+		SELECT 
+		    IFNULL(a.id, '') 'area.id',
+		    IFNULL(t.count, 0) count,
+		    a.name 'area.name'
+		FROM
+		    sys_area a
+		        LEFT JOIN
+		    (<!-- 按区域统计人民调解案件数量 -->
+				SELECT 
+				    a.accuser_county area_id, COUNT(*) count
+				FROM
+				    oa_people_mediation_apply a
+				        LEFT JOIN
+				    oa_people_mediation_accept_register r ON r.del_flag = 0
+				        AND a.PROC_INS_ID = r.PROC_INS_ID
+				        LEFT JOIN
+				    oa_dossier d ON d.del_flag = 0
+				        AND a.PROC_INS_ID = d.PROC_INS_ID
+				WHERE
+				    a.del_flag = 0
+				    <!-- 限定区域 -->
+				        AND a.accuser_county IN (SELECT 
+				            sa.id
+				        FROM
+				            sys_area sa
+				        WHERE
+				            sa.del_flag = 0
+				                AND (sa.id = '5' OR sa.parent_id = '5'))
+				    <!-- 判定是否受理，如果选择受理，就只查受理的，否则就查全部的 -->
+				    <if test="isAccept == 1">
+				        AND a.status = '1'
+				    </if>
+		        	<!-- 为了包含选中的结束日期 -->
+				    <![CDATA[ AND DATE_FORMAT(a.create_date,#{datePattern}) >= #{beginDate}
+							AND DATE_FORMAT(a.create_date,#{datePattern}) <= #{endDate} ]]>
+				    <!-- 案件是否归档0否1是 -->
+				    <if test="dossierStatus != null and dossierStatus != ''">
+				        AND d.status = #{dossierStatus}
+				    </if>
+				    <!-- 纠纷类型,字典dispute_type -->
+				    <if test="caseType != null and caseType != ''">
+				        AND r.case_type = #{caseType}
+				    </if>
+				    <!-- 严重等级,字典case_rank -->
+				    <if test="caseRank != null and caseRank != ''">
+				        AND r.case_rank = #{caseRank}
+				    </if>
+				    <!-- 是否群体性事件0否1是 -->
+				    <if test="overThreshold != null and overThreshold != ''">
+				        AND r.overThreshold = #{overThreshold}
+				    </if>
+				GROUP BY a.accuser_county
+		    ) t ON t.area_id = a.id
+		WHERE
+		    a.del_flag = 0 AND a.parent_id = '5'
+		ORDER BY a.code
+	</select>
+	
+	<!-- 大屏统计: 
+		* 全盟人民调解案件申请数量与受理数量走势对比图
+		* 全盟及各旗县人民调解案件数量 -->
+	<select id="countPeopleMediationAidAccept" parameterType="OaPeopleMediationApplyCount" resultType="OaPeopleMediationApplyCount">
+		SELECT 
+		    DATE_FORMAT(a.create_date, #{datePattern}) year,
+		    COUNT(*) count
+		FROM
+		    oa_people_mediation_apply a
+		        LEFT JOIN
+		    oa_people_mediation_accept_register r ON r.del_flag = 0
+		        AND a.PROC_INS_ID = r.PROC_INS_ID
+		        LEFT JOIN
+		    oa_dossier d ON d.del_flag = 0
+		        AND a.PROC_INS_ID = d.PROC_INS_ID
+		WHERE
+		    a.del_flag = 0
+		    	<!-- 设定统计范围为全盟 -->
+		        AND a.accuser_county IN (SELECT 
+		            sa.id
+		        FROM
+		            sys_area sa
+		        WHERE
+		            sa.del_flag = 0
+		                AND (sa.id = '5' OR sa.parent_id = '5'))
+				<!-- 判定是否受理，如果选择受理，就只查受理的，否则就查全部的 -->
+				<if test="isAccept == 1">
+		        AND a.status = '1'
+		        </if>
+		        <!-- 为了包含选中的结束日期 -->
+				<![CDATA[ AND DATE_FORMAT(a.create_date,#{datePattern}) >= #{beginDate}
+						AND DATE_FORMAT(a.create_date,#{datePattern}) <= #{endDate} ]]>
+		        <!-- 指定地区，未指定就是全盟 -->
+		        <if test="area.id != null and area.id != ''">
+		        AND a.accuser_county = #{area.id}
+		        </if>
+		        <!-- 是否涉及蒙语0否1是 -->
+		        <if test="hasMongol != null and hasMongol != ''">
+		        AND r.hasMongol = #{hasMongol}
+		        </if>
+				<!-- 案件是否归档0否1是 -->
+				<if test="dossierStatus != null and dossierStatus != ''">
+				    AND d.status = #{dossierStatus}
+				</if>
+				<!-- 纠纷类型，字典dispute_type -->
+				<if test="caseType != null and caseType != ''">
+				    AND r.case_type = #{caseType}
+				</if>
+				<!-- 严重等级，字典case_rank -->
+				<if test="caseRank != null and caseRank != ''">
+				    AND r.case_rank = #{caseRank}
+				</if>
+				<!-- 是否群体性事件0否1是 -->
+				<if test="overThreshold != null and overThreshold != ''">
+				    AND r.overThreshold = #{overThreshold}
+				</if>
+				<!-- 案件来源，字典mediate_Case_source  -->
+				<if test="caseSource != null and caseSource != ''">
+		        AND r.case_source = #{caseSource}
+				</if>
+		GROUP BY DATE_FORMAT(a.create_date, #{datePattern})
+		ORDER BY DATE_FORMAT(a.create_date, #{datePattern})
+	</select>
+
+	<!-- 查询草稿箱 -->
+	<select id="findDraftListForApi" resultType="OaPeopleMediationApply">
+		SELECT a.*
+		FROM oa_people_mediation_apply a
+		<where>
+			a.del_flag = 0
+			AND a.create_by = #{createBy.id} and (a.PROC_INS_ID is null or a.PROC_INS_ID = "") and a.status="0" 
+			<!-- 支持根据案件标题查询草稿 -->
+			<if test="caseTitle != null and caseTitle != ''">
+				AND a.case_title LIKE concat('%',#{caseTitle},'%')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 删除草稿箱，支持批量 先这样了-->
+	<update id="deleteDraft">
+		DELETE FROM oa_people_mediation_apply
+		WHERE (PROC_INS_ID is null or PROC_INS_ID = "") and status="0" and id in 
+		<foreach collection="array" item="id" open="(" separator="," close=")" >
+			#{id}
+		</foreach>
+	</update>
+	
+	
+	<!-- 查询人民调解和法律援助的草稿箱，暂时使用-->
+	<select id="findDraft" resultType="Act">
+		
+		SELECT
+			t.id,
+			t.title,
+			t.beginDate,
+			t.procDefKey,
+			t.taskName 
+		FROM 
+			(
+				SELECT 
+					a.id as id,
+					a.case_title as title,
+					a.create_date as beginDate,
+						CASE
+		WHEN a.legal_aid_type = "1" THEN
+			"legal"
+		WHEN a.legal_aid_type = "2" THEN
+			"defense"
+		END AS procDefKey,
+
+	CASE
+		WHEN a.legal_aid_type = "1" THEN
+					"法律援助"
+		WHEN a.legal_aid_type = "2" THEN
+			"通知辩护"
+		END  AS taskName
+				FROM 
+					oa_legal_aid_draft a
+				<where>
+					a.del_flag = 0
+					AND a.create_by = #{user.id}
+					<!-- 支持根据案件标题查询草稿 -->
+					<if test="caseTitle != null and caseTitle != ''">
+						AND a.case_title LIKE concat('%',#{caseTitle},'%')
+					</if>
+					<if test="beginDate != null and beginDate != ''">
+						AND DATEDIFF(a.create_date,#{beginDate})>=0 
+					</if>
+					<if test="endDate != null and endDate != ''">
+						AND DATEDIFF(a.create_date,#{endDate}) &lt;=0 
+					</if>
+				</where>
+				union
+				SELECT 
+					p.id as id ,
+					p.case_title as title,
+					p.create_date as beginDate,
+					"mediation" as procDefKey ,
+					"人民调解" as taskName
+				FROM 
+					oa_people_mediation_apply p 
+				<where>
+					p.del_flag = 0
+					AND p.create_by = #{user.id} and (p.PROC_INS_ID is null or p.PROC_INS_ID = "") and p.status="0" 
+					<!-- 支持根据案件标题查询草稿 -->
+					<if test="caseTitle != null and caseTitle != ''">
+						AND p.case_title LIKE concat('%',#{caseTitle},'%')
+					</if>
+					<if test="beginDate != null and beginDate != ''">
+						AND DATEDIFF(p.create_date,#{beginDate})>=0 
+					</if>
+					<if test="endDate != null and endDate != ''">
+						AND DATEDIFF(p.create_date,#{endDate}) &lt;=0 
+					</if>
+				</where>
+			)t
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY t.beginDate DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 查询人民调解和法律援助的草稿箱，暂时使用-->
+	<select id="findDraftMediationById" resultType="OaPeopleMediationApply">
+		
+		select  
+			<include refid="oaPeopleMediationApplyColumns"/>  
+			from
+		 oa_people_mediation_apply a
+		 	<include refid="oaPeopleMediationApplyJoins"/>
+		  where a.id=#{id} and (a.PROC_INS_ID is null or a.PROC_INS_ID = "") and a.status= "0"
+		
+	</select>
+	
+	<select id="findDraftLegalById" resultType="OaLegalAid">
+		
+		SELECT 
+			a.id AS "id",
+			a.name AS "name",
+			a.sex AS "sex",
+			a.birthday AS "birthday",
+			a.area_id AS "area.id",
+			a.ethnic AS "ethnic",
+			a.hasMongol AS "hasMongol",
+			a.id_card AS "idCard",
+			a.domicile AS "domicile",
+			a.address AS "address",
+			a.post_code AS "postCode",
+			a.phone AS "phone",
+			a.employer AS "employer",
+			a.proxy_name AS "proxyName",
+			a.proxy_type AS "proxyType",
+			a.proxy_id_card AS "proxyIdCard",
+			a.case_title AS "caseTitle",
+			a.case_type AS "caseType",
+			a.case_reason AS "caseReason",
+			a.case_file AS "caseFile",
+			a.create_by AS "createBy.id",
+			a.create_date AS "createDate",
+			a.update_by AS "updateBy.id",
+			a.update_date AS "updateDate",
+			a.remarks AS "remarks",
+			a.del_flag AS "delFlag",
+			a.aid_category AS 'aidCategory',
+			a.case_nature AS 'caseNature',
+			
+			a5.name AS "area.name"
+		
+		FROM 
+			oa_legal_aid_draft a 
+		LEFT JOIN 
+			sys_area a5 ON a5.id = a.area_id
+		WHERE 
+			a.id=#{id} 
+		
+	</select>
+	
+	
+		
+	<select id="findDraftdefenseById" resultType="OaLegalAidInform">
+		
+		SELECT 
+		a.id AS "id",
+		a.year AS "year",
+		a.year_no AS "yearNo",
+		a.name AS "name",
+		a.sex AS "sex",
+		a.birthday AS "birthday",
+		a.ethnic AS "ethnic",
+		a.hasmongol AS "hasmongol",
+		a.id_card AS "idCard",
+		a.domicile AS "domicile",
+		a.address AS "address",
+		a.phone AS "phone",
+		a.proxy_name AS "proxyName",
+		a.case_title AS "caseTitle",
+		a.case_reason AS "caseReason",
+		a.case_file AS "caseFile",
+		a.legal_office_id AS "legalOffice.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.legal_aid_type AS "legalAidType",
+		a.education AS "education",
+		a.renyuantype AS "renyuantype",
+		a.officetype AS "officetype",
+		a.jgphone AS "jgphone",
+		a.casetelevancy AS "casetelevancy",
+		a.caseguilt AS "caseguilt",
+		a.caseinform AS "caseinform",
+		a.informreson AS "informreson",
+		a.cumname AS "cumname",
+		a.dom AS "dom.id",
+		a.internation AS "internation",
+		a.officename AS "officenamee",
+		a.jgperson AS "jgperson",
+		a.casesstage AS "casesstage",
+		a.casesum AS "casesum",
+		a5.name AS "dom.name",
+		o8.name AS "legalOffice.name"
+		FROM 
+			oa_legal_aid_draft a 
+		LEFT JOIN 
+			sys_area a5 ON a5.id = a.dom 
+	   LEFT JOIN 
+	  sys_office o8 ON o8.id = a.legal_office_id
+		WHERE 
+			a.id=#{id} 
+		
+	</select>
+	
+	<!-- 接口:大屏查询人民调解案件 -->
+	<select id="findListForBigScreen" parameterType="com.thinkgem.jeesite.api.chart.entity.PeopleMediationVo" resultType="com.thinkgem.jeesite.api.chart.entity.PeopleMediationVo">
+		SELECT 
+			a.id as id,
+		    a.case_title caseTitle,
+		    a.create_date createDate,
+		    a.case_type caseType,
+		    r.case_involveCount caseInvolveCount,
+		    a.accuser_name accuserName,
+		    a.case_county 'area.id',
+		    s.name 'area.name',
+		    r.case_rank caseRank
+		FROM
+		    oa_people_mediation_apply a
+		        JOIN
+		    oa_people_mediation_accept_register r ON r.del_flag = 0
+		        AND a.PROC_INS_ID = r.PROC_INS_ID
+		        LEFT JOIN
+		    sys_area s ON s.del_flag = 0 AND r.case_county = s.id
+		<where>
+			a.del_flag = 0
+			<!-- 根据时间段 -->
+			<!-- <if test="beginDate != null and endDate != ''">
+		        AND a.create_date between #{beginDate} and DATE_ADD(#{endDate},INTERVAL 1 DAY)
+			</if> -->
+			<![CDATA[ AND DATE_FORMAT(a.create_date,#{datePattern}) >= #{beginDate} AND DATE_FORMAT(a.create_date,#{datePattern}) <= #{endDate} ]]>
+			<!-- 根据旗县 -->
+			<!-- <if test="area.id != null and area.id != ''">
+		        AND r.case_county = #{area.id}
+			</if> -->
+			<if test="areaList!=null and areaList.size()>0">
+				AND a.case_county in
+				<foreach collection="areaList" item="area" open="(" separator="," close=")" >
+					'${area}'
+				</foreach>
+			</if>
+			<if test="areaList.size()==0">
+				AND a.case_county in  (SELECT id from sys_area where id='5' or parent_id = '5')
+			</if>
+			<!-- 根据纠纷类型dispute_type -->
+			<if test="caseType != null and caseType != ''">
+		        AND a.case_type = #{caseType}
+			</if>
+			<!-- 根据严重等级case_rank -->
+			<if test="caseRank != null and caseRank != ''">
+		        AND r.case_rank = #{caseRank}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 接口:大屏查询人民调解案件 -->
+	<select id="findListCountForBigScreen" parameterType="com.thinkgem.jeesite.api.chart.entity.PeopleMediationVo" resultType="int">
+		SELECT 
+		    count(a.id)
+		FROM
+		    oa_people_mediation_apply a
+		        JOIN
+		    oa_people_mediation_accept_register r ON r.del_flag = 0
+		        AND a.PROC_INS_ID = r.PROC_INS_ID
+		        LEFT JOIN
+		    sys_area s ON s.del_flag = 0 AND r.case_county = s.id
+		<where>
+			a.del_flag = 0
+			<!-- 根据时间段 -->
+			<!-- <if test="beginDate != null and endDate != ''">
+		        AND a.create_date between #{beginDate} and DATE_ADD(#{endDate},INTERVAL 1 DAY)
+			</if> -->
+			<![CDATA[ AND DATE_FORMAT(a.create_date,#{datePattern}) >= #{beginDate} AND DATE_FORMAT(a.create_date,#{datePattern}) <= #{endDate} ]]>
+			<!-- 根据旗县 -->
+			<!-- <if test="area.id != null and area.id != ''">
+		        AND r.case_county = #{area.id}
+			</if> -->
+			<if test="areaList!=null and areaList.size()>0">
+				AND a.case_county in
+				<foreach collection="areaList" item="area" open="(" separator="," close=")" >
+					'${area}'
+				</foreach>
+			</if>
+			<if test="areaList.size()==0">
+				AND a.case_county in  (SELECT id from sys_area where id='5' or parent_id = '5')
+			</if>
+			<!-- 根据纠纷类型dispute_type -->
+			<if test="caseType != null and caseType != ''">
+		        AND a.case_type = #{caseType}
+			</if>
+			<!-- 根据严重等级case_rank -->
+			<if test="caseRank != null and caseRank != ''">
+		        AND r.case_rank = #{caseRank}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 人员评价，人民调解用procInsId作为关联 -->
+	<update id="isEvaluate">
+		UPDATE oa_people_mediation_apply SET 
+			is_evaluate = '1'
+		WHERE  PROC_INS_ID= #{id}
+	</update>
+	
+	<select id="countPeopleMediationAidAccept1" parameterType="OaPeopleMediationApplyCount" resultType="OaPeopleMediationApplyCount">
+		SELECT 
+			a.YEAR, 	
+			IFNULL(t.count,0) as "count",
+			IFNULL(a.id,'') as "area.id",
+			a.name as "area.name"
+		FROM
+			(
+				SELECT 
+					a.id,
+					a. CODE,
+					a. NAME,
+					m. YEAR
+				FROM
+					sys_area a,
+					(${sqlMap.dsf}) m
+				WHERE 
+					a.del_flag = 0
+					AND (
+					<if test="areaList!=null and areaList.size()>0">
+						a.id in 
+						<foreach collection="areaList" item="area" open="(" separator="," close=")" >
+							'${area}'
+						</foreach>
+					</if>
+					<if test="areaList.size()==0">
+						(a.id = '5' or a.parent_id = '5')
+					</if>
+						
+					 ))a
+				LEFT JOIN (
+				
+				SELECT 
+					DATE_FORMAT(a.create_date, #{datePattern}) year,
+					COUNT(*) count,
+					a.case_county as "caseCountyid"
+					
+				FROM
+						oa_people_mediation_apply a
+						JOIN	oa_people_mediation_accept_register r on a.PROC_INS_ID = r.PROC_INS_ID
+						LEFT JOIN act_ru_task t  on a.PROC_INS_ID = t.PROC_INST_ID_ and t.TASK_DEF_KEY_!='mediation_dengji'
+				WHERE
+					a.del_flag = 0
+						
+					<if test="areaList!=null and areaList.size()>0">
+						and	a.case_county in 
+							<foreach collection="areaList" item="area" open="(" separator="," close=")" >
+								'${area}'
+							</foreach>
+					</if>
+					<if test="areaList.size()==0">
+						and	a.case_county in (SELECT id from sys_area where id='5' or parent_id = '5')
+					</if>
+					
+					<!-- 判定是否受理，如果选择受理，就只查受理的，否则就查全部的 -->
+					<if test="isAccept == 1">
+							AND a.status = '1'
+							</if>
+							<!-- 为了包含选中的结束日期 -->
+					<![CDATA[ AND DATE_FORMAT(a.create_date,#{datePattern}) >= #{beginDate}
+							AND DATE_FORMAT(a.create_date,#{datePattern}) <= #{endDate} ]]>
+							<!-- 指定地区，未指定就是全盟 -->
+							<!-- <if test="area.id != null and area.id != ''">
+							AND a.accuser_county = #{area.id}
+							</if> -->
+							<!-- 是否涉及蒙语0否1是 -->
+							<if test="hasMongol != null and hasMongol != ''">
+							AND r.hasMongol = #{hasMongol}
+							</if>
+					<!-- 案件是否归档0否1是 -->
+					<!-- <if test="dossierStatus != null and dossierStatus != ''">
+							AND d.status = #{dossierStatus}
+					</if> -->
+					<!-- 纠纷类型，字典dispute_type -->
+					<if test="caseType != null and caseType != ''">
+							AND r.case_type = #{caseType}
+					</if>
+					<!-- 严重等级，字典case_rank -->
+					<if test="caseRank != null and caseRank != ''">
+							AND r.case_rank = #{caseRank}
+					</if>
+					<!-- 是否群体性事件0否1是 -->
+					<if test="overThreshold != null and overThreshold != ''">
+							AND r.overThreshold = #{overThreshold}
+					</if>
+					<!-- 案件来源，字典mediate_Case_source  -->
+					<if test="caseSource != null and caseSource != ''">
+							AND r.case_source = #{caseSource}
+					</if>
+					GROUP BY DATE_FORMAT(a.create_date, #{datePattern}),a.case_county
+					)t 
+					ON a.id = t.caseCountyid		
+					and a.YEAR = t.YEAR  
+					ORDER BY a.code,a.YEAR
+
+	</select>
+	
+	<!-- 统计各个地区人民调解和法律援助的数量 -->
+	<select id="countLeaglAndMediation" resultType="OaPeopleMediationApplyCount">
+		
+		SELECT
+			a.id as "area.id",
+			a.name as "area.name",
+			IFNULL(m.count,0) count,
+			a.key as procDefKey
+		FROM
+			(
+				SELECT 
+					a.id,
+					a.name,
+					k.key,
+					a.code 
+				FROM 
+					sys_area a, 
+						(SELECT 'legal_aid' as "key"  UNION ALL SELECT 'people_mediation') k 
+						where (a.id='5' or a.parent_id='5') order by a.code
+			) a 
+			LEFT JOIN 
+			(
+				(
+					SELECT 
+						count(*) as count, 
+						area_id as "areaId" ,
+						"legal_aid" as "key" 
+					FROM 
+						oa_legal_aid 
+					WHERE year_no is not null 
+					GROUP BY areaId
+				)
+				union
+				( 
+					SELECT 
+						count(*) as count , 
+						a.case_County as "areaId",
+						"people_mediation" as "key"  
+					FROM 
+						oa_people_mediation_apply a
+						JOIN oa_people_mediation_accept_register r on a.PROC_INS_ID = r.PROC_INS_ID
+						LEFT JOIN act_ru_task t  on a.PROC_INS_ID = t.PROC_INST_ID_ and t.TASK_DEF_KEY_!='mediation_dengji' 
+					GROUP BY areaId
+				)
+			) m ON a.id = m.areaId AND a.key = m.key
+			ORDER BY  a.code,
+					a.KEY
+					
+	</select>
+	<select id="countLegalAndMediationByAreaId" resultType="OaPeopleMediationApplyCount">
+		SELECT
+			a.id as "area.id",
+			a.name as "area.name",
+			IFNULL(m.count,0) count,
+			a.key as procDefKey
+		FROM
+			(
+				SELECT 
+					a.id,
+					a.name,
+					k.key,
+					a.code 
+				FROM 
+					sys_area a, 
+						(SELECT 'legal_aid' as "key"  UNION ALL SELECT 'people_mediation') k 
+						where (a.id='5' or a.parent_id='5') 
+						<if test="area!=null and area.id!='' and area.id!=null ">
+							and a.id = #{area.id}
+						</if>
+						order by a.code
+			) a 
+			LEFT JOIN 
+			(
+				(
+					SELECT 
+						count(*) as count, 
+						area_id as "areaId" ,
+						"legal_aid" as "key" 
+					FROM 
+						oa_legal_aid 
+					WHERE year_no is not null 
+					GROUP BY areaId
+				)
+				union
+				( 
+					SELECT 
+						count(*) as count , 
+						a.case_County as "areaId",
+						"people_mediation" as "key"  
+					FROM 
+						oa_people_mediation_apply a
+						JOIN oa_people_mediation_accept_register r on a.PROC_INS_ID = r.PROC_INS_ID
+						LEFT JOIN act_ru_task t  on a.PROC_INS_ID = t.PROC_INST_ID_ and t.TASK_DEF_KEY_!='mediation_dengji' 
+					GROUP BY areaId
+				)
+			) m ON a.id = m.areaId AND a.key = m.key
+			ORDER BY a.code,
+					a.KEY
+	</select>
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.cms.dao.SiteRoleDao">
+    
+	<sql id="siteRoleColumns">
+		a.site_id AS "siteId",
+		a.role_id AS "roleId"
+	</sql>
+	
+	<sql id="siteRoleJoins">
+	</sql>
+    
+	<select id="get" resultType="SiteRole">
+		SELECT 
+			<include refid="siteRoleColumns"/>
+		FROM cms_site_role a
+		<include refid="siteRoleJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SiteRole">
+		SELECT 
+			<include refid="siteRoleColumns"/>
+		FROM cms_site_role a
+		<include refid="siteRoleJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SiteRole">
+		SELECT 
+			<include refid="siteRoleColumns"/>
+		FROM cms_site_role a
+		<include refid="siteRoleJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cms_site_role(
+			site_id,
+			role_id
+		) VALUES (
+			#{siteId},
+			#{roleId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cms_site_role SET 	
+			site_id = #{siteId},
+			role_id = #{roleId}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM cms_site_role
+		WHERE site_id = #{siteId}
+	</update>
+	
+</mapper>

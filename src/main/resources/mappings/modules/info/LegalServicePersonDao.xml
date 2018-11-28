@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.LegalServicePersonDao">
+    
+    <resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+    <resultMap type="Office" id="infoLegalServiceOfficeMap">  
+        <id property="id" column="legalOffice.id" />  
+        <result property="name" column="legalOffice.name" />  
+    </resultMap>
+    <resultMap type="Office" id="officeMap">  
+        <id property="id" column="office.id" />  
+        <result property="name" column="office.name" />  
+    </resultMap>
+    <resultMap id="legalServicePersonResult" type="LegalServicePerson">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="birthday"        column="birthday"        />
+		<result property="phone"           column="phone"           />
+		<result property="sex"             column="sex"             />
+		<result property="idCard"          column="idCard"          />
+		<result property="licenseNumber"   column="licenseNumber"   />
+		<result property="qualificationNo" column="qualificationNo" />
+		<result property="weixinNo"        column="weixinNo"        />
+		<result property="qqNo"            column="qqNo"            />
+		<result property="licenseType"     column="licenseType"     />
+		<result property="certificateDate" column="certificateDate" />
+		<result property="practisingDate"  column="practisingDate"  />
+		<result property="industryRewards" column="industryRewards" />
+		<result property="imageUrl"        column="imageUrl"        />
+		<result property="role"        column="role"        />
+		<association property="legalOffice"  javaType="Office" resultMap="infoLegalServiceOfficeMap"/> 
+		<association property="office"  javaType="Office" resultMap="officeMap"/>
+	</resultMap>
+    <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="officename" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="id" column="login_id" />
+		<result property="sex" column="sexLabel" />
+		<result property="birthday" column="birthday" />
+		<result property="ethnic" column="ethnicLabel" />
+		<result property="no" column="licenseNumber" />
+		<result property="isMongolian" column="isMongolianLabel" />
+		<result property="introduction" column="introduction" />
+		<result property="education" column="education" />
+		<result property="politicalFace" column="politicalFace" />
+		<result property="personName" column="name" />
+		<result property="evaluation" column="evaluation" />
+		<result property="roleId"   column="roleName" />
+		<result property="idCard"          column="idCard"          />
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	
+	<sql id="legalServicePersonColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.legal_office_id AS "legalOffice.id",
+		a.birthday AS "birthday",
+		a.phone AS "phone",
+		a.sex AS "sex",
+		a.id_card AS "idCard",
+		a.license_number AS "licenseNumber",
+		a.qualification_no AS "qualificationNo",
+		a.weixin_no AS "weixinNo",
+		a.qq_no AS "qqNo",
+		a.license_type AS "licenseType",
+		a.certificate_date AS "certificateDate",
+		a.practising_date AS "practisingDate",
+		a.industry_rewards AS "industryRewards",
+		a.image_url AS "imageUrl",
+		a.office_id AS "office.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		o17.name AS "office.name",
+		o.name AS "legalOffice.name",
+		area.id AS "area.id",
+		area.name AS "area.name",
+		a.ethnic AS "ethnic",
+		a.education AS "education",
+		a.political_face AS "politicalFace",
+		a.business_expertise AS "businessExpertise",
+		a.introduction AS "introduction",
+		a.is_mongolian AS "isMongolian",
+		a.evaluation AS "evaluation",
+		a.administrative_division AS "administrativeDivision",
+		a.role AS "role",
+		d6.label AS "roleName"
+	</sql>
+	
+	<sql id="legalServicePersonJoins">
+		LEFT JOIN sys_office o ON o.id = a.legal_office_id
+		LEFT JOIN sys_area area ON area.id = o.area_id
+		LEFT JOIN sys_office o17 ON o17.id = a.office_id
+		LEFT JOIN  sys_user_office_info d4 on a.id=d4.info_id
+		LEFT JOIN  sys_dict d6 on a.role=d6.`value` and d6.type='info_role_type'  and d6.language_type='CN'
+	</sql>
+    
+	<select id="get" resultType="LegalServicePerson">
+		SELECT 
+			<include refid="legalServicePersonColumns"/>
+		FROM info_legal_service_person a
+		<include refid="legalServicePersonJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LegalServicePerson">
+		SELECT 
+			<include refid="legalServicePersonColumns"/>
+		FROM info_legal_service_person a
+		<include refid="legalServicePersonJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="legalOffice != null and legalOffice.id != null and legalOffice.id != ''">
+				AND a.legal_office_id = #{legalOffice.id}
+			</if>
+			<!-- 数据范围过滤 -->
+		        ${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="LegalServicePerson">
+		SELECT 
+			<include refid="legalServicePersonColumns"/>
+		FROM info_legal_service_person a
+		<include refid="legalServicePersonJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO info_legal_service_person(
+			id,
+			name,
+			legal_office_id,
+			birthday,
+			phone,
+			sex,
+			id_card,
+			license_number,
+			qualification_no,
+			weixin_no,
+			qq_no,
+			license_type,
+			certificate_date,
+			practising_date,
+			industry_rewards,
+			image_url,
+			office_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			ethnic,
+			education,
+			political_face,
+			business_expertise,
+			introduction,
+			is_mongolian,
+			administrative_division,
+			role
+		) VALUES (
+			#{id},
+			#{name},
+			#{legalOffice.id},
+			#{birthday},
+			#{phone},
+			#{sex},
+			#{idCard},
+			#{licenseNumber},
+			#{qualificationNo},
+			#{weixinNo},
+			#{qqNo},
+			#{licenseType},
+			#{certificateDate},
+			#{practisingDate},
+			#{industryRewards},
+			#{imageUrl},
+			#{office.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{ethnic},
+			#{education},
+			#{politicalFace},
+			#{businessExpertise},
+			#{introduction},
+			#{isMongolian},
+			#{administrativeDivision},
+			#{role}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_legal_service_person SET 	
+			name = #{name},
+			legal_office_id = #{legalOffice.id},
+			birthday = #{birthday},
+			phone = #{phone},
+			sex = #{sex},
+			id_card = #{idCard},
+			license_number = #{licenseNumber},
+			qualification_no = #{qualificationNo},
+			weixin_no = #{weixinNo},
+			qq_no = #{qqNo},
+			license_type = #{licenseType},
+			certificate_date = #{certificateDate},
+			practising_date = #{practisingDate},
+			industry_rewards = #{industryRewards},
+			image_url = #{imageUrl},
+			office_id = #{office.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			ethnic = #{ethnic},
+			education = #{education},
+			political_face = #{politicalFace},
+			business_expertise = #{businessExpertise},
+			introduction = #{introduction},
+			is_mongolian = #{isMongolian},
+			administrative_division = #{administrativeDivision},
+			role = #{role}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_legal_service_person SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<select id="getById" resultMap="agencyResult">
+		SELECT 
+			<include refid="legalServicePersonColumns"/>
+			,s.login_id,d1.label AS "sexLabel",d2.label AS "ethnicLabel",d3.label AS "isMongolianLabel",o.name AS "officename"
+		FROM info_legal_service_person a
+		<include refid="legalServicePersonJoins"/>
+		left join sys_user_office_info s on s.info_id=a.id
+		left join  sys_dict d1 on a.sex=d1.`value` and d1.type='sex' and d1.language_type='CN'
+		left join  sys_dict d2 on a.ethnic=d2.`value` and d2.type='ethnic'  and d2.language_type='CN'
+		left join  sys_dict d3 on a.is_mongolian=d3.`value` and d3.type='yes_no' and d3.language_type='CN'
+		WHERE a.id = #{id}
+	</select>
+	<select id="findListForApi" resultMap="agencyResult">
+		SELECT 
+			<include refid="legalServicePersonColumns"/>
+			,s.login_id,d1.label AS "sexLabel",d2.label AS "ethnicLabel",d3.label AS "isMongolianLabel",o.name AS "officename"
+		FROM info_legal_service_person a
+		<include refid="legalServicePersonJoins"/>
+		left join sys_user_office_info s on s.info_id=a.id 
+		left join  sys_dict d1 on a.sex=d1.`value` and d1.type='sex'  and d1.language_type='CN'
+		left join  sys_dict d2 on a.ethnic=d2.`value` and d2.type='ethnic' and d2.language_type='CN'
+		left join  sys_dict d3 on a.is_mongolian=d3.`value` and d3.type='yes_no' and d3.language_type='CN'
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND( a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or  o17.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or  d2.label LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					)
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.legal_office_id in (
+				      select suoi.login_id from info_legal_service_office o  left join sys_user_office_info  suoi on o.id=suoi.info_id
+				     where o.del_flag='0' and o.area_id = #{area.id }
+				)
+			</if>
+			<if test="town != null and town.id != null and town.id != ''">
+				AND a.legal_office_id in (
+				    select suoi.login_id from info_legal_service_office o  left join sys_user_office_info  suoi on o.id=suoi.info_id
+				     where o.del_flag='0' and o.town_id = #{town.id }
+				)
+			</if>
+			<if test="isMongolian != null and isMongolian != ''  and isMongolian != '暂无'">
+				 AND a.is_mongolian = #{isMongolian}
+			</if>
+			<if test="evaluation != null and evaluation != '' and evaluation != '暂无'">
+			    AND a.evaluation = #{evaluation}
+			</if>
+			<if test="officeId != null and officeId!= '' and evaluation != '暂无'">
+			    AND a.legal_office_id = #{officeId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_legal_service_person a
+		<include refid="legalServicePersonJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.legal_office_id in (
+				      select suoi.login_id from info_legal_service_office o  left join sys_user_office_info  suoi on o.id=suoi.info_id
+				     where o.del_flag='0' and o.area_id = #{area.id }
+				)
+			</if>
+		</where>
+	</select>
+	<!-- 批量删除基层法律工作者信息 -->
+    <update id="batchDelete" parameterType="String" >
+  		UPDATE info_legal_service_person SET del_flag = '1' where  id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+	
+	<select id="personIdCard" resultType="String">
+		SELECT id_card FROM info_legal_service_person a 
+		<where>
+			id_card = #{idcard}
+		</where>
+	</select>
+	
+	<!-- 修改评价值 -->
+    <update id="evaluationUpdate">
+		UPDATE info_legal_service_person SET 
+			evaluation = #{evaluation}
+		WHERE id = (select info_id from sys_user_office_info where login_id = #{id}
+		<if test="remark!='' ">
+			and remark= #{remark}
+		</if>
+		)
+	</update>
+</mapper>

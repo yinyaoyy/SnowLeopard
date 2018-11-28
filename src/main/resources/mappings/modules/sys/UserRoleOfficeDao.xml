@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.sys.dao.UserRoleOfficeDao">
+    
+	<sql id="userRoleOfficeColumns">
+		a.user_id AS "user.id",
+		a.office_id AS "office.id",
+		a.role_id AS "role.id",
+		a.is_main AS "isMain",
+		u1.name AS "user.name",
+		o2.name AS "office.name",
+		r3.name AS "role.name"
+	</sql>
+	<sql id="partTimeJobColumns">
+		a.user_id AS "userId",
+		a.office_id AS "officeId",
+		a.role_id AS "roleId",
+		a.is_main AS "isMain",
+		u1.name AS "userName",
+		o2.name AS "officeName",
+		r3.name AS "roleName"
+	</sql>
+	<sql id="userRoleOfficeJoins">
+		LEFT JOIN sys_user u1 ON u1.id = a.user_id
+		LEFT JOIN sys_office o2 ON o2.id = a.office_id
+		LEFT JOIN sys_role r3 ON r3.id = a.role_id
+	</sql>
+    
+	<select id="get" resultType="UserRoleOffice">
+		SELECT 
+			<include refid="userRoleOfficeColumns"/>
+		FROM sys_user_role_office a
+		<include refid="userRoleOfficeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="UserRoleOffice">
+		SELECT 
+			<include refid="userRoleOfficeColumns"/>
+		FROM sys_user_role_office a
+		<include refid="userRoleOfficeJoins"/>
+		
+		<where>
+		    AND a.user_id = #{user.id}
+			<if test="isMain != null and isMain != ''">
+		    AND a.is_main = #{isMain}
+		    </if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findPartTimeJobList" resultType="PartTimeJob">
+		SELECT 
+			a.user_id AS "userId",
+		a.office_id AS "officeId",
+		a.role_id AS "roleId",
+		a.is_main AS "isMain",
+		u1.name AS "userName",
+		o2.name AS "officeName",
+		r3.name AS "roleName"
+		FROM sys_user_role_office a
+		<include refid="userRoleOfficeJoins"/>
+		<where>
+		    AND a.user_id = #{userId}
+			<if test="isMain != null and isMain != ''">
+		    AND a.is_main = #{isMain}
+		    </if>
+		</where>
+	</select>
+	<select id="findUserByOfficeRole" resultType="java.lang.String">
+		select  u.login_name  from  sys_user_role_office a LEFT JOIN sys_user u on a.user_id=u.id
+        where 
+         1=1 
+         and u.login_name is not null 
+           <if test="officeId != null and officeId != ''">
+		   and  a.office_id=#{officeId}
+		    </if>
+		    <if test="roleId != null and roleId != ''">
+		    and role_id=#{roleId}
+		    </if>
+	</select>
+	
+	<select id = "getOfficeIdByUidAndRid" resultType="java.lang.String">
+	 select a.office_id from sys_user_role_office a where 1=1 
+	 <if test="uId!=null and uId != ''">
+	 and a.user_id = #{uId}
+	 </if>
+	 <if test="rId!=null and rId != ''">
+	 and a.role_id = #{rId}
+	 </if>
+	</select>
+	<select id="findAllList" resultType="UserRoleOffice">
+		SELECT 
+			<include refid="userRoleOfficeColumns"/>
+		FROM sys_user_role_office a
+		<include refid="userRoleOfficeJoins"/>
+		<where>
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_user_role_office(
+			user_id,
+			office_id,
+			role_id,
+			is_main
+		) VALUES (
+			#{user.id},
+			#{office.id},
+			#{role.id},
+			#{isMain}
+		)
+	</insert>
+	<!-- 批量插入生成的兑换码 -->
+       <insert id ="insertBatch" parameterType="java.util.List" >
+            INSERT INTO sys_user_role_office(user_id,office_id,role_id,is_main )
+             values
+             <foreach collection ="list" item="partTimeJob" index= "index" separator =",">
+                 (
+                 #{partTimeJob.userId}, #{partTimeJob.officeId},#{partTimeJob.roleId}, #{partTimeJob.isMain}
+                )
+             </foreach >
+      </insert >
+	<update id="update">
+		UPDATE sys_user_role_office SET 	
+			user_id = #{user.id},
+			office_id = #{office.id},
+			role_id = #{role.id},
+			is_main = #{isMain}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM sys_user_role_office
+		WHERE user_id = #{userId}
+	</update>
+	
+</mapper>

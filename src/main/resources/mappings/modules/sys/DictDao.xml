@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.sys.dao.DictDao">
+    
+	<select id="get" resultType="Dict">
+		SELECT 
+			* 
+		FROM sys_dict 
+		WHERE id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Dict">
+		SELECT 
+			* 
+		FROM sys_dict 
+		WHERE del_flag = #{DEL_FLAG_NORMAL} 
+		<if test="type != null and type != ''">
+			AND type = #{type}
+		</if>
+		<if test="languageType != null and languageType != ''">
+			AND language_type = #{languageType}
+		</if>
+			<if test="parentId != null and parentId != ''">
+			AND parent_id = #{parentId}
+		</if>
+		
+		<if test="description != null and description != ''">
+			AND description LIKE 
+					<if test="dbName == 'oracle'">'%'||#{description}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{description}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{description}, '%')</if>
+		</if>
+		ORDER BY type, sort, update_date DESC
+	</select>
+	
+	<select id="findAllList" resultType="Dict">
+		SELECT 
+			* 
+		FROM sys_dict 
+		WHERE del_flag = #{DEL_FLAG_NORMAL} 
+		ORDER BY type, sort, update_date DESC
+	</select>
+	
+	<select id="findTypeList" resultType="string">
+		SELECT 
+			type 
+		FROM sys_dict 
+		WHERE del_flag = #{DEL_FLAG_NORMAL} 
+		GROUP BY type
+		ORDER BY type
+	</select>
+	<select id="getDictByLanAndTypeAndVal" resultType="Dict">
+	select  * from  sys_dict where  
+	language_type=#{languageType}
+	  and  type=#{type} and  value=#{value}
+	</select>
+	<select id="getDictByLanAndLabel" resultType="Dict">
+	select  * from  sys_dict where  
+	language_type=#{languageType} and  type=#{type}
+	  and  label=#{label} 
+	</select>
+	<select id="selectFindList" resultType="Dict">
+	select * from sys_dict where
+	type=#{type} and value=#{value} and language_type=#{languageType} and del_flag='0'
+	</select>
+	<delete id="deleteFindList">
+	DELETE FROM sys_dict where type=#{type} and value=#{value} and language_type=#{languageType}
+	</delete>
+	<select id="findLanguageList" resultType="Dict">
+		select DISTINCT value 
+      from  sys_dict where  type='act_langtype' and del_flag=0
+	</select>
+		<select id="findListByLanguage" resultType="Dict">
+		SELECT 
+			d.id,d.value,d.label,d2.label language_type,d.type,d.description,d.sort
+		FROM sys_dict d  
+       LEFT JOIN (select  value,label from  sys_dict 
+       where  language_type= "CN" 
+        and type='act_langtype' and del_flag = #{DEL_FLAG_NORMAL} ) d2
+       on  d.language_type=d2.value
+		WHERE d.del_flag = #{DEL_FLAG_NORMAL} 
+		<if test="type != null and type != ''">
+			AND d.type = #{type}
+		</if>
+		<if test="languageType != null and languageType != ''">
+			AND d.language_type = #{languageType}
+		</if>
+		
+		<if test="description != null and description != ''">
+			AND d.description LIKE 
+					<if test="dbName == 'oracle'">'%'||#{description}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{description}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{description}, '%')</if>
+		</if>
+		ORDER BY type, sort, update_date DESC
+	</select>
+	<insert id="insert">
+		INSERT INTO sys_dict(
+			id, 
+			value, 
+			label, 
+			type, 
+			description, 
+			sort, 
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date, 
+			remarks, 
+			del_flag,
+			language_type,
+			parent_id
+		) VALUES (
+			#{id}, 
+			#{value}, 
+			#{label}, 
+			#{type}, 
+			#{description}, 
+			#{sort}, 
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag},
+			#{languageType},
+			#{parentId}
+		)
+	</insert>
+	<insert id="batchSave" useGeneratedKeys="true" parameterType="java.util.List"> 
+	   		INSERT INTO sys_dict(
+			id, 
+			value, 
+			label, 
+			type, 
+			description, 
+			sort, 
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date, 
+			remarks, 
+			del_flag,
+			language_type
+		) VALUES 
+		   <foreach collection="list" item="item" index="index" separator="," >  
+        		(
+			#{item.id}, 
+			#{item.value}, 
+			#{item.label}, 
+			#{item.type}, 
+			#{item.description}, 
+			#{item.sort}, 
+			#{item.createBy.id}, 
+			#{item.createDate}, 
+			#{item.updateBy.id}, 
+			#{item.updateDate}, 
+			#{item.remarks}, 
+			#{item.delFlag},
+			#{item.languageType}
+		) 
+    </foreach>  
+		
+
+	</insert>	
+	<update id="update">
+		UPDATE sys_dict SET 
+			value = #{value}, 
+			label = #{label}, 
+			type = #{type}, 
+			description = #{description}, 
+			sort = #{sort}, 
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks},
+			language_type=#{languageType},
+			parent_id =#{parentId}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE from sys_dict where 
+		 id = #{id}
+	</update>
+	<!-- 批量删除语言 -->
+          <delete id="batchDelete" parameterType="java.util.List" >
+  			DELETE FROM sys_dict where id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+         </foreach>
+    	</delete>
+	
+</mapper>

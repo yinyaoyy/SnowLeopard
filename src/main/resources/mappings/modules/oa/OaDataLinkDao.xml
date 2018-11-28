@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.oa.dao.OaDataLinkDao">
+    
+	<sql id="oaDataLinkColumns">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.table_name AS "tableName",
+		a.data_id AS "dataId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="oaDataLinkJoins">
+	</sql>
+    
+	<select id="get" resultType="OaDataLink">
+		SELECT 
+			<include refid="oaDataLinkColumns"/>
+		FROM oa_data_link a
+		<include refid="oaDataLinkJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaDataLink">
+		SELECT 
+			<include refid="oaDataLinkColumns"/>
+		FROM oa_data_link a
+		<include refid="oaDataLinkJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaDataLink">
+		SELECT 
+			<include refid="oaDataLinkColumns"/>
+		FROM oa_data_link a
+		<include refid="oaDataLinkJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_data_link(
+			id,
+			proc_ins_id,
+			table_name,
+			data_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{procInsId},
+			#{tableName},
+			#{dataId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_data_link SET 	
+			proc_ins_id = #{procInsId},
+			table_name = #{tableName},
+			data_id = #{dataId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_data_link SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getDataId" resultType="OaDataLink">
+		SELECT 
+			<include refid="oaDataLinkColumns"/>
+		FROM oa_data_link a
+		<include refid="oaDataLinkJoins"/>
+		<where>
+			 a.proc_ins_id=#{0} and a.table_name =#{1}
+		</where>
+	</select>
+
+	<select id="getCountByDataId" resultType="Integer">
+		SELECT 
+			count(a.Id)
+		FROM oa_data_link a
+		<where>
+			 a.data_id=#{0}
+		</where>
+	</select>
+	
+</mapper>

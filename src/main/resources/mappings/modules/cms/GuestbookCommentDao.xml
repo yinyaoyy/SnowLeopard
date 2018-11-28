@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.cms.dao.GuestbookCommentDao">
+    
+	<sql id="guestbookCommentColumns">
+		a.id AS "id",
+		a.guestbook_id AS "guestbookId",
+		a.create_by AS "createBy.id",
+		a.content AS "content",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate",
+		a.thumbs_up_true AS "thumbsUpTrue",
+		a.thumbs_up_false AS "thumbsUpFalse",
+		a.is_evaluate AS "isEvaluate"
+	</sql>
+	<sql id="guestbookCommentJoins">
+	</sql>
+	
+	<select id="get" resultType="GuestbookComment">
+		SELECT 
+			<include refid="guestbookCommentColumns"/>
+		FROM cms_guestbook_comment a
+		<include refid="guestbookCommentJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="findget" resultType="GuestbookComment">
+		SELECT 
+			<include refid="guestbookCommentColumns"/>
+		FROM cms_guestbook_comment a
+		WHERE a.guestbook_id = #{id}
+	</select>
+	<select id="findList" resultType="GuestbookComment">
+		SELECT 
+			<include refid="guestbookCommentColumns"/>
+		FROM cms_guestbook_comment a
+		<include refid="guestbookCommentJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="GuestbookComment">
+		SELECT 
+			<include refid="guestbookCommentColumns"/>
+		FROM cms_guestbook_comment a
+		<include refid="guestbookCommentJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 判断此消息下有没有回复 -->
+	<select id="countselect" resultType="int">
+	select count(1) from cms_guestbook_comment
+	where guestbook_id=#{id}
+	and del_flag='0'
+	</select>
+	<insert id="insert">
+		INSERT INTO cms_guestbook_comment(
+			id,
+			guestbook_id,
+			create_by,
+			content,
+			del_flag,
+			create_date,
+			comment_type
+		) VALUES (
+			#{id},
+			#{guestbookId},
+			#{createBy.id},
+			#{content},
+			#{delFlag},
+			#{createDate},
+			#{commentType}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cms_guestbook_comment SET 	
+			guestbook_id = #{guestbookId},
+			content = #{content},
+			re_user = #{reUser}
+		WHERE id = #{id}
+	</update>
+	<update id="updateThumbsUp">
+		UPDATE cms_guestbook_comment SET 	
+			thumbs_up_true = #{thumbsUpTrue},
+			thumbs_up_false = #{thumbsUpFalse}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cms_guestbook_comment SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="isEvaluate">
+		UPDATE cms_guestbook_comment SET 
+			is_evaluate = '1'
+		WHERE id = #{id}
+	</update>
+	<!-- 修改回复内容 -->
+	<update id="updateContent">
+	UPDATE cms_guestbook_comment SET 
+			content = #{content}
+		WHERE id = #{id}
+	</update>
+	<!-- 根据id删除回复-->
+	<update id="deleteGuestbookComment">
+	delete from cms_guestbook_comment 
+		WHERE id = #{id}
+	</update>
+</mapper>

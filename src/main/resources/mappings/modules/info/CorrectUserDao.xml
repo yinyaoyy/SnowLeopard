@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.CorrectUserDao">
+    
+	<sql id="correctUserColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.office_id AS "office.id",
+		a.accusation AS "accusation",
+		a.main_penalty AS "mainPenalty",
+		a.correct_type AS "correctType",
+		a.responsibility_name AS "responsibilityName",
+		a.correct_status AS "correctStatus",
+		a.correct_level AS "correctLevel",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks",
+		o3.name AS "office.name",
+		a.id_card AS "idCard",
+		a.sex AS "sex",
+		a.phone AS "phone"
+	</sql>
+	
+    <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="office.name" />
+		<result property="personName" column="name" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="imageUrl" />
+	</resultMap>
+	
+	<sql id="correctUserJoins">
+		LEFT JOIN sys_office o3 ON o3.id = a.office_id
+	</sql>
+    
+	<select id="get" resultType="CorrectUser">
+		SELECT 
+			<include refid="correctUserColumns"/>
+		FROM info_correct_user a
+		<include refid="correctUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="getByIdCard" resultType="CorrectUser">
+		SELECT 
+			<include refid="correctUserColumns"/>
+		FROM info_correct_user a
+		<include refid="correctUserJoins"/>
+		WHERE a.id_card = #{idCard}
+	</select>
+	<select id="findList" resultType="CorrectUser">
+		SELECT 
+			<include refid="correctUserColumns"/>
+		FROM info_correct_user a
+		<include refid="correctUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="office != null and office.id != null and office.id != ''">
+				AND a.office_id = #{office.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CorrectUser">
+		SELECT 
+			<include refid="correctUserColumns"/>
+		FROM info_correct_user a
+		<include refid="correctUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getById" resultMap="agencyResult">
+		SELECT 
+			<include refid="correctUserColumns"/>
+		FROM info_correct_user a
+		<include refid="correctUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findListForApi" resultMap="agencyResult">
+		SELECT 
+			<include refid="correctUserColumns"/>
+		FROM info_correct_user a
+		<include refid="correctUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+			</if>
+			<if test="office != null and office.id != null and office.id != ''">
+				AND a.office_id = #{office.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+    <select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_correct_user a
+		<include refid="correctUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="office != null and office.id != null and office.id != ''">
+				AND a.office_id = #{office.id}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO info_correct_user(
+			id,
+			name,
+			office_id,
+			accusation,
+			main_penalty,
+			correct_type,
+			responsibility_name,
+			correct_status,
+			correct_level,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			remarks,
+			id_card,
+			sex,
+			phone
+		) VALUES (
+			#{id},
+			#{name},
+			#{office.id},
+			#{accusation},
+			#{mainPenalty},
+			#{correctType},
+			#{responsibilityName},
+			#{correctStatus},
+			#{correctLevel},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{remarks},
+			#{idCard},
+			#{sex},
+			#{phone}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_correct_user SET 	
+			name = #{name},
+			office_id = #{office.id},
+			accusation = #{accusation},
+			main_penalty = #{mainPenalty},
+			correct_type = #{correctType},
+			responsibility_name = #{responsibilityName},
+			correct_status = #{correctStatus},
+			correct_level = #{correctLevel},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			id_card =#{idCard},
+			sex =#{sex},
+			phone=#{phone}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_correct_user SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="batchDelete" parameterType="String" >
+  		UPDATE info_correct_user SET del_flag = '1' where  id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+</mapper>

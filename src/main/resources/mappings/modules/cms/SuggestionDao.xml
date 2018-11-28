@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.cms.dao.SuggestionDao">
+    
+	<sql id="suggestionColumns">
+		a.id AS "id",
+		a.content AS "content",
+		a.name AS "name",
+		a.title AS "title",
+		a.phone AS "phone",
+		a.ip AS "ip",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag",
+		a.area AS "area",
+		a.is_inquiries AS "isInquiries",
+		a.inquiries_count AS "inquiriesCount",
+		a.is_comment AS "isComment",
+		a.proposed_office AS "proposedOffice",
+		a.proposed_user AS "proposedUser",
+		b.*
+	</sql>
+	
+	<sql id="suggestionJoins">
+				 left join   
+		 (select c.id as "commentId",c.guestbook_id as "guestbookId",c.create_by as "commentCreate",c.content as "commentContent",
+			c.del_flag as "commentDelFlag",c.create_date as "commentCreateDate",c.comment_type as "commentType",
+			c.thumbs_up_true AS "thumbsUpTrue",c.thumbs_up_false As "thumbsUpFalse",
+			d.name As "create_name",r.id As "re_id",r.create_by as "re_commentCreate",e.name as "re_create_name" ,
+			r.content as "re_commentContent",r.del_flag as "re_commentDelFlag",r.create_date as "re_commentCreateDate" ,r.comment_type as "re_commentType"
+			from  cms_guestbook_comment c left join 
+		  sys_user  d on c.create_by=d.id  LEFT JOIN  cms_guestbook_comment_re r  
+		  on c.id=r.comment_id
+		  LEFT JOIN sys_user e on e.id=r.create_by  
+		 ) b on b.guestbookId=a.id
+		 left join sys_user c on c.id=a.create_by 
+	
+	</sql>
+   	<resultMap id="suggestionResult" type="com.thinkgem.jeesite.modules.cms.entity.Suggestion">
+		<id property="id" column="id" />
+	<result property="title" column="title" />
+	<result property="content" column="content" />
+	<result property="name" column="name" />
+	<result property="phone" column="phone" />
+	<result property="createBy.id" column="createBy.id" />
+	<result property="createDate" column="createDate" />
+	<result property="delFlag" column="delFlag" />
+	<result property="isComment" column="isComment" />
+	<result property="proposedOffice" column="proposedOffice" />
+	<result property="proposedUser" column="proposedUser" />
+	<result property="isInquiries" column="isInquiries" />
+	<collection property="commentList" ofType="com.thinkgem.jeesite.modules.cms.entity.GuestbookComment" javaType="list">
+		<id property="id" column="commentId" />
+		<result property="createUser.id" column="commentCreate" />
+		<result property="createUser.name" column="create_name" />
+		<result property="content" column="commentContent" />
+		<result property="delFlag" column="commentDelFlag" />
+		<result property="createDate" column="commentCreateDate" />
+		<result property="commentType" column="commentType" />
+		<result property="guestbookId" column="guestbookId" />
+		<result property="thumbsUpTrue" column="thumbsUpTrue" />
+		<result property="thumbsUpFalse" column="thumbsUpFalse" />
+		 <collection property="guestbookCommentReList" ofType="com.thinkgem.jeesite.modules.cms.entity.GuestbookCommentRe" javaType="list">
+			<id property="id" column="re_id" />
+			<result property="commentId" column="commentId" />
+			<result property="createUser.id" column="re_commentCreate" />
+			<result property="createUser.name" column="re_create_name" />
+			<result property="content" column="re_commentContent" />
+			<result property="delFlag" column="re_commentDelFlag" />
+			<result property="createDate" column="re_commentCreateDate" />
+			<result property="commentType" column="re_commentType" />
+			<result property="guestbookId" column="guestbookId" />
+		</collection> 
+	</collection>
+</resultMap>	
+	<select id="get" resultMap="suggestionResult">
+		SELECT 
+			<include refid="suggestionColumns"/>
+		FROM cms_suggestion a
+		<include refid="suggestionJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<!-- <select id="findList" resultType="Suggestion">
+		SELECT 
+			<include refid="suggestionColumns"/>
+		FROM cms_suggestion a
+		<include refid="suggestionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	 -->
+	 <select id="findList" resultType="Suggestion">
+	 select a.id AS "id",
+		a.content AS "content",
+		a.name AS "name",
+		a.title AS "title",
+		a.phone AS "phone",
+		a.ip AS "ip",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag",
+		a.area AS "area",
+		a.is_inquiries AS "isInquiries",
+		a.inquiries_count AS "inquiriesCount",
+		a.is_comment AS "isComment",
+		a.proposed_office AS "proposedOffice",
+		a.proposed_user AS "proposedUser"
+		from cms_suggestion a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+				<if test="beginDate!= null and beginDate !=''">
+		and a. create_date<![CDATA[>=]]>  DATE_FORMAT(#{beginDate}, '%Y-%m-%d') 
+		 </if>
+		<if test="endDate!= null and endDate !=''">
+		and a.create_date<![CDATA[<=]]> DATE_FORMAT(#{endDate}, '%Y-%m-%d') 
+		 </if>
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+			</choose>
+	 </select>
+	<!-- <select id="findAllList" resultType="Suggestion">
+		SELECT 
+			<include refid="suggestionColumns"/>
+		FROM cms_suggestion a
+		<include refid="suggestionJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select> -->
+	<select id="findUserSuggestionList" resultMap="suggestionResult">
+		SELECT 
+			<include refid="suggestionColumns"/>
+		FROM cms_suggestion a
+		<include refid="suggestionJoins"/>
+		<where>
+			a.del_flag =0
+			<if test="isComment != null and isComment != ''">
+				AND a.is_comment=#{isComment}
+			</if>
+			<if test="createBy != null and createBy != '' and createBy.id!=null and createBy.id!=''">
+				AND a.create_by=#{createBy.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			GROUP BY a.id
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findUserIsInquiriesSuggestionList" resultMap="suggestionResult">
+		SELECT 
+			<include refid="suggestionColumns"/>
+		FROM cms_suggestion a
+		<include refid="suggestionJoins"/>
+		<where>
+			a.del_flag =0
+			<if test="createBy != null and createBy != '' and createBy.id!=null and createBy.id!=''">
+				AND b.re_commentCreate=#{createBy.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			GROUP BY a.id
+				ORDER BY b.re_commentCreateDate DESC
+			</otherwise>
+		</choose>
+	</select>
+	<insert id="insert">
+	     INSERT INTO cms_complaint
+	     <trim prefix="(" suffix=")" suffixOverrides="," >
+	        id,
+	        <if test="title != null and title != ''">
+			title,
+			</if>
+			<if test="content != null and content != ''">
+			content,
+			</if>
+			<if test="name != null and name != ''">
+			name,
+			</if>
+			<if test="phone != null and phone != ''">
+			phone,
+			</if>
+			<if test="createBy != null and createBy != ''">
+			create_by,
+			</if>
+			<if test="createDate != null and createDate != ''">
+			create_date,
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+			del_flag,
+			</if>
+			<if test="area != null and area != '' and area.id!=null and  area.id!=''">
+			area,
+			</if>
+			<if test="proposedOffice != null and proposedOffice != ''">
+			proposed_office,
+			</if>
+			<if test="proposedUser != null and proposedUser != ''">
+			proposed_user
+			</if>
+	     </trim>
+	     <trim prefix="values (" suffix=")" suffixOverrides="," >
+	     #{id},
+	        <if test="title != null and title != ''">
+			#{title},
+			</if>
+			<if test="content != null and content != ''">
+			#{content},
+			</if>
+			<if test="name != null and name != ''">
+			#{name},
+			</if>
+			<if test="phone != null and phone != ''">
+			#{phone},
+			</if>
+			<if test="createBy != null and createBy != ''">
+			#{createBy.id},
+			</if>
+			<if test="createDate != null and createDate != ''">
+			#{createDate},
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+			#{delFlag},
+			</if>
+			<if test="area != null and area != '' and area.id!=null and  area.id!=''">
+			#{area.id},
+			</if>
+			<if test="proposedOffice != null and proposedOffice != ''">
+			#{proposedOffice},
+			</if>
+			<if test="proposedUser != null and proposedUser != ''">
+			#{proposedUser},
+			</if>
+	     </trim>
+	</insert>		
+	<update id="update">
+		UPDATE cms_suggestion SET 	
+		 <set> 
+		     <if test="delFlag!=null and delFlag!=''"> 
+		     del_flag = #{delFlag},
+		     </if>
+		     <if test="isInquiries!=null and isInquiries!=''"> 
+		     is_inquiries = #{isInquiries},
+		     </if>
+		     <if test="isComment!=null and isComment!=''"> 
+		     is_comment = #{isComment},
+		     </if>
+		   </set>
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cms_suggestion SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

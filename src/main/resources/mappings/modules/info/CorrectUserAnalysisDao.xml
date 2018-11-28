@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.CorrectUserAnalysisDao">
+    
+	<sql id="correctUserAnalysisColumns">
+		a.id AS "id",
+		a.analysis_date AS "analysisDate",
+		a.error_rate AS "errorRate",
+		a.type AS "type",
+		a.min_value AS "minValue",
+		a.average_value AS "averageValue",
+		a.max_value AS "maxValue",
+		a.image_value AS "imageValue",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.id_card As "idCard"
+	</sql>
+	
+	<sql id="correctUserAnalysisJoins">
+	</sql>
+    
+	<select id="get" resultType="CorrectUserAnalysis">
+		SELECT 
+			<include refid="correctUserAnalysisColumns"/>
+		FROM info_correct_user_analysis a
+		<include refid="correctUserAnalysisJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="findList" resultType="CorrectUserAnalysis">
+		SELECT 
+			<include refid="correctUserAnalysisColumns"/>
+		FROM info_correct_user_analysis a
+		<include refid="correctUserAnalysisJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			<if test=" idCard != null and idCard != ''">
+			    and  a.id_card=#{idCard}
+			</if>
+			<if test=" idCard == null or idCard == ''">
+			    and  a.id_card=''
+			</if>
+			<if test=" type != null and type != ''">
+			    and  a.type=#{type}
+			</if>
+			<if test="beginDate!= null and beginDate !=''">
+		        and a. analysis_date<![CDATA[>=]]>  DATE_FORMAT(#{beginDate}, '%Y-%m-%d') 
+		    </if>
+		    <if test="endDate!= null and endDate !=''">
+		        and a.analysis_date<![CDATA[<=]]> DATE_FORMAT(#{endDate}, '%Y-%m-%d') 
+		     </if> 
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.analysis_date ,a.type
+			</otherwise>
+		</choose>
+	</select>
+		<select id="findListVo" resultType="CorrectUserAnalysisVo">
+		SELECT 
+			<include refid="correctUserAnalysisColumns"/>
+		    FROM info_correct_user_analysis a
+		<include refid="correctUserAnalysisJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} and  a.id_card=#{idCard}
+		</where>
+		<choose>
+			<otherwise>
+				ORDER BY a.analysis_date ,a.type GROUP BY a.analysis_date 
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findAllList" resultType="CorrectUserAnalysis">
+		SELECT 
+			<include refid="correctUserAnalysisColumns"/>
+		FROM info_correct_user_analysis a
+		<include refid="correctUserAnalysisJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO info_correct_user_analysis(
+			id,
+			analysis_date,
+			error_rate,
+			type,
+			min_value,
+			average_value,
+			max_value,
+			image_value,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			id_card
+		) VALUES (
+			#{id},
+			#{analysisDate},
+			#{errorRate},
+			#{type},
+			#{minValue},
+			#{averageValue},
+			#{maxValue},
+			#{imageValue},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{idCard}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_correct_user_analysis SET 	
+			analysis_date = #{analysisDate},
+			error_rate = #{errorRate},
+			type = #{type},
+			min_value = #{minValue},
+			average_value = #{averageValue},
+			max_value = #{maxValue},
+			image_value = #{imageValue},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			id_card=#{idCard}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_correct_user_analysis SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

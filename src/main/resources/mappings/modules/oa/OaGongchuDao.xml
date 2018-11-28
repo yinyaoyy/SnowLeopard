@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.oa.dao.OaGongchuDao">
+    
+	<sql id="oaGongchuColumns">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.start_time AS "startTime",
+		a.end_time AS "endTime",
+		a.gongchu_type AS "gongchuType",
+		a.reason AS "reason",
+		a.file AS "file",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.all_time AS "allTime",
+		a.agree_count AS "agreeCount",
+		a.all_count AS "allCount"
+	</sql>
+	
+	<sql id="oaGongchuJoins">
+	</sql>
+    
+	<select id="get" resultType="OaGongchu">
+		SELECT 
+			<include refid="oaGongchuColumns"/>
+		FROM oa_gongchu a
+		<include refid="oaGongchuJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaGongchu">
+		SELECT 
+			<include refid="oaGongchuColumns"/>
+		FROM oa_gongchu a
+		<include refid="oaGongchuJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaGongchu">
+		SELECT 
+			<include refid="oaGongchuColumns"/>
+		FROM oa_gongchu a
+		<include refid="oaGongchuJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_gongchu(
+			id,
+			proc_ins_id,
+			start_time,
+			end_time,
+			gongchu_type,
+			reason,
+			file,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			all_time,
+			agree_count,
+			all_count
+		) VALUES (
+			#{id},
+			#{procInsId},
+			#{startTime},
+			#{endTime},
+			#{gongchuType},
+			#{reason},
+			#{file},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{allTime},
+			#{agreeCount},
+			#{allCount}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_gongchu 
+		 <set> 
+		     <if test="procInsId!=null and procInsId!=''"> 
+		     proc_ins_id = #{procInsId},
+		     </if>
+		     <if test="startTime!=null and startTime!=''"> 
+		     start_time = #{startTime},
+		     </if>
+		     <if test="endTime!=null and endTime!=''"> 
+		     end_time = #{endTime},
+		     </if>
+		     <if test="gongchuType!=null and gongchuType!=''"> 
+		     gongchu_type = #{gongchuType},
+		     </if>
+		     <if test="reason!=null and reason!=''"> 
+		     reason = #{reason},
+		     </if>
+		     <if test="file!=null and file!=''"> 
+		     file = #{file},
+		     </if>
+		     <if test="updateBy!=null and updateBy!=''"> 
+		     update_by = #{updateBy.id},
+		     </if>
+		     <if test="updateDate!=null and updateDate!=''"> 
+		     update_date = #{updateDate},
+		     </if>
+		     <if test="remarks!=null and remarks!=''"> 
+		     remarks = #{remarks},
+		     </if>
+		     <if test="allTime!=null and allTime!=''"> 
+		     all_time = #{allTime},
+		     </if>
+		     <if test="agreeCount!=null"> 
+		     agree_count = #{agreeCount},
+		     </if>
+		     <if test="allCount!=null"> 
+		     all_count = #{allCount},
+		     </if>
+		 </set>
+		WHERE id = #{id}
+	</update>
+	<update id="delete">
+		UPDATE oa_gongchu SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

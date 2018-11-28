@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.tripartite.dao.nmgsft.NmgsftsjjhptDao">
+	
+	<!-- 获取当天律师事务所的“统一社会信用代码”
+	 * 方便获取律师信息 -->
+	<select id="selectLawOfficeCreditNo" resultType="String">
+	select t.creditCode creditNo from tri_nmgsft_law_office t where date_format(t.importDate,'%Y-%m-%d')= #{date}
+	</select>
+	
+	<!-- 获取当天公证机构的“机构执业证号、机构代码”
+	 * 方便获取公证员信息 -->
+	<select id="selectFairOrgs" resultType="Map">
+	SELECT 
+	    t.practiceCertNo, t.number
+	FROM
+	    tri_nmgsft_fair_orgs t
+	WHERE
+	    DATE_FORMAT(t.importDate, '%Y-%m-%d') = #{date}
+	        AND (practiceCertNo IS NOT NULL
+	        OR number IS NOT NULL)
+	</select>
+	
+	<!-- 获取当天公证机构的“执业机构许可证号、执业机构统一社会信用 代码”
+	 * 方便获取鉴定人信息 -->
+	<select id="selectIdtOrgs" resultType="Map">
+	SELECT 
+	    t.permitNo, t.creditCode
+	FROM
+	    tri_nmgsft_idt_orgs t
+	WHERE
+	    DATE_FORMAT(t.importDate, '%Y-%m-%d') = #{date}
+	        AND (permitNo IS NOT NULL
+	        OR creditCode IS NOT NULL)
+	</select>
+</mapper>

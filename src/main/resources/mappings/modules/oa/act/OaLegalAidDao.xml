@@ -1,0 +1,1045 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.oa.dao.act.OaLegalAidDao">
+    
+	<sql id="oaLegalAidColumns">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.year AS "year",
+		a.year_no AS "yearNo",
+		a.name AS "name",
+		a.sex AS "sex",
+		a.birthday AS "birthday",
+		a.area_id AS "area.id",
+		a.ethnic AS "ethnic",
+		a.hasMongol AS "hasMongol",
+		a.id_card AS "idCard",
+		a.domicile AS "domicile",
+		a.address AS "address",
+		a.post_code AS "postCode",
+		a.phone AS "phone",
+		a.employer AS "employer",
+		a.proxy_name AS "proxyName",
+		a.proxy_type AS "proxyType",
+		a.proxy_id_card AS "proxyIdCard",
+		a.case_title AS "caseTitle",
+		a.case_type AS "caseType",
+		a.case_reason AS "caseReason",
+		a.case_file AS "caseFile",
+		a.law_office_id AS "lawOffice.id",
+		a.lawyer_id AS "lawyer.id",
+		a.legal_office_id AS "legalOffice.id",
+		a.legal_person_id AS "legalPerson.id",
+		a.third_party_score AS "thirdPartyScore",
+		a.third_party_evaluation AS "thirdPartyEvaluation",
+		a.receive_subsidy AS "receiveSubsidy",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.legal_aid_type AS "legalAidType",
+		a.archiving AS "archiving",
+		a.aid_category AS 'aidCategory',
+		a.case_nature AS 'caseNature',
+		a.case_file2 AS 'caseFile2',
+		a.is_evaluate AS 'isEvaluate',
+		a.case_handle_process as 'caseHandleProcess',
+		a.education as "education",
+	    a.renyuanType as "renyuanType",
+		a.officeType as "officeType",
+		a.jgphone as "jgphone", 
+		a.caseTelevancy as "caseTelevancy",
+		a.caseGuilt as "caseGuilt", 
+        a.caseInform as "caseInform",
+        a.informReson as "informReson", 
+        a.cumName as "cumName",
+        a.dom as "dom.id", 
+        a.internation as "internation", 
+        a.officeName as "officeNamee", 
+        a.jgPerson as "jgPerson", 
+        a.sldate as "sldate", 
+        a.casesum as "casesum",
+        a.casesStage as "casesStage",
+        a.lawAssistanceOffice as "lawAssistanceOffice.id",
+        a.lawAssistUser as "lawAssistUser.id",
+        a.qrcode as "qrcode",
+        
+		a5.name AS "area.name",
+		o6.name AS "lawOffice.name",
+		u7.name AS "lawyer.name",
+		o8.name AS "legalOffice.name",
+		u9.name AS "legalPerson.name",
+		o10.name AS "lawAssistanceOffice.name",
+		u11.name AS "lawAssistUser.name"
+	</sql>
+	
+	<sql id="oaLegalAidJoins">
+		LEFT JOIN sys_area a5 ON a5.id = a.area_id
+		LEFT JOIN sys_office o6 ON o6.id = a.law_office_id
+		LEFT JOIN sys_user u7 ON u7.id = a.lawyer_id
+		LEFT JOIN sys_office o8 ON o8.id = a.legal_office_id
+		LEFT JOIN sys_user u9 ON u9.id = a.legal_person_id
+		
+		LEFT JOIN sys_office o10 ON o10.id = a.lawAssistanceOffice
+		LEFT JOIN sys_user u11 ON u11.id = a.lawAssistUser
+	</sql>
+    
+	<select id="get" resultType="OaLegalAid">
+		SELECT 
+			<include refid="oaLegalAidColumns"/>
+		FROM oa_legal_aid a
+		<include refid="oaLegalAidJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getApi" resultType="OaLegalAid">
+		SELECT 
+			<include refid="oaLegalAidColumns"/>,u10.prescription AS "guestbookEvaluate.prescription",u10.id AS "guestbookEvaluate.id",u10.proposal AS "guestbookEvaluate.proposal"
+		FROM oa_legal_aid a
+		<include refid="oaLegalAidJoins"/>
+		LEFT JOIN  cms_guestbook_evaluate u10 ON u10.comment_id = a.id
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaLegalAid">
+		SELECT 
+			<include refid="oaLegalAidColumns"/>
+		FROM oa_legal_aid a
+		<include refid="oaLegalAidJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="caseTitle != null and caseTitle != ''">
+				AND a.case_title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{caseTitle}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{caseTitle}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{caseTitle},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaLegalAid">
+		SELECT 
+			<include refid="oaLegalAidColumns"/>
+		FROM oa_legal_aid a
+		<include refid="oaLegalAidJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_legal_aid(
+			id,
+			proc_ins_id,
+			name,
+			sex,
+			birthday,
+			area_id,
+			ethnic,
+			hasMongol,
+			id_card,
+			domicile,
+			address,
+			post_code,
+			phone,
+			employer,
+			proxy_name,
+			proxy_type,
+			proxy_id_card,
+			case_title,
+			case_type,
+			case_reason,
+			case_file,
+			law_office_id,
+			lawyer_id,
+			legal_office_id,
+			legal_person_id,
+			third_party_score,
+			third_party_evaluation,
+			receive_subsidy,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			legal_aid_type,
+			source,
+			aid_category,
+			case_nature,
+			case_file2,
+			education,
+			renyuanType,
+			 officeType,
+			 jgphone, 
+			  caseTelevancy,
+			   caseGuilt, 
+            caseInform,
+           informReson, 
+            cumName,
+            dom, 
+           internation, 
+           officeName, 
+           jgPerson, 
+           sldate, 
+           casesStage,
+           casesum
+		) VALUES (
+			#{id},
+			#{procInsId},
+			#{name},
+			#{sex},
+			#{birthday},
+			#{area.id},
+			#{ethnic},
+			#{hasMongol},
+			#{idCard},
+			#{domicile},
+			#{address},
+			#{postCode},
+			#{phone},
+			#{employer},
+			#{proxyName},
+			#{proxyType},
+			#{proxyIdCard},
+			#{caseTitle},
+			#{caseType},
+			#{caseReason},
+			#{caseFile},
+			#{lawOffice.id},
+			#{lawyer.id},
+			#{legalOffice.id},
+			#{legalPerson.id},
+			#{thirdPartyScore},
+			#{thirdPartyEvaluation},
+			#{receiveSubsidy},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{legalAidType},
+			#{source},
+			#{aidCategory},
+			#{caseNature},
+			#{caseFile2},
+			#{education},
+			#{renyuanType},
+			#{officeType},
+			#{jgphone}, 
+			#{caseTelevancy},
+			#{caseGuilt}, 
+            #{caseInform},
+           #{informReson}, 
+            #{cumName},
+            #{dom.id}, 
+           #{internation}, 
+           #{officeNamee}, 
+           #{jgPerson}, 
+           #{sldate}, 
+           #{casesStage},
+           #{casesum}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_legal_aid SET 	
+			name = #{name},
+			sex = #{sex},
+			birthday = #{birthday},
+			area_id = #{area.id},
+			ethnic = #{ethnic},
+			hasMongol = #{hasMongol},
+			id_card = #{idCard},
+			domicile = #{domicile},
+			address = #{address},
+			post_code = #{postCode},
+			phone = #{phone},
+			employer = #{employer},
+			proxy_name = #{proxyName},
+			proxy_type = #{proxyType},
+			proxy_id_card = #{proxyIdCard},
+			case_title = #{caseTitle},
+			case_type = #{caseType},
+			case_reason = #{caseReason},
+			case_file = #{caseFile},
+			law_office_id = #{lawOffice.id},
+			lawyer_id = #{lawyer.id},
+			legal_office_id = #{legalOffice.id},
+			legal_person_id = #{legalPerson.id},
+			third_party_score = #{thirdPartyScore},
+			third_party_evaluation = #{thirdPartyEvaluation},
+			receive_subsidy = #{receiveSubsidy},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			aid_category = #{aidCategory},
+			case_nature = #{caseNature},
+			case_file2 = #{caseFile2},
+			case_handle_process = #{caseHandleProcess}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 查询草稿箱 -->
+	<select id="findDraftListForApi" resultType="OaLegalAid">
+		SELECT a.*
+		FROM oa_legal_aid_draft a
+		<where>
+			a.del_flag = 0
+			AND a.create_by = #{createBy.id}
+			<!-- 支持根据案件标题查询草稿 -->
+			<if test="caseTitle != null and caseTitle != ''">
+				AND a.case_title LIKE concat('%',#{caseTitle},'%')
+			</if>
+			<if test="legalAidType!=null and legalAidType!=''">
+			and legal_aid_type=#{legalAidType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 保存草稿 -->
+	<insert id="insertDraft">
+		INSERT INTO oa_legal_aid_draft(
+			id,
+			name,
+			sex,
+			birthday,
+			area_id,
+			ethnic,
+			hasMongol,
+			id_card,
+			domicile,
+			address,
+			post_code,
+			phone,
+			employer,
+			proxy_name,
+			proxy_type,
+			proxy_id_card,
+			case_title,
+			case_type,
+			case_reason,
+			case_file,
+			aid_category,
+			case_nature,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			education,
+			renyuanType,
+			officeType,
+			jgphone, 
+			caseTelevancy,
+			caseGuilt, 
+            caseInform,
+            informReson, 
+            cumName,
+            dom, 
+            internation, 
+            officeName, 
+            jgPerson, 
+            casesStage,
+            casesum,
+            legal_aid_type
+		) VALUES (
+			#{id},
+			#{name},
+			#{sex},
+			#{birthday},
+			#{area.id},
+			#{ethnic},
+			#{hasMongol},
+			#{idCard},
+			#{domicile},
+			#{address},
+			#{postCode},
+			#{phone},
+			#{employer},
+			#{proxyName},
+			#{proxyType},
+			#{proxyIdCard},
+			#{caseTitle},
+			#{caseType},
+			#{caseReason},
+			#{caseFile},
+			#{aidCategory},
+			#{caseNature},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{education},
+			#{renyuanType},
+			#{officeType},
+			#{jgphone}, 
+			#{caseTelevancy},
+			#{caseGuilt}, 
+            #{caseInform},
+           #{informReson}, 
+            #{cumName},
+            #{dom.id}, 
+           #{internation}, 
+           #{officeNamee}, 
+           #{jgPerson}, 
+           #{casesStage},
+           #{casesum},
+           #{legalAidType}
+		)
+	</insert>
+	<!-- 修改草稿 -->
+	<update id="updateDraft">
+		UPDATE oa_legal_aid_draft SET 	
+			name = #{name},
+			sex = #{sex},
+			birthday = #{birthday},
+			area_id = #{area.id},
+			ethnic = #{ethnic},
+			hasMongol = #{hasMongol},
+			id_card = #{idCard},
+			domicile = #{domicile},
+			address = #{address},
+			post_code = #{postCode},
+			phone = #{phone},
+			employer = #{employer},
+			proxy_name = #{proxyName},
+			proxy_type = #{proxyType},
+			proxy_id_card = #{proxyIdCard},
+			case_title = #{caseTitle},
+			case_type = #{caseType},
+			case_reason = #{caseReason},
+			case_file = #{caseFile},
+			aid_category = #{aidCategory},
+			case_nature = #{caseNature},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			education=#{education},
+			renyuanType=#{renyuanType},
+			officeType=#{officeType},
+			jgphone=#{jgphone}, 
+			caseTelevancy=#{caseTelevancy},
+			caseGuilt=#{caseGuilt}, 
+            caseInform=#{caseInform},
+            informReson=#{informReson}, 
+            cumName=#{cumName},
+            dom=#{dom.id}, 
+            internation=#{internation}, 
+            officeName=#{officeNamee}, 
+            jgPerson=#{jgPerson}, 
+            casesStage=#{casesStage},
+            casesum=#{casesum}
+		WHERE id = #{id}
+	</update>
+	<!-- 删除草稿箱，支持批量 -->
+	<update id="deleteDraft">
+		DELETE FROM oa_legal_aid_draft 
+		WHERE id in 
+		<foreach collection="array" item="id" open="(" separator="," close=")" >
+			#{id}
+		</foreach>
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_legal_aid SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!-- 获取目前年份最大的序号并加1 -->
+	<select id="selectYearNo" resultType="int">
+		select ifnull(max(year_no),0)+1 from oa_legal_aid where year = DATE_FORMAT(now(),'%Y')
+	</select>
+	
+	<update id="updateSelective">
+		UPDATE oa_legal_aid SET
+		<if test="yearNo != null and yearNo != ''">
+			year = DATE_FORMAT(now(),'%Y'),
+			year_no = #{yearNo},
+		</if>
+		<if test="caseFile != null and caseFile != ''">
+			case_file = #{caseFile},
+		</if>
+		<if test="caseFile2 != null and caseFile2 != ''">
+			case_file2 = #{caseFile2},
+		</if>
+		<if test="lawOffice != null and lawOffice.id != null and lawOffice.id != ''">
+			law_office_id = #{lawOffice.id}	,
+		</if>
+		<if test="lawyer != null and lawyer.id != null and lawyer.id != ''">
+			lawyer_id = #{lawyer.id}	,
+		</if>
+		<if test="legalOffice != null and legalOffice.id != null and legalOffice.id != ''">
+			legal_office_id = #{legalOffice.id}	,
+		</if>
+		<if test="legalPerson != null and legalPerson.id != null and legalPerson.id != ''">
+			legal_person_id = #{legalPerson.id}	,
+		</if>
+		<if test="thirdPartyScore != null and thirdPartyScore != ''">
+			third_party_score = #{thirdPartyScore}	,
+		</if>
+		<if test="thirdPartyEvaluation != null and thirdPartyEvaluation != ''">
+			third_party_evaluation = #{thirdPartyEvaluation}	,
+		</if>
+		<if test="receiveSubsidy != null and receiveSubsidy != ''">
+			receive_subsidy = #{receiveSubsidy}	,
+		</if>
+		<if test="caseHandleProcess != null and caseHandleProcess != ''">
+			case_handle_process = #{caseHandleProcess},
+		</if>
+		<if test="aidCategory != null and aidCategory != ''">
+			aid_category = #{aidCategory}	,
+		</if>
+		<if test="caseNature != null and caseNature != ''">
+			case_nature = #{caseNature}	,
+		</if>
+		<if test="caseFile2 != null and caseFile2 != ''">
+			case_file2 = #{caseFile2}	,
+		</if>
+		<if test="lawAssistanceOffice != null and lawAssistanceOffice.id != null and lawAssistanceOffice.id != ''">
+			lawAssistanceOffice = #{lawAssistanceOffice.id}	,
+		</if>
+		<if test="lawAssistUser != null and lawAssistUser.id != null and lawAssistUser.id != ''">
+			lawAssistUser = #{lawAssistUser.id}	,
+		</if>
+		<if test="qrcode != null and qrcode != ''">
+			qrcode = #{qrcode},
+		</if>
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="archiving">
+		UPDATE oa_legal_aid SET
+			archiving = 1,
+			update_date = now()
+		 WHERE id = #{id}
+	</update>
+	
+	<!-- 根据年度区域统计申请数量 -->
+	<select id="countYearArea" parameterType="OaLegalAidCount" resultType="OaLegalAidCount">
+		SELECT
+			<if test="forTable == 'true'">
+			t.year,
+			</if>
+		    IFNULL(a.id, '') 'area.id',
+		    IFNULL(t.count, 0) count,
+		    a.name 'area.name'
+		FROM
+		    sys_area a
+		        LEFT JOIN
+		    (SELECT 
+				<if test="forTable == 'true'">
+			        DATE_FORMAT(t.create_date, #{datePattern}) year,
+				</if>
+		            t.area_id,
+		            COUNT(*) count
+		    FROM
+		        oa_legal_aid t
+		    WHERE
+		        t.del_flag = 0
+		        <![CDATA[ 
+		        AND date_format(t.create_date,#{datePattern}) >= #{beginDate}
+		        AND date_format(t.create_date,#{datePattern}) <= #{endDate}
+		         ]]> 
+		    GROUP BY 
+				<if test="forTable == 'true'">
+			        DATE_FORMAT(t.create_date, #{datePattern}),
+				</if>
+				t.area_id) t ON t.area_id = a.id
+		WHERE
+		    a.del_flag = 0
+		        AND (a.id = '5' OR a.parent_id = '5')
+		        <if test="area.id != null and area.id != ''">
+		        AND a.id = #{area.id}
+		        </if>
+		ORDER BY a.code
+	</select>
+	
+	<!-- 根据年度区域案件类型统计已受理数量 -->
+	<select id="countCaseType" parameterType="OaLegalAidCount" resultType="OaLegalAidCount">
+		SELECT 
+		    IFNULL(a.id, '') 'area.id',
+		    IFNULL(t.count, 0) count,
+		    a.name 'area.name',
+		    t.case_type 'caseType'
+		FROM
+		    sys_area a
+		        LEFT JOIN
+		    (SELECT 
+		        t.area_id, t.case_type, COUNT(*) count
+		    FROM
+		        oa_legal_aid t
+		    WHERE
+		        t.del_flag = 0
+		    		AND t.year IS NOT NULL
+		    		AND t.year_no IS NOT NULL
+		        <![CDATA[ 
+		        AND date_format(t.create_date,#{datePattern}) >= #{beginDate}
+		        AND date_format(t.create_date,#{datePattern}) <= #{endDate}
+		         ]]> 
+		        <if test="area.id != null and area.id != ''">
+		        AND t.area_id = #{area.id}
+		        </if>
+		    GROUP BY t.area_id , t.case_type) t ON t.area_id = a.id
+		WHERE
+		    a.del_flag = 0
+		        AND a.parent_id = '5'
+		        <if test="area.id != null and area.id != ''">
+		        AND a.id = #{area.id}
+		        </if>
+		ORDER BY a.code
+	</select>
+	
+	<!-- 根据年度区域 申请方式 统计已受理数量 -->
+	<select id="countLegalAidType" parameterType="OaLegalAidCount" resultType="OaLegalAidCount">
+		SELECT 
+		    IFNULL(a.id, '') 'area.id',
+		    IFNULL(t.count, 0) count,
+		    a.name 'area.name',
+		    t.legal_aid_type 'legalAidType'
+		FROM
+		    sys_area a
+		        LEFT JOIN
+		    (SELECT t.*, COUNT(*) count FROM(
+		    SELECT
+		        t.area_id, '1' legal_aid_type
+		    FROM
+		        oa_legal_aid t
+		    WHERE
+		        t.del_flag = 0
+		        AND t.legal_aid_type = '1'
+		        <![CDATA[ 
+		        AND date_format(t.create_date,#{datePattern}) >= #{beginDate}
+		        AND date_format(t.create_date,#{datePattern}) <= #{endDate}
+		         ]]> 
+		        <if test="area.id != null and area.id != ''">
+		        AND t.area_id = #{area.id}
+		        </if>
+		    UNION ALL
+		    SELECT 
+		        o.area_id, '2' legal_aid_type
+		    FROM
+		        oa_legal_aid_inform t
+    		LEFT JOIN sys_office o ON o.id = t.legal_office_id
+		    WHERE
+		        t.del_flag = 0
+		        AND t.legal_aid_type = '2'
+		        <![CDATA[ 
+		        AND date_format(t.create_date,#{datePattern}) >= #{beginDate}
+		        AND date_format(t.create_date,#{datePattern}) <= #{endDate}
+		         ]]> 
+		        <if test="area.id != null and area.id != ''">
+		        AND o.area_id = #{area.id}
+		        </if>) t
+		    GROUP BY t.area_id , t.legal_aid_type) t ON t.area_id = a.id
+		WHERE
+		    a.del_flag = 0 AND a.parent_id = '5'
+		        <if test="area.id != null and area.id != ''">
+		        AND t.area_id = #{area.id}
+		        </if>
+		ORDER BY a.code
+	</select>
+	
+	
+	<!-- 根据区域统计申请数量,用于首页table -->
+	<select id="countMonthArea" parameterType="OaLegalAidCount" resultType="OaLegalAidCount">
+	
+	SELECT 
+	    '2018' YEAR,
+	    IFNULL(a.id, '') 'area.id',
+	    IFNULL(t.count, 0) count,
+	    a.NAME 'area.name',
+	    a.MONTH
+	FROM
+    (SELECT 
+        a.id, a.code, a.NAME, m.month
+    FROM
+        sys_area a, (SELECT '01' month UNION ALL SELECT '02' UNION ALL SELECT '03' UNION ALL SELECT '04' UNION ALL SELECT '05' UNION ALL SELECT '06' UNION ALL SELECT '07' UNION ALL SELECT '08' UNION ALL SELECT '09' UNION ALL SELECT '10' UNION ALL SELECT '11' UNION ALL SELECT '12')  m
+    WHERE
+        a.del_flag = 0
+            AND (a.id = '5' OR a.parent_id = '5')) a
+        LEFT JOIN
+    (SELECT 
+        IFNULL(t.YEAR, DATE_FORMAT(t.create_date, '%Y')) YEAR,
+            DATE_FORMAT(t.create_date, '%m') AS MONTH,
+            t.area_id,
+            COUNT(*) count
+    FROM
+        oa_legal_aid t
+    WHERE
+        t.del_flag = 0
+            AND IFNULL(t.YEAR, DATE_FORMAT(t.create_date, '%Y')) = #{year}
+    	GROUP BY IFNULL(t.YEAR, DATE_FORMAT(t.create_date, '%Y')) , t.area_id , DATE_FORMAT(t.create_date, '%m')) t ON a.id = t.area_id AND a.month = t.month
+		ORDER BY  a.MONTH,FIELD(a.name,'锡林郭勒盟','二连浩特市','锡林浩特市','阿巴嘎旗','苏尼特左旗','苏尼特右旗','东乌珠穆沁旗','西乌珠穆沁旗','太仆寺旗','镶黄旗','正镶白旗','正蓝旗','多伦县','乌拉盖管理区')		
+	</select>
+	
+	<!-- 大屏统计: 按区域统计时间段内法援申请数量
+		*全盟法律援助案件申请数量占比图、各旗县法律援助案件占比图 -->
+	<select id="countAreaByYearForBigScreen" parameterType="OaLegalAidCount" resultType="OaLegalAidCount">
+		SELECT 
+		    IFNULL(a.id, '') 'area.id',
+		    IFNULL(t.count, 0) count,
+		    a.name 'area.name'
+		FROM
+		    sys_area a
+		        LEFT JOIN
+		    (SELECT 
+		            t.area_id,
+		            COUNT(*) count
+		    FROM
+		        oa_legal_aid t
+		    WHERE
+		        t.del_flag = 0
+		        <!-- 如果选择受理，就只查受理的，否则就查全部的 -->
+		        <if test="isAccept == 1">
+		        AND t.year_no is not null
+		        </if>
+		        <!-- 为了包含选中的结束日期，需要在结束日期上加1 -->
+		        <![CDATA[ AND DATE_FORMAT(t.create_date,#{datePattern}) >= #{beginDate} AND DATE_FORMAT(t.create_date,#{datePattern}) <= #{endDate} ]]>
+		        <!-- 详细统计条件 -->
+		        <!-- 是否归档(未归档是进行中，已归档是结束) -->
+		        <if test="archiving != null and archiving != ''">
+		        AND t.archiving = #{archiving}
+		        </if>
+		        <!-- 诉讼类型:1.诉讼，律师处理的；2.非诉讼，调解员处理的；3.通知辩护，其他单位转交 -->
+		        <choose>
+		        	<when test="litigationType == 1">
+		        AND t.legal_aid_type = '1'<!-- 申请 -->
+		        AND t.lawyer_id is not null<!-- 律师处理 -->
+		        	</when>
+		        	<when test="litigationType == 2">
+		        AND t.legal_aid_type = '1'<!-- 申请 -->
+		        AND t.legal_person_id is not null<!-- 调解员处理处理 -->
+		        	</when>
+		        	<when test="litigationType == 3">
+		        AND t.legal_aid_type = '2'<!-- 指定(其他单位转交) -->
+		        	</when>
+		        	<otherwise></otherwise>
+		        </choose>
+		        <!-- 案件类型 -->
+		        <if test="caseType != null and caseType != ''">
+		        AND t.case_type = #{caseType}
+		        </if>
+		        <!-- 是否蒙语 -->
+		        <if test="hasMongol != null and hasMongol != ''">
+		        AND t.hasMongol = #{hasMongol}
+		        </if>
+		    GROUP BY t.area_id) t ON t.area_id = a.id
+		WHERE
+		    a.del_flag = 0 AND a.parent_id = '5'
+		ORDER BY a.code
+	</select>
+	
+	<!-- 大屏统计: 按年度统计区域内的数量
+	 * 全盟法律援助案件申请数量与受理数量走势对比图
+	 * 全盟法律援助案件数量折线图 -->
+	<select id="countYearByAreaForBigScreen" parameterType="OaLegalAidCount" resultType="OaLegalAidCount">
+		SELECT 
+		    DATE_FORMAT(t.create_date, #{datePattern}) year,
+		    COUNT(*) count,t.area_id as "area.id",
+		    a.name as "area.name"
+		FROM
+		    oa_legal_aid t
+		LEFT JOIN sys_area a on t.area_id = a.id
+		WHERE
+		    t.del_flag = 0
+		    	<!-- 统计区域 -->
+		        AND t.area_id IN (SELECT 
+		            a.id
+		        FROM
+		            sys_area a
+		        WHERE
+		            a.del_flag = 0 AND (a.id = '5'
+		                OR a.parent_id = '5'))
+		        <!-- 为了包含选中的结束日期，需要在结束日期上加1 -->
+		        <![CDATA[ AND DATE_FORMAT(t.create_date,#{datePattern}) >= #{beginDate} AND DATE_FORMAT(t.create_date,#{datePattern}) <= #{endDate} ]]>
+		        <!-- 是否指定了区域 -->
+		        <if test="area.id != null and area.id !=''">
+		       		AND t.area_id = #{area.id}
+		        </if>
+		        <!-- 如果选择受理，就只查受理的，否则就查全部的 -->
+		        <if test="isAccept == 1">
+		        AND t.year_no is not null
+		        </if>
+		        <!-- 详细统计条件 -->
+		        <!-- 是否归档(未归档是进行中，已归档是结束) -->
+		        <if test="archiving != null and archiving != ''">
+		        AND t.archiving = #{archiving}
+		        </if>
+		        <!-- 诉讼类型:1.诉讼，律师处理的；2.非诉讼，调解员处理的；3.通知辩护，其他单位转交 -->
+		        <choose>
+		        	<when test="litigationType == 1">
+		        AND t.legal_aid_type = '1'<!-- 申请 -->
+		        AND t.lawyer_id is not null<!-- 律师处理 -->
+		        	</when>
+		        	<when test="litigationType == 2">
+		        AND t.legal_aid_type = '1'<!-- 申请 -->
+		        AND t.legal_person_id is not null<!-- 调解员处理处理 -->
+		        	</when>
+		        	<when test="litigationType == 3">
+		        AND t.legal_aid_type = '2'<!-- 指定(其他单位转交) -->
+		        	</when>
+		        	<otherwise></otherwise>
+		        </choose>
+		        <!-- 案件类型 -->
+		        <if test="caseType != null and caseType != ''">
+		        AND t.case_type = #{caseType}
+		        </if>
+		        <!-- 是否蒙语 -->
+		        <if test="hasMongol != null and hasMongol != ''">
+		        AND t.hasMongol = #{hasMongol}
+		        </if>
+		GROUP BY DATE_FORMAT(t.create_date, #{datePattern})
+		ORDER BY t.create_date
+	</select>
+	
+	<!-- 接口:查询法援申请 -->
+	<select id="findListForBigScreen" parameterType="com.thinkgem.jeesite.api.chart.entity.LegalAidVo" resultType="com.thinkgem.jeesite.api.chart.entity.LegalAidVo">
+		SELECT 
+			<include refid="oaLegalAidColumns"/>
+		FROM oa_legal_aid a
+		<include refid="oaLegalAidJoins"/>
+		<where>
+			a.del_flag = 0  AND a.year_no is not null  
+			<if test="caseTitle != null and caseTitle != ''">
+				AND a.case_title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{caseTitle}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{caseTitle}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{caseTitle},'%')</if>
+			</if>
+			<!-- 根据时间段 -->
+			<if test="beginDate != null and endDate != ''">
+		        <![CDATA[ AND DATE_FORMAT(a.create_date,#{datePattern}) >= #{beginDate} AND DATE_FORMAT(a.create_date,#{datePattern}) <= #{endDate} ]]>
+			</if>
+			<!-- 根据旗县 -->
+			<!-- <if test="area.id != null and area.id != ''">
+		        AND a.area_id = #{area.id}
+			</if> -->
+			<if test="areaList.size()==0">
+					AND a.area_id in  (SELECT id from sys_area where id='5' or parent_id = '5')
+			</if>
+			<if test="areaList!=null and areaList.size()>0">
+					AND	a.area_id in 
+					<foreach collection="areaList" item="area" open="(" separator="," close=")" >
+						'${area}'
+					</foreach>
+			</if>
+			<!-- 根据案件类型case_type -->
+			<if test="caseType != null and caseType != ''">
+		        AND a.case_type = #{caseType}
+			</if>
+			<if test="caseNature != null and caseNature != ''">
+		        AND a.case_nature = #{caseNature}
+			</if>
+			<if test="archiving != null and archiving != ''">
+			    AND a.archiving = #{archiving}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findCountListForBigScreen" parameterType="com.thinkgem.jeesite.api.chart.entity.LegalAidVo" resultType="int">
+		SELECT 
+			count(a.id) 
+		FROM oa_legal_aid a
+		<where>
+			a.del_flag = 0  AND a.year_no is not null 
+			<if test="caseTitle != null and caseTitle != ''">
+				AND a.case_title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{caseTitle}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{caseTitle}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{caseTitle},'%')</if>
+			</if>
+			<!-- 根据时间段 -->
+			<if test="beginDate != null and endDate != ''">
+		        <![CDATA[ AND DATE_FORMAT(a.create_date,#{datePattern}) >= #{beginDate} AND DATE_FORMAT(a.create_date,#{datePattern}) <= #{endDate} ]]>
+			</if>
+			<!-- 根据旗县 -->
+			<!-- <if test="area.id != null and area.id != ''">
+		        AND a.area_id = #{area.id}
+			</if> -->
+			<if test="areaList.size()==0">
+					AND a.area_id in  (SELECT id from sys_area where id='5' or parent_id = '5')
+			</if>
+			<if test="areaList!=null and areaList.size()>0">
+					AND	a.area_id in 
+					<foreach collection="areaList" item="area" open="(" separator="," close=")" >
+						'${area}'
+					</foreach>
+			</if>
+			<!-- 根据案件类型case_type -->
+			<if test="caseType != null and caseType != ''">
+		        AND a.case_type = #{caseType}
+			</if>
+			<if test="caseNature != null and caseNature != ''">
+		        AND a.case_nature = #{caseNature}
+			</if>
+			<if test="archiving != null and archiving != ''">
+			    AND a.archiving = #{archiving}
+			</if>
+		</where>
+	</select>
+	
+	<update id="isEvaluate">
+		UPDATE oa_legal_aid SET 
+			is_evaluate = '1'
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 大屏上法律援助的数量执行图，支持多个地区选择 -->
+	<select id="countYearByAreaForBigScreen1" parameterType="OaLegalAidCount" resultType="OaLegalAidCount">
+		SELECT 
+			a.YEAR, 	
+			IFNULL(t.count,0) as "count",
+			IFNULL(a.id,'') as "area.id",
+			a.name as "area.name"
+		FROM
+			(
+				SELECT 
+					a.id,
+					a.CODE,
+					a.NAME,
+					m.YEAR
+				FROM
+					sys_area a,
+					(${sqlMap.dsf}) m
+				WHERE 
+					a.del_flag = 0
+					AND (
+					<if test="areaList!=null and areaList.size()>0">
+						a.id in 
+						<foreach collection="areaList" item="area" open="(" separator="," close=")" >
+							'${area}'
+						</foreach>
+					</if>
+					<if test="areaList.size()==0">
+						(a.id = '5' or a.parent_id = '5')
+					</if>
+						
+					 ))a
+				LEFT JOIN (
+					SELECT 
+					    DATE_FORMAT(t.create_date, #{datePattern}) year,
+					    COUNT(*) count,t.area_id as "areaid"
+					FROM
+					
+					    oa_legal_aid t
+					WHERE
+					    t.del_flag = 0
+			    	<!-- 统计区域 -->
+			       <!--  AND t.area_id IN (SELECT 
+			            a.id
+			        FROM
+			            sys_area a
+			        WHERE
+			            a.del_flag = 0 AND (a.id = '5'
+			                OR a.parent_id = '5')) -->
+			        <!-- 为了包含选中的结束日期，需要在结束日期上加1 -->
+			        <![CDATA[ AND DATE_FORMAT(t.create_date,#{datePattern}) >= #{beginDate} AND DATE_FORMAT(t.create_date,#{datePattern}) <= #{endDate} ]]>
+			        <!-- 是否指定了区域 -->
+			        <!-- <if test="area.id != null and area.id !=''">
+			        </if> -->
+			        <!-- AND t.area_id = #{area.id} -->
+			          	
+			          	<if test="areaList!=null and areaList.size()>0">
+						and	t.area_id in 
+							<foreach collection="areaList" item="area" open="(" separator="," close=")" >
+								'${area}'
+							</foreach>
+						</if>
+						<if test="areaList.size()==0">
+						and	t.area_id in (SELECT id from sys_area where id='5' or parent_id = '5')
+						</if>
+			          	
+			          	<!-- t.area_id in 
+			        	<foreach collection="areaList" item="area" open="(" separator="," close=")" >
+							'${area}'
+						</foreach> -->
+			        <!-- 如果选择受理，就只查受理的，否则就查全部的 -->
+			        <if test="isAccept == 1">
+			        AND t.year_no is not null
+			        </if>
+			        <!-- 详细统计条件 -->
+			        <!-- 是否归档(未归档是进行中，已归档是结束) -->
+			        <if test="archiving != null and archiving != ''">
+			        AND t.archiving = #{archiving}
+			        </if>
+			        <!-- 诉讼类型:1.诉讼，律师处理的；2.非诉讼，调解员处理的；3.通知辩护，其他单位转交 -->
+			        <choose>
+			        	<when test="litigationType == 1">
+			        AND t.legal_aid_type = '1'<!-- 申请 -->
+			        AND t.lawyer_id is not null<!-- 律师处理 -->
+			        	</when>
+			        	<when test="litigationType == 2">
+			        AND t.legal_aid_type = '1'<!-- 申请 -->
+			        AND t.legal_person_id is not null<!-- 调解员处理处理 -->
+			        	</when>
+			        	<when test="litigationType == 3">
+			        AND t.legal_aid_type = '2'<!-- 指定(其他单位转交) -->
+			        	</when>
+			        	<otherwise></otherwise>
+			        </choose>
+			        <!-- 案件类型 -->
+			        <if test="caseType != null and caseType != ''">
+			        AND t.case_type = #{caseType}
+			        </if>
+			        <!-- 是否蒙语 -->
+			        <if test="hasMongol != null and hasMongol != ''">
+			        AND t.hasMongol = #{hasMongol}
+			        </if>
+					GROUP BY DATE_FORMAT(t.create_date, #{datePattern}),t.area_id
+					ORDER BY t.create_date
+				)t
+				ON a.id = t.areaid		
+				and a.YEAR = t.YEAR  
+				ORDER BY a.id,a.YEAR
+			
+	</select>
+	
+	
+</mapper>

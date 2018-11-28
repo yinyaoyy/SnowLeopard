@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.language.dao.SysMunlLangDao">
+    
+	<sql id="sysMunlLangColumns">
+		a.id AS "id",
+		a.lang_key AS "langKey",
+		a.lang_context AS "langContext",
+		a.lang_code AS "langCode",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.create_name AS "createName",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id",
+		a.update_name AS "updateName",
+		a.language_ascription AS "languageAscription",
+		a.operation_type AS "operationType",
+		a.attribute_type AS "attributeType",
+		a.description AS "description"
+	</sql>
+	
+	<sql id="sysMunlLangJoins">
+	</sql>
+    
+	<select id="getLanguageAscription" resultType="SysMunlLang">
+		SELECT 
+			distinct a.language_ascription
+		FROM sys_munl_lang a
+	</select>
+	
+	<select id="get" resultType="SysMunlLang">
+		SELECT 
+			<include refid="sysMunlLangColumns"/>
+		FROM sys_munl_lang a
+		<include refid="sysMunlLangJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="findList" resultType="SysMunlLang">
+		SELECT 
+			<include refid="sysMunlLangColumns"/>
+		FROM sys_munl_lang a   where 1=1
+		<if test="langKey != null and langKey !=''">
+			AND a.lang_key like 
+				<if test="dbName == 'oracle'">'%'||#{langKey}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{langKey}+'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{langKey}, '%')</if>
+		</if>
+		<if test="operationType != null and operationType !=''">
+			AND a.operation_type=#{operationType}
+		</if>
+		<if test="attributeType != null and attributeType !=''">
+			AND a.attribute_type=#{attributeType}
+		</if>
+		<if test="languageAscription != null and languageAscription !=''">
+			AND a.language_ascription  like
+				<if test="dbName == 'oracle'">'%'||#{languageAscription}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{languageAscription}+'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{languageAscription}, '%')</if>
+		</if>
+		<if test="langContext != null and langContext !=''">
+		    AND a.lang_context like
+				<if test="dbName == 'oracle'">'%'||#{langContext}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{langContext}+'%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%', #{langContext}, '%')</if>
+		</if>
+		<if test="langCode!= null and langCode !=''">
+				AND a.lang_code = #{langCode}
+		</if>
+		ORDER BY a.lang_key and a.update_date DESC
+	</select>
+		<select id="findAllLanguageList" resultType="SysMunlLang">
+		SELECT 
+			<include refid="sysMunlLangColumns"/>
+		FROM sys_munl_lang a  where 1=1 
+		<if test="languageAscription != null and languageAscription !=''">
+			and a.language_ascription =#{languageAscription}
+		</if>
+		<if test="langCode!= null and langCode !=''">
+			and  a.lang_code = #{langCode}
+		</if>
+	</select>
+	<select id="getCountByLanguage" resultType="java.lang.Integer"> 
+	select count(*) from sys_munl_lang where operation_type=#{operationType} and  lang_code=#{langCode}
+	</select>
+	<select id="getListByLanguageAndAscrip" resultType="SysMunlLang">
+	   select  c.lang_key,case  when e.lang_context is null  then c.lang_context else e.lang_context end  lang_context from sys_munl_lang  c
+       LEFT JOIN  (select * from sys_munl_lang  where  language_ascription=#{languageAscription} and lang_code=#{langCode}) e on c.lang_key =e.lang_key
+       where  c.language_ascription=#{languageAscription} and c.lang_code='CN'
+	</select>
+	<select id="findAllList" resultType="SysMunlLang">
+		SELECT 
+			<include refid="sysMunlLangColumns"/>
+		FROM sys_munl_lang a
+		<include refid="sysMunlLangJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="getLanguageAscriptionList" resultType="SysMunlLang"> 
+	  select  distinct language_ascription from  sys_munl_lang 
+	</select>
+	<!-- 通过key和语言类型查询语言内容 -->
+	<select id="findLanguageContent" resultType="string">
+		SELECT 
+			lang_context 
+		FROM sys_munl_lang a 
+		WHERE a.lang_key = #{langKey} and a.lang_code = #{langCode}
+	</select>
+	<insert id="insert">
+		INSERT INTO sys_munl_lang(
+			lang_key,
+			lang_context,
+			lang_code,
+			create_date,
+			create_by,
+			create_name,
+			update_date,
+			update_by,
+			update_name,
+			description,
+			language_ascription,
+			operation_type,
+			attribute_type
+		) VALUES (
+			#{langKey},
+			#{langContext},
+			#{langCode},
+			#{createDate},
+			#{createBy.id},
+			#{createName},
+			#{updateDate},
+			#{updateBy.id},
+			#{updateName},
+			#{description},
+			#{languageAscription},
+			#{operationType},
+			#{attributeType}
+		)
+	</insert>
+	<insert id="batchAdd" parameterType="java.util.List">
+	 INSERT INTO sys_munl_lang(
+			lang_key,
+			lang_context,
+			lang_code,
+			create_date,
+			create_by,
+			create_name,
+			update_date,
+			update_by,
+			update_name,
+			description,
+			language_ascription,
+			operation_type,
+			attribute_type
+		) VALUES 
+        <foreach collection="list" item="item" index="index" separator=",">
+       (
+			#{item.langKey},
+			#{item.langContext},
+			#{item.langCode},
+			#{item.createDate},
+			#{item.createBy.id},
+			#{item.createName},
+			#{item.updateDate},
+			#{item.updateBy.id},
+			#{item.updateName},
+			#{item.description},
+			#{item.languageAscription},
+			#{item.operationType},
+			#{item.attributeType}
+		)
+        </foreach>
+	</insert>
+	<update id="update">
+		UPDATE sys_munl_lang SET 	
+			lang_key = #{langKey},
+			lang_context = #{langContext},
+			lang_code = #{langCode},
+			create_name = #{createName},
+			update_date = #{updateDate},
+			update_by = #{updateBy.id},
+			update_name = #{updateName},
+			language_ascription =#{languageAscription},
+			operation_type =#{operationType},
+			attribute_type =#{attributeType},
+			description =#{description}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM sys_munl_lang
+		WHERE id = #{id}
+	</update>
+	<update id="updateLangKeyByLangKey" parameterType="java.lang.String">
+			update sys_munl_lang set lang_key = #{newLangKey}
+			where lang_key = #{oldLangKey}
+	</update>
+	<delete id="deleteBylangKey">
+	DELETE FROM sys_munl_lang
+	WHERE lang_key = #{langKey}
+	</delete>
+	<!-- 批量删除语言 -->
+          <delete id="batchDelete" parameterType="java.util.List" >
+  			DELETE FROM sys_munl_lang where id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+         </foreach>
+    	</delete>
+</mapper>

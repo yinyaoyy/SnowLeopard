@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.JudiciaryDao">
+    
+	<sql id="judiciaryColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.area_id AS "area.id",
+		a.town_id AS "town.id",
+		a1.name AS "area.name",
+		a2.name AS "town.name",
+		a.coordinate AS "coordinate",
+		a.address AS "address",
+		a.charge_user AS "chargeUser",
+		a.phone AS "phone",
+		a.team_size AS "teamSize",
+		a.introduction AS "introduction",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.img_url AS "imgUrl",
+		a.zipcode as "zipCode",
+		s.login_id AS 'login_id'
+	</sql>
+		<resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+	  <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="name" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="coordinate" column="coordinate" />
+		<result property="personName" column="chargeUser" />
+		<result property="hasPerson" column="hasPerson" />
+		<result property="zipCode" column="zipCode" />
+		<result property="introduction" column="introduction" />
+		<result property="id" column="login_id" />
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	<sql id="judiciaryJoins">
+	   left join sys_area a1 on a1.id=a.area_id
+	   left join sys_area a2 on a2.id=a.town_id
+       LEFT JOIN sys_user_office_info s ON s.info_id = a.id
+	        AND s.del_flag = '0'
+	        AND s.type = '1'
+	</sql>
+    
+	<select id="get" resultType="Judiciary">
+		SELECT 
+			<include refid="judiciaryColumns"/>
+		FROM info_judiciary a
+		<include refid="judiciaryJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Judiciary">
+		SELECT 
+			<include refid="judiciaryColumns"/>
+		FROM info_judiciary a
+		 left join sys_area a1 on a1.id=a.area_id
+	   left join sys_area a2 on a2.id=a.town_id
+	   left join sys_office o on o.name = a.name
+       left join sys_user_office_info s on s.login_id=o.id
+	        AND s.del_flag = '0'
+	        AND s.type = '1'
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area!= null and area.id!=null and area.id!= ''">
+				AND a.area_id = #{area.id}
+			</if>
+			<if test="town != null and town.id != null and town.id != ''">
+				AND a.town_id = #{town.id}
+			</if>
+			<!-- 数据范围过滤 -->
+		        ${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Judiciary">
+		SELECT 
+			<include refid="judiciaryColumns"/>
+		FROM info_judiciary a
+		<include refid="judiciaryJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="getById" resultMap="agencyResult">
+		SELECT 
+			<include refid="judiciaryColumns"/>
+		FROM info_judiciary a
+		<include refid="judiciaryJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+  <select id="findListForApi" resultMap="agencyResult">
+		SELECT (SELECT COUNT(*) 
+            FROM info_judiciary_user i10
+                 WHERE i10.del_flag = 0
+                   AND i10.office_id = a.id) hasPerson,
+			<include refid="judiciaryColumns"/>
+		FROM info_judiciary a
+		<include refid="judiciaryJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+			<if test="town != null and town.id != null and town.id != ''">
+				AND a.town_id = #{town.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<insert id="insert">
+		INSERT INTO info_judiciary(
+			id,
+			name,
+			area_id,
+			town_id,
+			coordinate,
+			address,
+			charge_user,
+			phone,
+			team_size,
+			introduction,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			img_url,
+			zipcode
+		) VALUES (
+			#{id},
+			#{name},
+			#{area.id},
+			#{town.id},
+			#{coordinate},
+			#{address},
+			#{chargeUser},
+			#{phone},
+			#{teamSize},
+			#{introduction},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{imgUrl},
+			#{zipCode}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_judiciary SET 	
+			name = #{name},
+			area_id = #{area.id},
+			town_id = #{town.id},
+			coordinate = #{coordinate},
+			address = #{address},
+			charge_user = #{chargeUser},
+			phone = #{phone},
+			team_size = #{teamSize},
+			introduction = #{introduction},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			img_url=#{imgUrl},
+			zipcode=#{zipCode}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_judiciary SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 统计司法所数量 -->
+	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_judiciary a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+			<if test="town != null and town.id != null and town.id != ''">
+				AND a.town_id = #{town.id}
+			</if>
+		</where>
+	</select>
+</mapper>

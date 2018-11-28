@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.oa.dao.act.OaPeopleMediationExamineDao">
+    
+	<sql id="oaPeopleMediationExamineColumns">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.examine_date AS "examineDate",
+		a.examine_place AS "examinePlace",
+		a.participants AS "participants",
+		a.inquirer AS "inquirer",
+		a.respondent AS "respondent",
+		a.record_content AS "recordContent",
+		a.recorder AS "recorder",
+		a.case_file as "caseFile",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	<sql id="oaPeopleMediationExamineColumns1">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.examine_date AS "examineDate",
+		a.examine_place AS "examinePlace",
+		a.participants AS "participants",
+		a.inquirer AS "inquirer",
+		a.respondent AS "respondent",
+		a.record_content AS "recordContent",
+		a.recorder AS "recorder",
+		a.case_file as "caseFile",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+	</sql>
+	<sql id="oaPeopleMediationApplyColumns">
+		p.id AS "oaPeopleMediationApply.id",
+		p.proc_ins_id AS "oaPeopleMediationApply.procInsId",
+		p.year AS "oaPeopleMediationApply.year",
+		p.year_no AS "oaPeopleMediationApply.yearNo",
+		p.accuser_name AS "oaPeopleMediationApply.accuserName",
+		p.accuser_idcard AS "oaPeopleMediationApply.accuserIdcard",
+		p.accuser_sex AS "oaPeopleMediationApply.accuserSex",
+		p.accuser_birthday AS "oaPeopleMediationApply.accuserBirthday",
+		p.accuser_ethnic AS "oaPeopleMediationApply.accuserEthnic",
+		p.accuser_county AS "oaPeopleMediationApply.accuserCounty.id",
+		p.accuser_town AS "oaPeopleMediationApply.accuserTown.id",
+		p.accuser_occupation AS "oaPeopleMediationApply.accuserOccupation",
+		p.accuser_domicile AS "oaPeopleMediationApply.accuserDomicile",
+		p.accuser_address AS "oaPeopleMediationApply.accuserAddress",
+		p.accuser_post_code AS "oaPeopleMediationApply.accuserPostCode",
+		p.accuser_phone AS "oaPeopleMediationApply.accuserPhone",
+		p.defendant_name AS "oaPeopleMediationApply.defendantName",
+		p.defendant_idcard AS "oaPeopleMediationApply.defendantIdcard",
+		p.defendant_sex AS "oaPeopleMediationApply.defendantSex",
+		p.defendant_birthday AS "oaPeopleMediationApply.defendantBirthday",
+		p.defendant_ethnic AS "oaPeopleMediationApply.defendantEthnic",
+		p.defendant_county AS "oaPeopleMediationApply.defendantCounty.id",
+		p.defendant_town AS "oaPeopleMediationApply.defendantTown.id",
+		p.defendant_occupation AS "oaPeopleMediationApply.defendantOccupation",
+		p.defendant_domicile AS "oaPeopleMediationApply.defendantDomicile",
+		p.defendant_address AS "oaPeopleMediationApply.defendantAddress",
+		p.defendant_post_code AS "oaPeopleMediationApply.defendantPostCode",
+		p.defendant_phone AS "oaPeopleMediationApply.defendantPhone",
+		p.case_title AS "oaPeopleMediationApply.caseTitle",
+		p.case_situation AS "oaPeopleMediationApply.caseSituation",
+		p.mediator as "oaPeopleMediationApply.mediator.id",
+		p.qrcode AS "oaPeopleMediationApply.qrcode",
+		o10.id as "oaPeopleMediationApply.peopleMediationCommittee.id",
+		a5.name AS "oaPeopleMediationApply.accuserCounty.name",
+		a6.name AS "oaPeopleMediationApply.accuserTown.name",
+		a7.name AS "oaPeopleMediationApply.defendantCounty.name",
+		a8.name AS "oaPeopleMediationApply.defendantTown.name",
+		u9.name AS "oaPeopleMediationApply.mediator.name",
+		o10.name AS "oaPeopleMediationApply.peopleMediationCommittee.name"
+	</sql>
+	
+	<sql id="oaPeopleMediationApplyJoins">
+		LEFT JOIN sys_area a5 ON a5.id = p.accuser_county
+		LEFT JOIN sys_area a6 ON a6.id = p.accuser_town
+		LEFT JOIN sys_area a7 ON a7.id = p.defendant_county
+		LEFT JOIN sys_area a8 ON a8.id = p.defendant_town
+		LEFT JOIN sys_user u9 ON u9.id = p.mediator
+		LEFT JOIN  sys_office o10 ON o10.id = p.people_mediation_committee
+	</sql>
+	<sql id="oaPeopleMediationExamineJoins"></sql>
+	<resultMap id="getDateFromAccept" type="OaPeopleMediationExamine">
+		<id column="id" property="id" />
+		<result column="proc_ins_id" property="procInsId"/>
+		<association property="oaPeopleMediationApply" javaType="oaPeopleMediationApply">
+			<id column="oaPeopleMediationApply.id" property="id" />
+			<result column="oaPeopleMediationApply.procInsId" property="procInsId"/>
+		</association>
+	</resultMap>
+
+	<select id="get" resultType="OaPeopleMediationExamine">
+		select 
+		<include refid="oaPeopleMediationExamineColumns1"/>
+		<include refid="oaPeopleMediationApplyColumns"/>
+		from oa_people_mediation_apply p
+		left join oa_people_mediation_examine a
+		on p.proc_ins_id=a.proc_ins_id 
+		<include refid="oaPeopleMediationApplyJoins"/>
+		where p.proc_ins_id= 
+		(SELECT  ap.PROC_INS_ID as pid 
+		FROM oa_people_mediation_apply ap
+		WHERE ap.id = #{id})
+	</select>
+    
+	<!-- <select id="get" resultType="OaPeopleMediationExamine">
+		SELECT 
+			<include refid="oaPeopleMediationExamineColumns"/>
+		FROM oa_people_mediation_examine a
+		<include refid="oaPeopleMediationExamineJoins"/>
+		WHERE a.id = #{id}
+	</select> -->
+	
+	<select id="findList" resultType="OaPeopleMediationExamine">
+		SELECT 
+			<include refid="oaPeopleMediationExamineColumns"/>
+		FROM oa_people_mediation_examine a
+		<include refid="oaPeopleMediationExamineJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaPeopleMediationExamine">
+		SELECT 
+			<include refid="oaPeopleMediationExamineColumns"/>
+		FROM oa_people_mediation_examine a
+		<include refid="oaPeopleMediationExamineJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_people_mediation_examine(
+			id,
+			proc_ins_id,
+			examine_date,
+			examine_place,
+			participants,
+			inquirer,
+			respondent,
+			record_content,
+			recorder,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			case_file
+		) VALUES (
+			#{id},
+			#{act.procInsId},
+			#{examineDate},
+			#{examinePlace},
+			#{participants},
+			#{inquirer},
+			#{respondent},
+			#{recordContent},
+			#{recorder},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{caseFile}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_people_mediation_examine SET 	
+			proc_ins_id = #{act.procInsId},
+			examine_date = #{examineDate},
+			examine_place = #{examinePlace},
+			participants = #{participants},
+			inquirer = #{inquirer},
+			respondent = #{respondent},
+			record_content = #{recordContent},
+			recorder = #{recorder},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			case_file = #{caseFile}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_people_mediation_examine SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

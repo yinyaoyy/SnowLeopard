@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.oa.dao.OaAgreementDao">
+    
+	<sql id="oaAgreementColumns">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.type AS "type",
+		a.title AS "title",
+		a.content AS "content",
+		a.files AS "files",
+		a.status AS "status",
+		a.office_id AS "office.id",
+		a.area_id AS "area.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		o9.name AS "office.name",
+		a10.name AS "area.name"
+	</sql>
+	
+	<sql id="oaAgreementJoins">
+		LEFT JOIN sys_office o9 ON o9.id = a.office_id
+		LEFT JOIN sys_area a10 ON a10.id = a.area_id
+	</sql>
+    
+	<select id="get" resultType="OaAgreement">
+		SELECT 
+			<include refid="oaAgreementColumns"/>
+		FROM oa_agreement a
+		<include refid="oaAgreementJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaAgreement">
+		SELECT 
+			<include refid="oaAgreementColumns"/>
+		FROM oa_agreement a
+		<include refid="oaAgreementJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaAgreement">
+		SELECT 
+			<include refid="oaAgreementColumns"/>
+		FROM oa_agreement a
+		<include refid="oaAgreementJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_agreement(
+			id,
+			proc_ins_id,
+			type,
+			title,
+			content,
+			files,
+			status,
+			office_id,
+			area_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{procInsId},
+			#{type},
+			#{title},
+			#{content},
+			#{files},
+			#{status},
+			#{office.id},
+			#{area.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_agreement SET 	
+			type = #{type},
+			title = #{title},
+			content = #{content},
+			files = #{files},
+			status = #{status},
+			office_id = #{office.id},
+			area_id = #{area.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_agreement SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<delete id="deletes" parameterType="String">
+		delete from oa_agreement
+		<where>
+			id = #{id}
+		</where>
+	</delete>
+</mapper>

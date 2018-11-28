@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.SupervisorDao">
+    
+	<sql id="supervisorColumns">
+		a.id AS "id",
+		a.name AS "name.id",
+		ilo.name as "name.name",
+		a.xr_name AS "xrName",
+		a.sex AS "sex",
+		a.appllication AS "appllication",
+		a.birthday AS "birthday",
+		a.nation AS "nation",
+		a.politics_status AS "politicsStatus",
+		a.education_background AS "educationBackground",
+		a.graduate_institutions AS "graduateInstitutions",
+		a.major AS "major",
+		a.idno AS "idno",
+		a.phone AS "phone",
+		a.qq_no AS "qqNo",
+		a.telephone AS "telephone",
+		a.zipcode AS "zipcode",
+		a.mailbox AS "mailbox",
+		a.native_province AS "nativeProvince",
+		a.native_city AS "nativeCity.id",
+		a.native_county AS "nativeCounty.id",
+		a.native_towns AS "nativeTowns.id",
+		a.company AS "company",
+		a.company_nature AS "companyNature",
+		a.often_province AS "oftenProvince.id",
+		a.often_city AS "oftenCity.id",
+		a.often_county AS "oftenCounty.id",
+		a13.name AS "oftenCounty.name",
+		a.often_towns AS "oftenTowns",
+		a.job AS "job",
+		a.position AS "position",
+		a.duty AS "duty",
+		a.technical_post AS "technicalPost",
+		a.post_tech AS "postTech",
+		a.representative AS "representative",
+		a.cppcc AS "cppcc",
+		a.civil_servant AS "civilServant",
+		a.resume AS "resume",
+		a.honor AS "honor",
+		a.member AS "member",
+		a.member_jj AS "memberJj",
+		a.member_post AS "memberPost",
+		a.photograph AS "photograph",
+		a.job_no AS "jobNo",
+		a.evaluation AS "evaluation",
+		a.is_mongolian AS "isMongolian"
+	</sql>
+		<resultMap type="Area" id="areaMap">  
+        <id property="id" column="oftenCounty.id" />  
+        <result property="name" column="oftenCounty.name" />  
+    </resultMap>
+    <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="name.name" />
+		<result property="personName" column="xrName" />
+		<result property="agencyAddress" column="oftenTowns" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="sex" column="sexLabel" />
+		<result property="ethnic" column="nation" />
+		<result property="introduction" column="resume" />
+		<result property="politicalFace" column="politicsStatus" />
+		<result property="isMongolian" column="isMongolianLabel" />
+		<result property="roleId" column="role.name" />
+		<result property="birthday" column="birthday" />
+		<result property="education" column="educationBackground" />
+		<result property="evaluation" column="evaluation" />
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	<sql id="supervisorJoins">
+	LEFT JOIN sys_office ilo ON ilo.id = a.name
+	LEFT JOIN sys_area a13 ON a13.id = a.often_county
+	LEFT JOIN sys_user_office_info d4 on a.id=d4.info_id
+	</sql>
+    
+	<select id="get" resultType="Supervisor">
+		SELECT 
+			<include refid="supervisorColumns"/>
+		FROM info_supervisor a
+		<include refid="supervisorJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Supervisor">
+		SELECT 
+			<include refid="supervisorColumns"/>
+		FROM info_supervisor a
+		<include refid="supervisorJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="xrName != null and xrName != ''">
+				AND a.xr_Name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{xrName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{xrName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{xrName},'%')</if>
+			</if>
+			<if test="name!=null and  name.id != null and name.id!=''">
+			AND a.name=#{name.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Supervisor">
+		SELECT 
+			<include refid="supervisorColumns"/>
+		FROM info_supervisor a
+		<include refid="supervisorJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	 <select id="getById" resultMap="agencyResult">
+		SELECT 
+			<include refid="supervisorColumns"/>
+			,d1.label AS "sexLabel",d2.label AS "isMongolianLabel"
+		FROM info_supervisor a
+		<include refid="supervisorJoins"/>
+		LEFT JOIN  sys_dict d1 on a.sex=d1.`value` and d1.type='sex'  and d1.language_type='CN'
+		LEFT JOIN  sys_dict d2 on a.is_mongolian=d2.`value` and d2.type='yes_no' and d2.language_type='CN'
+		WHERE a.id = #{id}
+	</select> 
+	<select id="findListForApi" resultMap="agencyResult">
+		SELECT 
+			<include refid="supervisorColumns"/>
+			,d1.label AS "sexLabel",d2.label AS "isMongolianLabel"
+		FROM info_supervisor a
+		<include refid="supervisorJoins"/>
+		LEFT JOIN  sys_dict d1 on a.sex=d1.`value` and d1.type='sex'  and d1.language_type='CN'
+		LEFT JOIN  sys_dict d2 on a.is_mongolian=d2.`value` and d2.type='yes_no' and d2.language_type='CN'
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND ( a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or
+					a.nation LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or
+					ilo.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					)
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				   AND ( a.often_county = #{area.id} )
+			 </if>
+			<if test="town != null and town.id != null and town.id != ''">
+			  AND ( a.often_county = #{town.id} )
+			</if>
+			<if test="isMongolian!= null and isMongolian != ''">
+				 AND a.is_mongolian = #{isMongolian}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+  <select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_supervisor a
+		<include refid="supervisorJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="oftenCity != null and oftenCity.id != null and oftenCity.id != ''">
+				   AND ( a.often_city = #{oftenCity.id} or a.often_city = #{oftenCity.id} )
+			    </if>
+			<if test=" job!= null and job != ''">
+				 AND a.job = #{job}
+			</if>
+		</where>
+	</select> 
+	<insert id="insert">
+		INSERT INTO info_supervisor(
+			id,
+			name,
+			xr_name,
+			sex,
+			appllication,
+			birthday,
+			nation,
+			politics_status,
+			education_background,
+			graduate_institutions,
+			major,
+			idno,
+			phone,
+			qq_no,
+			telephone,
+			zipcode,
+			mailbox,
+			native_province,
+			native_city,
+			native_county,
+			native_towns,
+			company,
+			company_nature,
+			often_province,
+			often_city,
+			often_county,
+			often_towns,
+			job,
+			position,
+			duty,
+			technical_post,
+			post_tech,
+			representative,
+			cppcc,
+			civil_servant,
+			resume,
+			honor,
+			member,
+			member_jj,
+			member_post,
+			photograph,
+			job_no,
+			is_mongolian
+		) VALUES (
+			#{id},
+			#{name.id},
+			#{xrName},
+			#{sex},
+			#{appllication},
+			#{birthday},
+			#{nation},
+			#{politicsStatus},
+			#{educationBackground},
+			#{graduateInstitutions},
+			#{major},
+			#{idno},
+			#{phone},
+			#{qqNo},
+			#{telephone},
+			#{zipcode},
+			#{mailbox},
+			#{nativeProvince.id},
+			#{nativeCity.id},
+			#{nativeCounty.id},
+			#{nativeTowns},
+			#{company},
+			#{companyNature},
+			#{oftenProvince.id},
+			#{oftenCity.id},
+			#{oftenCounty.id},
+			#{oftenTowns},
+			#{job},
+			#{position},
+			#{duty},
+			#{technicalPost},
+			#{postTech},
+			#{representative},
+			#{cppcc},
+			#{civilServant},
+			#{resume},
+			#{honor},
+			#{member},
+			#{memberJj},
+			#{memberPost},
+			#{photograph},
+			#{jobNo},
+			#{isMongolian}
+		)
+	</insert>
+	<!-- 	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_supervisor a
+		<include refid="supervisorJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="licenseType !=null and licenseType != ''">
+			AND a.license_type = #{licenseType}
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.law_office_id in (
+				    select ilo.id from info_low_office ilo 
+				     where ilo.del_flag='0' and ilo.area_id = #{area.id }
+				)
+			</if>
+		</where>
+	</select> -->
+	<update id="update">
+		UPDATE info_supervisor SET 	
+			name = #{name.id},
+			xr_name = #{xrName},
+			sex = #{sex},
+			appllication = #{appllication},
+			birthday = #{birthday},
+			nation = #{nation},
+			politics_status = #{politicsStatus},
+			education_background = #{educationBackground},
+			graduate_institutions = #{graduateInstitutions},
+			major = #{major},
+			idno = #{idno},
+			phone = #{phone},
+			qq_no = #{qqNo},
+			telephone = #{telephone},
+			zipcode = #{zipcode},
+			mailbox = #{mailbox},
+			native_province = #{nativeProvince.id},
+			native_city = #{nativeCity.id},
+			native_county = #{nativeCounty.id},
+			native_towns = #{nativeTowns},
+			company = #{company},
+			company_nature = #{companyNature},
+			often_province = #{oftenProvince.id},
+			often_city = #{oftenCity.id},
+			often_county = #{oftenCounty.id},
+			often_towns = #{oftenTowns},
+			job = #{job},
+			position = #{position},
+			duty = #{duty},
+			technical_post = #{technicalPost},
+			post_tech = #{postTech},
+			representative = #{representative},
+			cppcc = #{cppcc},
+			civil_servant = #{civilServant},
+			resume = #{resume},
+			honor = #{honor},
+			member = #{member},
+			member_jj = #{memberJj},
+			member_post = #{memberPost},
+			photograph = #{photograph},
+			job_no = #{jobNo},
+			is_mongolian=#{isMongolian}
+		WHERE id = #{id}
+	</update>
+	<update id="delete">
+		DELETE FROM info_supervisor
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 接口:大屏查询律师信息 -->
+	<select id="findListForApiBigScreen" parameterType="com.thinkgem.jeesite.api.chart.entity.SupervisorVo"
+		resultType="com.thinkgem.jeesite.api.chart.entity.SupervisorVo">
+		SELECT 
+			<include refid="supervisorColumns"/>
+		FROM info_supervisor a
+		<include refid="supervisorJoins"/>
+		
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			
+			<if test="nativeCounty !=null and nativeCounty.id != null and nativeCounty.id != ''">
+				AND a.native_county = #{nativeCounty.id }
+				
+			</if>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 修改评价值 -->
+    <update id="evaluationUpdate">
+		UPDATE info_supervisor SET 
+			evaluation = #{evaluation}
+		WHERE id = (select info_id from sys_user_office_info where login_id = #{id}
+		<if test="remark!='' ">
+			and remark= #{remark}
+		</if>
+		)
+	</update>
+</mapper>

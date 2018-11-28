@@ -1,0 +1,886 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.sys.dao.UserDao">
+	
+	<resultMap id="userResult" type="com.thinkgem.jeesite.modules.sys.entity.User">
+		<id property="id" column="id" />
+		<result property="company.id" column="company.id" />
+		<result property="office.id" column="office.id" />
+		<result property="papernum" column="papernum" />
+		<result property="loginName" column="login_name" />
+		<result property="password" column="password" />
+		<result property="no" column="no" />
+		<result property="name" column="name" />
+		<result property="email" column="email" />
+		<result property="phone" column="phone" />
+		<result property="mobile" column="mobile" />
+		<result property="userType" column="user_type" />
+		<result property="userType" column="userTypeDesc" />
+		<result property="loginIp" column="login_ip" />
+		<result property="loginDate" column="login_date" />
+		<result property="remarks" column="remarks" />
+		<result property="userSourceType" column="userSourceType" />
+		<result property="userSourceTypeDesc" column="userSourceTypeDesc" />
+		<result property="user_source_type" column="userSourceType" />
+		<result property="loginFlag" column="loginFlag" />
+		<result property="photo" column="photo" />
+		<result property="address" column="address" />
+		<result property="birthday" column="birthday" />
+		<result property="bir" column="birthday" />
+		<result property="isPerfect" column="is_perfect" />
+		<result property="createBy.id" column="createBy.id" />
+		<result property="createDate" column="create_date" />
+		<result property="isShow" column="is_show" />
+		<result property="identityType" column="identity_type" />
+		<result property="updateBy.id" column="updateBy.id" />
+		<result property="updateDate" column="update_date" />
+		<result property="company.name" column="company.name" />
+		<result property="company.parentId" column="company.parentId" />
+		<result property="company.parentIds" column="company.parentIds" />
+		<result property="company.area.id" column="company.area.id" />
+		<result property="company.area.name" column="company.area.name" />
+		<result property="company.area.parentId" column="company.area.parentId" />
+		<result property="company.area.parentIds" column="company.area.parentIds" />
+		<result property="company.primaryPerson.id" column="company.primaryPerson.id" />
+		<result property="company.primaryPerson.name" column="company.primaryPerson.name" />
+		<result property="company.deputyPerson.id" column="company.deputyPerson.id" />
+		<result property="company.deputyPerson.name" column="company.deputyPerson.name" />
+		<result property="office.name" column="office.name" />
+		<result property="office.parentId" column="office.parentId" />
+		<result property="office.parentIds" column="office.parentIds" />
+		<result property="office.area.id" column="office.area.id" />
+		<result property="office.area.name" column="office.area.name" />
+		<result property="office.area.parentId" column="office.area.parentId" />
+		<result property="office.area.parentIds" column="office.area.parentIds" />
+		<result property="office.primaryPerson.id" column="office.primaryPerson.id" />
+		<result property="office.primaryPerson.name" column="office.primaryPerson.name" />
+		<result property="office.deputyPerson.id" column="office.deputyPerson.id" />
+		<result property="office.deputyPerson.name" column="office.deputyPerson.name" />
+		<result property="userExpand.id" column="userExpand.id" />
+		<result property="userExpand.qq" column="userExpand.qq" />
+		<result property="userExpand.weChat" column="userExpand.weChat" />
+		<result property="userExpand.otherLinks" column="userExpand.otherLinks" />
+		<result property="userExpand.schoolInfo" column="userExpand.schoolInfo" />
+		<result property="userExpand.major" column="userExpand.major" />
+		<result property="userExpand.education" column="userExpand.education" />
+		<result property="userExpand.sex" column="userExpand.sex" />
+		<result property="userExpand.userImg" column="userExpand.userImg" />
+		<collection property="roleList" ofType="com.thinkgem.jeesite.modules.sys.entity.Role" javaType="list">
+			<id property="id" column="roleId" />
+			<result property="name" column="roleName" />
+		</collection>
+	</resultMap>
+	
+    <sql id="userColumns">
+    	a.id,
+    	a.company_id AS "company.id",
+    	a.office_id AS "office.id",
+		a.papernum,
+    	a.login_name,
+    	a.password,
+    	a.no,
+		a.name,
+		a.email,
+		a.phone,
+		a.mobile,
+		a.user_type,
+		d2.label AS "userTypeDesc",
+		a.login_ip,
+		a.login_date,
+		a.remarks,
+		a.login_flag,
+		a.photo,
+		a.is_show,
+		a.create_by AS "createBy.id",
+		a.create_date,
+		a.update_by AS "updateBy.id",
+		a.update_date,
+		a.login_count AS "loginCount",
+		a.del_flag,
+		a.address,
+		a.birthday,
+		a.is_perfect,
+		a.identity_type,
+		a.user_source_type As "userSourceType",
+		d1.label AS "userSourceTypeDesc",
+		a.area_id AS "area.id",
+		a.town_area_id as "townarea.id",
+		b.id as "userExpand.id",
+		b.job_name  as "userExpand.jobName",
+		b.qq as "userExpand.qq",
+		b.we_chat as "userExpand.weChat",
+		b.other_links as "userExpand.otherLinks",
+		b.school_info as "userExpand.schoolInfo",
+		b.major as "userExpand.major",
+		b.education as "userExpand.education",
+		b.sex as "userExpand.sex",
+		b.identity_type  AS "userExpand.identityType",
+		b.prepare_type AS "userExpand.prepareType",
+		b.ethnic AS "userExpand.ethnic",
+		b.native_place AS "userExpand.nativePlace",
+		b.degree AS "userExpand.degree",
+		b.political_face AS "userExpand.politicalFace",
+		b.birth_place AS "userExpand.birthPlace",
+		b.join_time AS "userExpand.joinTime",
+		b.used_name AS "userExpand.usedName",
+		b.startwork_time AS "userExpand.startworkTime",
+		b.is_series AS "userExpand.isSeries",
+		b.public_officials_registration_time AS "userExpand.publicOfficialsRegistrationTime",
+		b.graduation_time AS "userExpand.graduationTime",
+		b.profession_category AS "userExpand.professionCategory",
+		b.is_high AS "userExpand.isHigh",
+		b.contribution AS "userExpand.contribution",
+		b.job_category AS "userExpand.jobCategory",
+		b.job_level AS "userExpand.jobLevel",
+		b.now_worktime AS "userExpand.nowWorktime",
+		b.now_doc_number AS "userExpand.nowDocNumber",
+		b.serve_samejob_time AS "userExpand.serveSamejobTime",
+		b.serve_samedoc_number_time AS "userExpand.serveSamedocNumberTime",
+		b.salary_source AS "userExpand.salarySource",
+		b.person_status AS "userExpand.personStatus",
+		b.column_marking AS "userExpand.columnMarking",
+		b.column_date AS "userExpand.columnDate",
+		b.column_doc_number AS "userExpand.columnDocNumber",
+		b.column_channel AS "userExpand.columnChannel",
+		b.layoffs_sign AS "userExpand.layoffsSign",
+		b.column_source AS "userExpand.columnSource",
+		b.layoffs_time AS "userExpand.layoffsTime",
+		b.layoffs_channel AS "userExpand.layoffsChannel",
+		b.layoffs_doc_number AS "userExpand.layoffsDocNumber",
+		b.layoffs_go AS "userExpand.layoffsGo",
+		b.introduction AS "userExpand.introduction",
+		b.reward_punishment AS "userExpand.rewardPunishment",
+		b.learn_traing AS "userExpand.learnTraing",
+		b.user_img AS "userExpand.userImg",
+    	c.name AS "company.name",
+    	c.parent_id AS "company.parent.id",
+    	c.parent_ids AS "company.parentIds",
+    	ca.id AS "company.area.id",
+    	ca.name AS "company.area.name",
+    	ca.parent_id AS "company.area.parent.id",
+    	ca.parent_ids AS "company.area.parentIds",
+    	o.name AS "office.name",
+    	o.parent_id AS "office.parent.id",
+    	o.parent_ids AS "office.parentIds",
+    	oa.id AS "office.area.id",
+    	oa.name AS "office.area.name",
+    	oa.parent_id AS "office.area.parent.id",
+    	oa.parent_ids AS "office.area.parentIds",
+    	cu.id AS "company.primaryPerson.id",
+    	cu.name AS "company.primaryPerson.name",
+    	cu2.id AS "company.deputyPerson.id",
+    	cu2.name AS "company.deputyPerson.name",
+    	ou.id AS "office.primaryPerson.id",
+    	ou.name AS "office.primaryPerson.name",
+    	ou2.id AS "office.deputyPerson.id",
+    	ou2.name AS "office.deputyPerson.name",
+    	a6.name AS "area.name",
+    	a7.name AS "townarea.name"  
+    </sql>
+    
+    <sql id="userJoins">
+    	LEFT JOIN sys_area a6 ON a6.id = a.area_id
+    	LEFT JOIN sys_area a7 ON a7.id = a.town_area_id
+		LEFT JOIN sys_office c ON c.id = a.company_id
+		LEFT JOIN sys_area ca ON ca.id = c.area_id
+		LEFT JOIN sys_office o ON o.id = a.office_id
+		LEFT JOIN sys_area oa ON oa.id = o.area_id
+		LEFT JOIN sys_user cu ON cu.id = c.primary_person
+		LEFT JOIN sys_user cu2 ON cu2.id = c.deputy_person
+		LEFT JOIN sys_user ou ON ou.id = o.primary_person
+		LEFT JOIN sys_user ou2 ON ou2.id = o.deputy_person
+		LEFT JOIN user_expand b ON a.id = b.id
+		LEFT JOIN  sys_dict d1 on a.user_source_type=d1.`value` and d1.type='sys_user_source_type' and d1.language_type='CN'
+		LEFT JOIN  sys_dict d2 on a.user_source_type=d2.`value` and d2.type='user_type' and d2.language_type='CN'
+    </sql>
+	<sql id="newUserColumns">
+    	a.id,
+    	a.company_id AS "company.id",
+    	a.papernum,
+    	a.login_name,
+    	a.password,
+    	a.no,
+		a.name,
+		a.email,
+		a.phone,
+		a.mobile,
+		a.user_type,
+		a.login_ip,
+		a.login_date,
+		a.remarks,
+		a.login_flag,
+		a.photo,
+		a.create_by AS "createBy.id",
+		a.create_date,
+		a.update_by AS "updateBy.id",
+		a.update_date,
+		a.login_count AS "loginCount",
+		a.del_flag,
+		a.address,
+		a.birthday,
+		a.is_perfect,
+		a.identity_type,
+		b.id as "userExpand.id",
+		b.qq as "userExpand.qq",
+		b.we_chat as "userExpand.weChat",
+		b.other_links as "userExpand.otherLinks",
+		b.school_info as "userExpand.schoolInfo",
+		b.major as "userExpand.major",
+		b.education as "userExpand.education",
+		d.id as "roleId",
+		d.name as "roleName",
+    	o.id AS "office.id",
+    	o.name AS "office.name",
+		ca.id as "company.area.id",
+		ca.name as "company.area.name"
+	</sql>
+    <sql id="newUserJoins">
+		LEFT JOIN user_expand b ON a.id = b.id
+		LEFT JOIN sys_user_role_office c ON c.user_id = a.id
+		LEFT JOIN sys_role d ON d.id = c.role_id
+		LEFT JOIN sys_office e ON e.id = a.company_id
+		LEFT JOIN sys_area ca ON ca.id = e.area_id
+		LEFT JOIN sys_office o ON o.id = a.office_id
+		LEFT JOIN sys_area oa ON oa.id = o.area_id
+    </sql>
+    
+  
+	<!-- 通讯录获取本部门全部人员-->
+	<select id="getAllList" resultType="User">
+		SELECT
+			<include refid="userColumns"/>
+		FROM sys_user a
+		<include refid="userJoins"/>
+		<if test="role != null and role.id != null and role.id != ''">
+			JOIN sys_user_role_office ur ON ur.user_id = a.id AND ur.role_id = #{role.id}
+		</if>
+		WHERE a.del_flag = 0
+		<if test="isPerfect != null and isPerfect != ''">
+		and( a.is_perfect != '${isPerfect}' or a.is_perfect IS null)
+		</if>
+		<if test="id != null and id != ''">
+		and a.id != '${id}'
+		</if>
+		<if test="company != null and company.id != null and company.id != ''">
+			AND (c.id = #{company.id} OR c.parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%,'||#{company.id}||',%')</if>
+					<if test="dbName == 'mssql'">'%,'+#{company.id}+',%')</if>
+					<if test="dbName == 'mysql'">CONCAT('%,', #{company.id}, ',%'))</if>
+		</if>
+		<if test="office != null and office.id != null and office.id != ''">
+			AND (o.id = #{office.id} OR o.parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+					<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+					<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
+		</if>
+		<!-- 如果不是超级管理员，则不显示超级管理员用户 -->
+		<if test="!currentUser.admin">
+			AND a.id != '1'
+		</if>
+		<if test="loginName != null and loginName != ''">
+			AND a.login_name like 
+					<if test="dbName == 'oracle'">'%'||#{loginName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{loginName}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{loginName}, '%')</if>
+		</if>
+		<if test="name != null and name != ''">
+			AND a.name like 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{name}, '%')</if>
+		</if>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+	</select>
+    
+	<!-- 根据编号获得用户 -->
+	<select id="get" resultType="User">
+		SELECT
+			<include refid="userColumns"/><!-- ,
+			ro.office_id AS "roleList.officeList.id" -->
+		FROM sys_user a
+		<include refid="userJoins"/><!-- 
+		LEFT JOIN sys_role_office ro ON ro.role_id = r.id -->
+		WHERE a.id = #{id}
+	</select>
+	<!--根据用户Id查询用户所在地区  -->
+	<select id="getAreaByUser" parameterType="String" resultType="String">
+	select b.area_id from sys_user a left JOIN sys_office b 
+	on a.office_id = b.id 
+	where a.id = #{userId}
+	</select>
+	<!-- 根据登录名查询用户 -->
+	<select id="getByLoginName" resultType="User" parameterType="User">
+		SELECT
+			<include refid="userColumns"/><!-- ,
+			ro.office_id AS "roleList.officeList.id" -->
+		FROM sys_user a
+		<include refid="userJoins"/><!-- 
+		LEFT JOIN sys_role_office ro ON ro.role_id = r.id -->
+		WHERE a.login_name = #{loginName} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	
+	<select id="getInfoByLoginName" resultType="User">
+		SELECT
+			<include refid="userColumns"/><!-- ,
+			ro.office_id AS "roleList.officeList.id" -->
+		FROM sys_user a
+		<include refid="userJoins"/><!-- 
+		LEFT JOIN sys_role_office ro ON ro.role_id = r.id -->
+		WHERE a.login_name = #{loginName} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	<!--留言咨询根据地区id和类型查找用户的登录名  -->
+	<select id="getUserListByAreaAndType" parameterType="String" resultType="String">
+		select a.login_name  from sys_user a 
+		LEFT JOIN 
+		sys_user_office_info b 
+		on 
+		a.id = b.login_id 
+		LEFT JOIN sys_office c 
+		on 
+		a.office_id = c.id 
+		left join sys_area d on c.area_id = d.id
+		where a.del_flag = '0'
+		<if test="areaId != null and areaId != ''">
+		and (c.area_id = #{areaId} or d.parent_id = #{areaId})
+	    </if> 
+	    <if test="type != null and type != ''">
+	     and b.remark = #{type}
+	    </if>
+	    <if test="type != null and type == ''">
+	     and b.remark in ('lawyer','notaryMember','lawAssitanceUser','peopleMediation','infoForensicPersonnel')
+	    </if>
+	</select>
+	
+	<!-- 根据身份证号查询用户 -->
+	<select id="getByIdCard" resultType="User" parameterType="String">
+		SELECT
+			<include refid="userColumns"/>
+		FROM sys_user a
+		<include refid="userJoins"/>
+		WHERE a.papernum = #{papernum} AND a.del_flag = 0
+	</select>
+	<!-- 分页查询用户信息 -->
+	<select id="findList" resultType="User">
+		SELECT
+			<include refid="userColumns"/>
+		FROM sys_user a
+		<include refid="userJoins"/>
+		<if test="role != null and role.id != null and role.id != ''">
+			JOIN sys_user_role_office ur ON ur.user_id = a.id AND ur.role_id = #{role.id}
+		</if>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="company != null and company.id != null and company.id != ''">
+			AND (c.id = #{company.id} OR c.parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%,'||#{company.id}||',%')</if>
+					<if test="dbName == 'mssql'">'%,'+#{company.id}+',%')</if>
+					<if test="dbName == 'mysql'">CONCAT('%,', #{company.id}, ',%'))</if>
+		</if>
+		<if test="office != null and office.id != null and office.id != ''">
+			AND (o.id = #{office.id} OR o.parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%,'||#{office.id}||',%')</if>
+					<if test="dbName == 'mssql'">'%,'+#{office.id}+',%')</if>
+					<if test="dbName == 'mysql'">CONCAT('%,', #{office.id}, ',%'))</if>
+		</if>
+		<!-- 如果不是超级管理员，则不显示超级管理员用户 -->
+		<if test="!currentUser.admin">
+			AND a.id != '1'
+		</if>
+		<if test="loginName != null and loginName != ''">
+			AND a.login_name like 
+					<if test="dbName == 'oracle'">'%'||#{loginName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{loginName}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{loginName}, '%')</if>
+		</if>
+		<if test="name != null and name != ''">
+			AND a.name like 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{name}, '%')</if>
+		</if>
+		<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY CAST((case when b.job_level = '' then '1000' else ifnull(b.job_level,'1000') end) AS SIGNED INTEGER),c.code, o.code, a.name
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 根据OfficeId获取用户（树查询用户时用） -->
+	<select id="findUserByOfficeId" resultType="User" useCache="true">
+		SELECT
+			a.id, a.name, a.login_name
+		FROM sys_user a
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.office_id = #{office.id}
+		ORDER BY a.name
+	</select>
+	
+	<!-- 查询全部用户 -->
+	<select id="findAllList" resultType="User">
+		SELECT
+			<include refid="userColumns"/>
+		FROM sys_user a
+		<include refid="userJoins"/>
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+		ORDER BY c.code, o.code, a.name
+	</select>
+	
+	<!-- 查询全部用户数目 -->
+	<select id="findAllCount" resultType="long">
+		SELECT
+			COUNT(1)
+		FROM sys_user a
+		WHERE a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+	
+	<!-- 根据账号获取姓名 -->
+	<select id="getName" resultType="User">
+		SELECT
+			 a.name
+		FROM sys_user a left join act_hi_procinst b on b.START_USER_ID_=a.login_name
+		WHERE b.PROC_INST_ID_ = #{procInsId}
+	</select>
+	<!-- 插入用户 -->
+	<insert id="insert">
+		INSERT INTO sys_user(
+			id, 
+			office_id,
+			company_id,
+			papernum,
+			password, 
+			login_name,
+			no, 
+			name, 
+			email, 
+			mobile, 
+			user_type, 
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date, 
+			remarks, 
+			login_flag, 
+			photo, 
+			del_flag,
+			address,
+			birthday,
+			area_id,
+			user_source_type,
+			is_show,
+			identity_type
+		) VALUES (
+			#{id}, 
+			#{office.id},
+			#{company.id},
+			#{papernum},
+			#{password}, 
+			#{loginName},
+			#{no}, 
+			#{name}, 
+			#{email}, 
+			#{mobile}, 
+			#{userType}, 
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{loginFlag}, 
+			#{photo}, 
+			#{delFlag},
+			#{address},
+			#{birthday},
+			#{area.id},
+			#{userSourceType},
+			#{isShow},
+			#{identityType}
+		)
+	</insert>
+		<insert id="insertUser">
+		INSERT INTO sys_user(
+			id,
+			papernum,
+			login_name, 
+			password, 
+			name, 
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date, 
+ 			del_flag,
+ 			is_perfect, 
+			photo, 
+ 			address,
+ 			area_id,
+ 			user_source_type,
+ 			identity_type
+		) VALUES (
+			#{id}, 
+			#{papernum},
+			#{loginName},
+			#{password}, 
+			#{name}, 
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{delFlag}, 
+			#{isPerfect},
+			#{photo},
+			#{address},
+			#{area.id},
+			#{userSourceType},
+			#{identityType}
+		)
+	</insert>
+	<!-- 更新用户 -->
+	<update id="update">
+		UPDATE sys_user SET 
+			company_id = #{company.id}, 
+			office_id = #{office.id},
+		    papernum = #{papernum},
+			login_name = #{loginName},
+			password = #{password}, 
+			no = #{no}, 
+			name = #{name}, 
+			email = #{email}, 
+			phone = #{phone}, 
+			mobile = #{mobile},
+			user_type = #{userType},
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks},
+			login_flag = #{loginFlag},
+			<!-- photo = #{photo}, -->
+			address = #{address},
+			birthday = #{birthday},
+			is_perfect = '',
+			area_id = #{area.id}
+		WHERE id = #{id}
+	</update>
+	<!-- 更新用户 -->
+	<update id="updateInfo">
+		UPDATE sys_user SET 
+			name = #{name}, 
+			email = #{email}, 
+			office_id = #{office.id},
+			mobile=#{mobile},
+ 			is_perfect = #{isPerfect},
+ 			address = #{address},
+ 			birthday = #{birthday},
+ 			company_id = #{company.id},
+ 			photo = #{photo},
+ 			area_id = #{area.id}
+		WHERE id = #{id}
+	</update>
+	<!-- 更新群众用户基本信息用 -->
+	<update id="updatequn">
+	UPDATE sys_user 
+	
+	<trim prefix="set" suffixOverrides=",">
+	update_date = #{updateDate}, 
+	<if test="birthday!=null">
+		birthday = #{birthday},
+	</if>
+	<if test="mobile!=null and mobile!=''">
+		mobile=#{mobile},
+	</if>
+	<if
+		test="area != null and area != '' and area.id!=null and  area.id!=''">
+		area_id = #{area.id},
+	</if>
+	<if
+		test="townarea != null and townarea != '' and townarea.id!=null and  townarea.id!=''">
+		town_area_id=#{townarea.id},
+	</if>
+	<if test="userSourceType!=null and userSourceType!=''">
+		user_source_type=#{userSourceType},
+	</if>
+	<if test="papernum!=null and papernum!='' and papernum.indexOf('*')==-1" >
+			papernum = #{papernum},
+	</if>
+	</trim>
+	WHERE id = #{id}
+</update>
+	<!-- 删除用户和角色关联表数据 -->
+	<delete id="deleteUserRole">
+		DELETE FROM sys_user_role WHERE user_id = #{id}
+	</delete>
+	
+		<!-- 删除用户和角色关联表数据一个用户会有多个角色支持删除任意一个角色  suzz-->
+	<delete id="deleteUserRoleOne">
+		DELETE FROM sys_user_role WHERE 
+		user_id = #{userId}
+		<if test="roleId !=null and roleId !=''">
+		and role_id=#{roleId}
+		</if>
+	</delete>
+	<!--  删除角色机构用户对应表  suzz 删除出时注意信息的完整性-->
+	<delete id="deleteRoleOffice">
+	DELETE FROM sys_user_role_office  WHERE 
+	   user_id = #{userId}
+	<if test="officeId !=null and officeId !=''">
+	  and office_id = #{officeId}
+	</if>
+	<if test="roleId!=null and roleId!=''">
+	and role_id= #{roleId}
+	</if>
+	<if test="isMain !=null and isMain!=''">
+	 and is_main=#{isMain}
+	</if>
+	</delete>
+	<!-- 修改sys_user_role_office对应关系 ,不要乱加内容此处特别重要-->
+	<update id="updateUserRoleOffice">
+	update sys_user_role_office
+	   set
+	  is_main=#{isMain}
+	 
+	  where user_id=#{userId}
+	  and  office_id=#{officeId}
+	</update>
+	
+	<!-- 修改sys_user_role_office普通用户权限机构和主职保持一致-->
+	<update id="updateOfficeIdPd">
+	update sys_user_role_office
+	   set
+	 office_id=#{officeId}
+	  where user_id=#{userId}
+   AND role_id  in(SELECT id from sys_role where enname="pd")
+	</update>
+	<!-- 修改用户的机构id 删除用户兼职的时候用 -->
+	<update id="updateUserOfficeId">
+	update sys_user
+	   set
+	<if test="companyId !=null and companyId != ''">
+     company_id=#{companyId},
+	</if>
+	<if test="officeId !=null and officeId != ''">
+	  office_id=#{officeId}
+	</if>
+	  where id=#{userId} 
+	</update>
+	<!-- 插入用户和角色关联表数据 -->
+	<insert id="insertUserRole">
+		INSERT INTO sys_user_role(user_id, role_id)
+		<foreach collection="roleList" item="role" separator=" union all ">
+			SELECT #{id}, #{role.id}
+			<if test="dbName != 'mssql'">
+			FROM dual
+			</if>
+		</foreach>
+	</insert>
+	
+	<!-- 插入用户和角色关联表数据 -->
+	<insert id="insertRoleGx">
+		INSERT INTO sys_user_role(user_id, role_id
+			)VALUES (
+			#{id}, 
+			#{role.id}
+			)
+	</insert>
+	<!-- 更新用户信息  ,后台个人面板-->
+	<update id="updateUserInfo">
+		UPDATE sys_user SET 
+			papernum = #{papernum},
+			area_id = #{area.id},
+			email = #{email}, 
+			phone = #{phone}, 
+			mobile = #{mobile}, 
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks},
+			photo = #{photo},
+			address = #{address},
+			user_type = #{userType},
+			is_show = #{isShow}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 更新用户密码 -->
+	<update id="updatePasswordById">
+		UPDATE sys_user SET 
+			password = #{password} 
+		WHERE id = #{id}
+	</update>
+		<!-- 更新用户密码 -->
+	<update id="updatePhotoById">
+		UPDATE sys_user SET 
+			photo = #{photo} 
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 更新登录信息，如登录IP、登录时间 -->
+	<update id="updateLoginInfo">
+		UPDATE sys_user SET 
+			login_ip = #{loginIp}, 
+			login_Date = #{loginDate},
+			login_count=login_count+1
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 逻辑删除用户 -->
+	<update id="delete">
+		UPDATE sys_user SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!-- 批量删除用户 -->
+          <update id="batchDelete" parameterType="java.util.List" >
+  			UPDATE sys_user SET del_flag = '1' where  id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+         </foreach>
+    	</update>
+	
+	<insert id="insertSysUserOfficeInfo">
+		insert into sys_user_office_info(login_id,info_id,type,remark,is_main) 
+  		values(#{id},#{infoDataId},#{type},#{remark},#{isMain})
+	</insert>
+	
+	<!-- 理论上uuid不存在重复，所以无论那张表的id均可以直接查询 -->
+	<select id="selectSysUserOfficeInfo" resultType="String">
+		select login_id from sys_user_office_info where 
+		<if test="infoId !='' and infoId !=null">
+		info_id = #{infoId} 
+		</if>
+		<if test="type !='' and type != null">
+		and type=#{type}
+		</if>
+	</select>
+	
+	<select id="selectSysUserlogin" resultType="String">
+		select login_id from sys_user_office_info where info_id = #{infoId} and remark=#{remark}
+	</select>
+	<!-- 查询用户类型-->
+	<select id="userTypeid" resultType="String">
+		select remark from sys_user_office_info where login_id = #{loginId}
+	</select>
+	
+	<!-- 根据账号id或者是业务id查询用户全部信息(主职/兼职) -->
+	<select id="selectByUserId" resultType="UserAndInfoData">
+		SELECT 
+		    t.*
+		FROM
+		    sys_user_office_info t
+		WHERE
+		    t.del_flag = 0 
+		<if test="userId != null and userId != ''">
+		AND t.login_id = #{userId}
+		</if>
+		<if test="infoId != null and infoId != ''">
+		AND t.login_id = (SELECT 
+		    	i.login_id
+			FROM
+		        sys_user_office_info i
+		    WHERE
+		        i.info_id = #{infoDataId})
+		</if>
+	</select>
+		<!-- 根据账号id和业务id查询用户在对应职位表中的职业属性(主职/兼职) 查询除去普通用户的角色  保证是唯一的一条 suzz-->
+	<select id="selectUserInfor" resultType="UserAndInfoData">
+		SELECT  
+	   a.login_id as id,
+	   a.info_id as infoDataId,
+	   a.type as type,
+	   a.remark remark,
+	   c.is_main as isMain,
+	   c.role_id as roleId,
+	   c.office_id as infoDataOfficeId
+		FROM
+			sys_user_office_info a,sys_user_role_office c
+		WHERE 
+			a.del_flag = 0 
+			and c.user_id = a.login_id 
+			<if test="infoId != null and infoId != ''">
+			and a.info_id = #{infoId} 
+			</if>
+			<if test="userId != null and userId != ''">
+		    AND a.login_id = #{userId}
+		  </if>
+		  	<if test="officeId != null and officeId != ''">
+		    AND c.office_id = #{officeId}
+		  </if>
+			and c.role_id not in(SELECT id from sys_role where enname="pd")	
+	</select>
+	
+	<select id="selectOfficeUser" resultType="UserAndInfoData">
+	SELECT  
+	   c.user_id as id,
+	   c.is_main as isMain,
+	   c.role_id as roleId,
+	   c.office_id as infoDataOfficeId
+		FROM
+			sys_user_role_office c
+		WHERE 
+			c.office_id = #{officeId}
+	</select>
+	<!-- 为了排查是否包含兼职的情况,suzz-->
+	<select id="selectUserRoleOffice" resultType="UserAndInfoData">
+		SELECT  
+	   c.user_id as id,
+	   c.is_main as isMain,
+	   c.role_id as roleId,
+	   c.office_id as infoDataOfficeId
+		FROM
+			sys_user_role_office c
+		WHERE 
+			c.user_id = #{userId}
+		  	<if test="roleId != null and roleId != ''">
+		    AND c.role_id = #{roleId}
+		  </if>
+		  	<if test="officeId != null and officeId != ''">
+		    AND c.office_id = #{officeId}
+		  </if>
+		  	<if test="isMain != null and isMain != ''">
+		    AND c.is_main = #{isMain}
+		  </if>
+			and c.role_id not in(SELECT id from sys_role where enname="pd")	
+	</select>
+	
+	<select id="selectOfficeInfo" resultType="UserAndInfoData">
+		SELECT  
+			info_id as infoDataId,
+			login_id as id,
+			remark as remark,
+			is_main as isMain
+			
+		FROM
+			sys_user_office_info
+		WHERE 
+			del_flag = 0 
+			
+			and login_id = #{loginId} 	
+	</select>
+	
+	<!--  删除人员角色业务对应表中数据 suzz-->
+	<select id="selectInfoIdByLoginId" resultType="String">
+		SELECT  
+			info_id as infoId
+		FROM
+			sys_user_office_info
+		WHERE 
+			del_flag = 0 
+			and login_id = #{loginId} 	
+	</select>
+	
+	<!-- 根据业务数据主键删除对照关系 -->
+	<update id="deleteByInfoDataId">
+		update sys_user_office_info t set t.del_flag = '1' where info_id = #{infoDataId}
+	</update>
+	
+	
+	<!-- 根据业务数据兼职主职标记 -->
+	<update id="updateIsMain">
+		update sys_user_office_info t set t.is_main = #{isMain} where info_id = #{infoId}
+	</update>
+	
+	<!-- 查询当前人是否已存在账号-->
+	<select id="identityType" resultType="String"> 
+		select papernum from sys_user where papernum = #{papernum} and identity_type = '0' and del_flag = '0'
+	</select>
+</mapper>

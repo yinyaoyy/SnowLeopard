@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.cms.dao.GuestbookCommentThumbsUpDao">
+    
+	<sql id="guestbookCommentThumbsUpColumns">
+		a.comment_id AS "commentId",
+		a.user_id AS "userId",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="guestbookCommentThumbsUpJoins">
+	</sql>
+    
+	<select id="get" resultType="GuestbookCommentThumbsUp">
+		SELECT 
+			<include refid="guestbookCommentThumbsUpColumns"/>
+		FROM cms_guestbook_comment_thumbs_up a
+		<include refid="guestbookCommentThumbsUpJoins"/>
+		WHERE a.comment_id = #{commentId} and  a.user_id=#{userId}
+	</select>
+	
+	<select id="findList" resultType="GuestbookCommentThumbsUp">
+		SELECT 
+			<include refid="guestbookCommentThumbsUpColumns"/>
+		FROM cms_guestbook_comment_thumbs_up a
+		<include refid="guestbookCommentThumbsUpJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="GuestbookCommentThumbsUp">
+		SELECT 
+			<include refid="guestbookCommentThumbsUpColumns"/>
+		FROM cms_guestbook_comment_thumbs_up a
+		<include refid="guestbookCommentThumbsUpJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cms_guestbook_comment_thumbs_up(
+			comment_id,
+			user_id,
+			del_flag
+		) VALUES (
+			#{commentId},
+			#{userId},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cms_guestbook_comment_thumbs_up SET 	
+			comment_id = #{commentId},
+			user_id = #{userId}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cms_guestbook_comment_thumbs_up SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE comment_id = #{commentId}
+	</update>
+	
+	<select id="findThumbsUpByCommentId" resultType="int">
+		SELECT 
+			count(a.comment_id)
+		FROM cms_guestbook_comment_thumbs_up a
+		<include refid="guestbookCommentThumbsUpJoins"/>
+		WHERE a.comment_id = #{commentId} and a.del_flag=0
+	</select>
+	
+	<update id="updateDelFlag">
+		UPDATE cms_guestbook_comment_thumbs_up SET 	
+			del_flag =#{delFlag}
+		WHERE comment_id = #{commentId} and user_id = #{userId}
+	</update>
+	
+	<delete id="deleteByCommentIdAndUserId">
+		DELETE FROM 
+			cms_guestbook_comment_thumbs_up 
+		WHERE comment_id = #{commentId} and user_id = #{userId}
+	</delete>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.api.chart.dao.CountByAreaDao">
+
+<!-- 通用的根据地区统计数量的查询方法 -->
+<select id="countByArea" resultType="CountByArea">
+	SELECT 
+	    IFNULL(a.id, '') 'area.id',
+	    IFNULL(t.count, 0) count,
+	    a.name 'area.name'
+	FROM
+	    sys_area a
+	        LEFT JOIN
+	    (${countSql}) t ON t.area_id = a.id
+	WHERE
+	    a.del_flag = 0 AND a.parent_id = '5'
+	ORDER BY 
+	<if test="sort=='high'">
+	IFNULL(t.count,0) DESC,
+	</if>
+	<if test="sort=='low'">
+	IFNULL(t.count,0) ASC,
+	</if>
+	a.code
+</select>	
+<!-- 通用的根据地区、日期统计数量的查询方法 -->
+<select id="countByAreaDate" resultType="CountByArea">
+	SELECT 
+	    IFNULL(a.id, '') 'area.id',
+	    IFNULL(t.count, 0) count,
+	    a.name 'area.name',
+	    t.date
+	FROM
+	    sys_area a
+	        LEFT JOIN
+	    (${countSql}) t ON t.area_id = a.id
+	WHERE
+	    a.del_flag = 0 AND a.parent_id = '5'
+	ORDER BY a.code,t.date
+</select>	
+</mapper>

@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.NotaryAgencyDao">
+    
+    <resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+    <resultMap type="Office" id="officeMap">  
+        <id property="id" column="office.id" />  
+        <result property="name" column="office.name" />
+    </resultMap>
+    <resultMap id="notaryAgencyResult" type="NotaryAgency">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="practisingTime" column="practisingTime" />
+		<result property="expertise" column="expertise" />
+		<result property="licenseNumber" column="licenseNumber" />
+		<result property="address" column="address" />
+		<result property="telephone" column="telephone" />
+		<result property="serviceTime" column="serviceTime" />
+		<result property="manager" column="manager" />
+		<result property="licenseStatus" column="licenseStatus" />
+		<result property="organizationCode" column="organizationCode" />
+		<result property="approvalNumber" column="approvalNumber" />
+		<result property="approvalDate" column="approvalDate" />
+		<result property="faxNumber" column="faxNumber" />
+		<result property="website" column="website" />
+		<result property="coordinate" column="coordinate" />
+		<result property="imageUrl" column="imageUrl" />
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+		<association property="office"  javaType="Office" resultMap="officeMap"/> 
+	</resultMap>
+    <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="name" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="telephone" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="coordinate" column="coordinate" />
+		<result property="teamSize" column="hasPerson" />
+		<result property="personName" column="manager" />
+		<result property="worktime" column="serviceTime" /> <!-- 执业时间 -->
+		<result property="businessExpertise" column="expertise" />  <!--业务专长  -->
+		<result property="no" column="licenseNumber" />
+		<result property="id" column="login_id" />
+	<!-- 	<result property="zipCode" column="zipCode" /> -->
+		<result property="introduction" column="introduction" />
+		<result property="mainOrgans" column="officeName" />    <!-- 查询机构详情暂时licenseForm当作主营机关 -->
+		<result property="fax" column="faxNumber" /> 
+		<result property="practisingTime" column="practisingTime" /> 
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	<sql id="notaryAgencyColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.practising_time AS "practisingTime",
+		a.expertise AS "expertise",
+		a.license_number AS "licenseNumber",
+		a.address AS "address",
+		a.telephone AS "telephone",
+		a.service_time AS "serviceTime",
+		a.manager AS "manager",
+		a.license_status AS "licenseStatus",
+		a.organization_code AS "organizationCode",
+		a.approval_number AS "approvalNumber",
+		a.approval_date AS "approvalDate",
+		a.office_id AS "office.id",
+		a.fax_number AS "faxNumber",
+		a.website AS "website",
+		a.coordinate AS "coordinate",
+		a.image_url AS "imageUrl",
+		a.area_id AS "area.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.introduction AS "introduction",
+		o14.name AS "office.name",
+		a7.name AS "area.name",
+		o14.zip_code AS "zipCode",
+		o14.name AS "officeName",
+		suoi.login_id AS "login_id"
+	</sql>
+	
+	<sql id="notaryAgencyJoins">
+		LEFT JOIN sys_office o14 ON o14.name = a.name
+		LEFT JOIN sys_area a7 ON a7.id = a.area_id
+		left join sys_user_office_info suoi on suoi.info_id=a.id AND suoi.del_flag = '0'
+	</sql>
+    <select id="findListForApi" resultMap="agencyResult">
+		SELECT (SELECT COUNT(*) 
+                  FROM info_notary_member i10
+                 WHERE i10.del_flag = 0
+                   AND i10.notary_agency_id = o14.id) hasPerson,
+			<include refid="notaryAgencyColumns"/>
+		FROM info_notary_agency a
+		<include refid="notaryAgencyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="get" resultType="NotaryAgency">
+		SELECT 
+			<include refid="notaryAgencyColumns"/>
+		FROM info_notary_agency a
+		<include refid="notaryAgencyJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="NotaryAgency">
+		SELECT 
+			<include refid="notaryAgencyColumns"/>
+		FROM info_notary_agency a
+		<include refid="notaryAgencyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<!-- 数据范围过滤 -->
+		        ${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="NotaryAgency">
+		SELECT 
+			<include refid="notaryAgencyColumns"/>
+		FROM info_notary_agency a
+		<include refid="notaryAgencyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO info_notary_agency(
+			id,
+			name,
+			practising_time,
+			expertise,
+			license_number,
+			address,
+			telephone,
+			service_time,
+			manager,
+			license_status,
+			organization_code,
+			approval_number,
+			approval_date,
+			office_id,
+			fax_number,
+			website,
+			coordinate,
+			image_url,
+			area_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{practisingTime},
+			#{expertise},
+			#{licenseNumber},
+			#{address},
+			#{telephone},
+			#{serviceTime},
+			#{manager},
+			#{licenseStatus},
+			#{organizationCode},
+			#{approvalNumber},
+			#{approvalDate},
+			#{office.id},
+			#{faxNumber},
+			#{website},
+			#{coordinate},
+			#{imageUrl},
+			#{area.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_notary_agency SET 	
+			name = #{name},
+			practising_time = #{practisingTime},
+			expertise = #{expertise},
+			license_number = #{licenseNumber},
+			address = #{address},
+			telephone = #{telephone},
+			service_time = #{serviceTime},
+			manager = #{manager},
+			license_status = #{licenseStatus},
+			organization_code = #{organizationCode},
+			approval_number = #{approvalNumber},
+			approval_date = #{approvalDate},
+			office_id = #{office.id},
+			fax_number = #{faxNumber},
+			website = #{website},
+			coordinate = #{coordinate},
+			image_url = #{imageUrl},
+			area_id = #{area.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_notary_agency SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<select id="getInfo" resultMap="agencyResult">
+	SELECT (SELECT COUNT(*) 
+                  FROM info_notary_member i10
+                 WHERE i10.del_flag = 0
+                   AND i10.notary_agency_id = o14.id) hasPerson,
+			<include refid="notaryAgencyColumns"/>
+		FROM info_notary_agency a
+		<include refid="notaryAgencyJoins"/>
+		where a.id=#{id}
+	</select>
+	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_notary_agency a
+		<include refid="notaryAgencyJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 批量删除公证处 -->
+    <update id="batchDelete" parameterType="String" >
+  		UPDATE info_notary_agency SET del_flag = '1' where  id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+	
+	<select id="personInstitution" resultType="String">
+		SELECT name FROM info_notary_agency a  
+		<where>
+			license_number = #{licenseNumber}
+			<if test="areaId != null and areaId != ''">
+			   AND a.area_id =#{areaId} 
+		    </if>
+		</where>
+	</select>
+</mapper>

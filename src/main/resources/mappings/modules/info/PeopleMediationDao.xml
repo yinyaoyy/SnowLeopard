@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.PeopleMediationDao">
+    
+	<sql id="peopleMediationColumns">
+		a.id AS "id",
+		a.name AS "name",
+		d1.label  AS "sex",
+		a.phone AS "phone",
+		d3.label AS "ethnic",
+		a.id_card AS "idCard",
+		a.education AS "education",
+		a.role_id AS "roleId",
+		a.start_time AS "startTime",
+		a.is_pluralistic AS "isPluralistic",
+		a.office_id AS "office.id",
+		a.political_face AS "politicalFace",
+		a.area_id AS "area.id",
+		a.introduction AS "introduction",
+		a.image_url AS "imageUrl",
+		a.age AS "age",
+		a.birthday AS "birthday",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.no AS "no",
+		a.evaluation AS "evaluation",
+		d4.label AS "mediatorType",
+		d2.label AS "isMongolian",
+		o11.name AS "office.name",
+		a13.name AS "area.name"
+	</sql>
+	 <sql id="peopleMediation">
+	    a.id AS "id",
+		a.name AS "name",
+		ddd.value AS "sex",
+		ddd.label AS "sexLabel",
+		a.phone AS "phone",
+		d2.label AS "ethnicLabel",
+		d2.value AS "ethnic",
+		a.id_card AS "idCard",
+		a.education AS "education",
+		a.role_id AS "roleId",
+		a.start_time AS "startTime",
+		a.is_pluralistic AS "isPluralistic",
+		a.office_id AS "office.id",
+		a.political_face AS "politicalFace",
+		a.area_id AS "area.id",
+		a.image_url AS "imageUrl",
+		<!-- a.age AS "age", -->
+		<!-- a.birthday AS "birthday", -->
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.evaluation AS "evaluation",
+		d3.label AS "isMongolian",
+        a1.officename AS "office.name",
+        a1.areaName AS "area.name",
+        a1.townName AS "town.name",
+        a1.address  AS "address",
+        a.role_id AS "role",
+        d4.label AS "mediatorLabel",
+        d4.value AS "mediatorType",
+		a.no AS "no"
+		</sql> 
+		
+	 <sql id="peopleMediatorVo">
+	    a.id AS "id",
+		a.name AS "name",
+		a.phone AS "phone",
+		a.id_card AS "idCard",
+		a.education AS "education",
+		a.role_id AS "roleId",
+		a.start_time AS "startTime",
+		a.is_pluralistic AS "isPluralistic",
+		a.office_id AS "office.id",
+		a.political_face AS "politicalFace",
+		a.area_id AS "area.id",
+		a.image_url AS "imageUrl",
+		<!-- a.age AS "age", -->
+		<!-- a.birthday AS "birthday", -->
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+        a.role_id AS "role",
+		a.no AS "no",
+		a.mediatorType AS "mediatorType",
+		a.evaluation AS "evaluation",
+		a13.name AS 'area.name'
+		</sql> 
+	 <resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+    <resultMap type="Area" id="townMap">  
+        <id property="id" column="town.id" />  
+        <result property="name" column="town.name" />  
+    </resultMap>
+	 <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="personName" column="name" />
+		<result property="idCard" column="idCard" />
+		<result property="agencyName" column="office.name" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="coordinate" column="coordinate" />
+		<result property="id" column="user_id" />
+	    <result property="sex" column="sexLabel" />
+	    <!-- <result property="age" column="age" /> -->
+	    <result property="ethnic" column="ethnicLabel" />
+	    <result property="introduction" column="introduction" />
+	    <result property="isMongolian" column="isMongolian" />
+        <result property="roleId" column="role" /> 
+        <result property="politicalFace" column="politicalFace" /> 
+        <result property="education" column="education" /> 
+        <result property="mediatorType" column="mediatorLabel" />
+        <result property="evaluation" column="evaluation" />
+        <!-- <result property="birthday" column="birthday" /> -->
+     	<association property="area"  javaType="Area" resultMap="areaMap"/> 
+		<association property="town"  javaType="Area" resultMap="townMap"/>
+	</resultMap>
+	
+	<sql id="peopleMediationJoins">
+		LEFT JOIN sys_office o11 ON o11.id = a.office_id
+		LEFT JOIN sys_area a13 ON a13.id = a.area_id
+	</sql>
+	
+	
+	<select id="get" resultType="PeopleMediation">
+		SELECT 
+			<include refid="peopleMediationColumns"/>
+		FROM info_people_mediation a
+		<include refid="peopleMediationJoins"/>
+		LEFT JOIN sys_dict d1 on a.sex=d1.`value` and d1.type='sex' and d1.language_type='CN'
+        LEFT JOIN sys_dict d2 on a.isMongolian=d2.`value` and d2.type='yes_no' and d2.language_type='CN'
+        LEFT JOIN  sys_dict d3 on a.ethnic=d3.`value` and d3.type='ethnic'  and d3.language_type='CN'
+        LEFT JOIN  sys_dict d4 on a.mediatorType=d4.`value` and d4.type='mediator_type'  and d4.language_type='CN'
+		WHERE a.id = #{id}
+	</select>
+	
+	
+	<select id="getPeopleMediationInfo" resultType="PeopleMediation">
+		SELECT  *  FROM info_people_mediation a
+		<where>
+			 a.del_flag = #{DEL_FLAG_NORMAL} and  a.name = #{name}
+		<if test="idCard != null and idCard != ''">
+		    AND a.id_card = #{idCard}
+		</if>
+		<if test="office != null and office.id != null and office.id != ''">
+			AND a.office_id = #{office.id}
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+			AND a.area_id = #{area.id}
+			</if>
+		</where>
+	</select>
+	
+	
+  <select id="findListForApi" resultMap="agencyResult">
+		SELECT 
+			<include refid="peopleMediation"/>,a.introduction AS "introduction",a15.login_id AS "user_id"
+			from info_people_mediation a
+        LEFT JOIN (
+			SELECT 
+			    e.id AS officeid,
+			    e.address AS address,
+			    e.`name` AS officename,
+			    e.belongtowns,
+			    b.name AS 'areaName',
+			    d.`name` AS 'townName',
+			    c.login_id
+			FROM
+			    info_people_mediation_committee e
+			        LEFT JOIN
+			    sys_area b ON e.area_id = b.id
+			        LEFT JOIN
+			    sys_area d ON e.belongtowns = d.id
+			        LEFT JOIN
+			    sys_user_office_info c ON e.id = c.info_id
+			        AND c.remark = 'peopleMediationCommittee'
+        		)a1 on a.office_id=a1.login_id
+        LEFT JOIN sys_dict ddd on a.sex=ddd.`value` and ddd.type='sex' and ddd.language_type='CN'
+        LEFT JOIN  sys_dict d2 on a.ethnic=d2.`value` and d2.type='ethnic'  and d2.language_type='CN'
+		LEFT JOIN  sys_dict d3 on a.isMongolian=d3.`value` and d3.type='yes_no' and d3.language_type='CN'
+		LEFT JOIN  sys_dict d4 on a.mediatorType=d4.`value` and d4.type='mediator_type'  and d4.language_type='CN'
+		LEFT JOIN sys_user_office_info a15 ON a15.info_id = a.id
+		LEFT JOIN sys_area d5 ON d5.id = a.area_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND (a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or  a1.officename LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if> 
+					)
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+			   AND a.area_id  = #{area.id} 
+			</if>
+			<if test="town != null and town.id != null and town.id != ''">
+			   AND a1.belongtowns = #{town.id}
+			</if>
+			<if test="isMongolian != null and isMongolian != '' and isMongolian != '暂无'">
+			   AND a.isMongolian = #{isMongolian}
+			</if>
+			<if test="evaluation != null and evaluation != '' and evaluation != '暂无'">
+			    AND a.evaluation = #{evaluation}
+			</if>
+			<if test="officeId != null and officeId!= '' and evaluation != '暂无'">
+			    AND a.office_id = #{officeId}
+			</if>
+			
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getInfo" resultMap="agencyResult">
+	SELECT 
+			<include refid="peopleMediation"/>,
+		a.introduction AS "introduction",a1.login_id 
+			from info_people_mediation a
+        LEFT JOIN (select  e.id as officeid,e.address as address,e.`name` as officename,e.belongtowns,b.name AS "areaName",d.`name` as "townName",c.login_id from  info_people_mediation_committee e 
+        LEFT JOIN sys_area  b on  e.area_id=b.id
+        LEFT JOIN sys_area  d on  e.belongtowns=d.id
+        LEFT JOIN (select * from sys_user_office_info where remark='peopleMediationCommittee') c on e.id=c.info_id)a1 on a.office_id=a1.login_id
+        LEFT JOIN sys_office o on a.office_id = o.id
+        LEFT JOIN sys_dict ddd on a.sex=ddd.`value` and ddd.type='sex' and ddd.language_type='CN'
+        LEFT JOIN  sys_dict d2 on a.ethnic=d2.`value` and d2.type='ethnic'  and d2.language_type='CN'
+		LEFT JOIN  sys_dict d3 on a.isMongolian=d3.`value` and d3.type='yes_no' and d3.language_type='CN'
+		LEFT JOIN  sys_dict d4 on a.mediatorType=d4.`value` and d4.type='mediator_type'  and d4.language_type='CN'
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PeopleMediation">
+		SELECT 
+			<include refid="peopleMediation"/>,a.introduction AS "introduction"
+			from info_people_mediation a
+        LEFT JOIN (select  e.id as officeid,e.address as address,e.`name` as officename,e.belongtowns,b.name AS "areaName",d.`name` as "townName",c.login_id from  info_people_mediation_committee e 
+        LEFT JOIN sys_area  b on  e.area_id=b.id
+        LEFT JOIN sys_area  d on  e.belongtowns=d.id
+        LEFT JOIN (select * from sys_user_office_info where remark='peopleMediationCommittee') c on e.id=c.info_id)a1 on a.office_id=a1.login_id
+        LEFT JOIN sys_office o on a.office_id = o.id
+        LEFT JOIN sys_dict ddd on a.sex=ddd.`value` and ddd.type='sex' and ddd.language_type='CN'
+        LEFT JOIN  sys_dict d2 on a.ethnic=d2.`value` and d2.type='ethnic'  and d2.language_type='CN'
+		LEFT JOIN  sys_dict d3 on a.isMongolian=d3.`value` and d3.type='yes_no' and d3.language_type='CN'
+		LEFT JOIN  sys_dict d4 on a.mediatorType=d4.`value` and d4.type='mediator_type'  and d4.language_type='CN'
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="office != null and office.id != null and office.id != ''">
+			   AND a.office_id  = #{office.id} 
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+			   AND a.area_id  = #{area.id} 
+			</if>
+			<if test="town != null and town.id != null and town.id != ''">
+			   AND a1.belongtowns = #{town.id}
+			</if>
+			<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PeopleMediation">
+		SELECT 
+			<include refid="peopleMediationColumns"/>
+		FROM info_people_mediation a
+		<include refid="peopleMediationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_people_mediation a
+		<include refid="peopleMediationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id=#{area.id}
+			</if>
+		</where>
+	</select>
+	<insert id="insert">
+		INSERT INTO info_people_mediation(
+			id,
+			name,
+			sex,
+			phone,
+			ethnic,
+			id_card,
+			education,
+			role_id,
+			start_time,
+			is_pluralistic,
+			office_id,
+			political_face,
+			area_id,
+			introduction,
+			image_url,
+			age,
+			birthday,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			no,
+			agencyNo,
+			mediatorType
+		) VALUES (
+			#{id},
+			#{name},
+			#{sex},
+			#{phone},
+			#{ethnic},
+			#{idCard},
+			#{education},
+			#{roleId},
+			#{startTime},
+			#{isPluralistic},
+			#{office.id},
+			#{politicalFace},
+			#{area.id},
+			#{introduction},
+			#{imageUrl},
+			#{age},
+			#{birthday},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{no},
+			#{agencyNo},
+			#{mediatorType}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_people_mediation SET 	
+			name = #{name},
+			sex = #{sex},
+			phone = #{phone},
+			ethnic = #{ethnic},
+			id_card = #{idCard},
+			education = #{education},
+			role_id = #{roleId},
+			start_time = #{startTime},
+			is_pluralistic = #{isPluralistic},
+			office_id = #{office.id},
+			political_face = #{politicalFace},
+			area_id = #{area.id},
+			introduction = #{introduction},
+			image_url = #{imageUrl},
+			age = #{age},
+			birthday = #{birthday},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			no=#{no}
+		WHERE id = #{id}
+	</update>
+	<update id="delete">
+		UPDATE info_people_mediation SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	   <update id="batchDelete" parameterType="String" >
+  		UPDATE info_people_mediation SET del_flag = '1' where  id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+	
+	<select id="findUserLoginNameById" resultType="String">
+		select login_name from sys_user where id = 
+			(select login_id from sys_user_office_info where info_id=#{0})
+	</select>
+	<select id="findInfoByCardNo" parameterType="String" resultType="String">
+	select a.id_card from info_people_mediation a where a.id_card=#{idCard}
+	</select>
+	
+	<!-- 接口:大屏查询人民调解员信息 -->
+	<select id="findListForBigScreen" parameterType="com.thinkgem.jeesite.api.chart.entity.PeopleMediatorVo"
+		resultType="com.thinkgem.jeesite.api.chart.entity.PeopleMediatorVo">
+		SELECT 
+			<include refid="peopleMediatorVo"/>
+			,(
+			SELECT 
+			    COUNT(*)
+			FROM
+			    oa_people_mediation_apply a,
+			    sys_user_office_info u
+			WHERE
+			    a.del_flag = '0' AND u.del_flag = '0'
+			        AND a.mediator = u.login_id
+			        AND u.info_id = a.id
+			) acceptCount
+		FROM info_people_mediation a
+		<include refid="peopleMediationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 修改评价值 -->
+    <update id="evaluationUpdate">
+		UPDATE info_people_mediation SET 
+			evaluation = #{evaluation}
+		WHERE id = (select info_id from sys_user_office_info where login_id = #{id}
+		<if test="remark!='' ">
+			and remark= #{remark}
+		</if>
+		)
+	</update>
+</mapper>

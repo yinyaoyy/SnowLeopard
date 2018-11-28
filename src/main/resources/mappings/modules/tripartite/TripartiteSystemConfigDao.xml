@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.tripartite.dao.TripartiteSystemConfigDao">
+    
+	<sql id="tripartiteSystemConfigColumns">
+		a.id AS "id",
+		a.type AS "type",
+		a.parent_id AS "parent.id",
+		a.value AS "value",
+		a.description AS "description",
+		a.method AS 'method',
+		a.service_name AS 'serviceName',
+		a.request_rate AS "requestRate",
+		a.last_request_date AS "lastRequestDate",
+		a.is_pause AS "isPause",
+		a.before_task_id AS "beforeTaskId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		if(p.type='1',p.id,p.parent_id) AS "systemId",
+		p.type AS "parent.type",
+		p.value AS "parent.value",
+		p.description AS "parent.description",
+		p.request_rate AS "parent.requestRate",
+		p.last_request_date AS "parent.lastRequestDate",
+		p.is_pause AS "parent.isPause",
+		p.remarks AS "parent.remarks",
+		b.type AS "beforeTask.type",
+		b.value AS "beforeTask.value",
+		b.description AS "beforeTask.description",
+		b.request_rate AS "beforeTask.requestRate",
+		b.last_request_date AS "beforeTask.lastRequestDate",
+		b.is_pause AS "beforeTask.isPause",
+		b.remarks AS "beforeTask.remarks"
+	</sql>
+	
+	<sql id="tripartiteSystemConfigJoins">
+		LEFT JOIN sys_tripartite_system_config p
+			   ON p.del_flag = '0'
+		      AND a.parent_id = p.id
+		LEFT JOIN sys_tripartite_system_config b
+			   ON b.del_flag = '0'
+		      AND a.before_task_id = b.id
+	</sql>
+    
+	<select id="get" resultType="TripartiteSystemConfig">
+		SELECT 
+			<include refid="tripartiteSystemConfigColumns"/>
+		FROM sys_tripartite_system_config a
+		<include refid="tripartiteSystemConfigJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TripartiteSystemConfig">
+		SELECT 
+			<include refid="tripartiteSystemConfigColumns"/>
+		FROM sys_tripartite_system_config a
+		<include refid="tripartiteSystemConfigJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="parent != null and parent.id != null and parent.id != ''">
+				AND a.parent_id = #{parent.id}
+			</if>
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+			<if test="value != null and value != ''">
+				AND a.value LIKE
+					<if test="dbName == 'oracle'">'%'||#{value}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{value}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{value},'%')</if>
+			</if>
+			<if test="description != null and description != ''">
+				AND a.description LIKE
+					<if test="dbName == 'oracle'">'%'||#{description}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{description}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{description},'%')</if>
+			</if>
+			<if test="isPause != null and isPause != ''">
+				AND a.is_pause = #{isPause}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TripartiteSystemConfig">
+		SELECT 
+			<include refid="tripartiteSystemConfigColumns"/>
+		FROM sys_tripartite_system_config a
+		<include refid="tripartiteSystemConfigJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_tripartite_system_config(
+			id,
+			type,
+			parent_id,
+			value,
+			description,
+			method,
+			service_name,
+			request_rate,
+			last_request_date,
+			is_pause,
+			before_task_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{type},
+			#{parent.id},
+			#{value},
+			#{description},
+			#{method},
+			#{serviceName},
+			#{requestRate},
+			#{lastRequestDate},
+			#{isPause},
+			#{beforeTask.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_tripartite_system_config SET 	
+			type = #{type},
+			parent_id = #{parent.id},
+			value = #{value},
+			description = #{description},
+			method = #{method},
+			service_name=#{serviceName},
+			request_rate = #{requestRate},
+			last_request_date = #{lastRequestDate},
+			is_pause = #{isPause},
+			before_task_id = #{beforeTask.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sys_tripartite_system_config SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

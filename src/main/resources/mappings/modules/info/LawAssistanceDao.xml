@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.LawAssistanceDao">
+    
+    <resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+	<resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="name" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="hasPerson" column="hasPerson" />
+		<result property="personName" column="manager" />
+		<result property="zipCode" column="zipcode" />
+		<result property="worktime" column="worktime" />
+		<result property="introduction" column="introduction" />
+		<result property="teamSize" column="teamSize" />
+		<result property="coordinate" column="coordinate" />
+		<result property="id" column="login_id" />
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	
+	<sql id="lawAssistanceColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.mobile AS "mobile",
+		a.worktime AS "worktime",
+		a.zipcode AS "zipcode",
+		a.phone AS "phone",
+		a.address AS "address",
+		a.introduction AS "introduction",
+		a.img AS "img",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.coordinate AS "coordinate",
+		a.area AS "area.id",
+		a7.name AS "area.name",
+		a.manager AS "manager",
+		a.team_size AS "teamSize",
+		suoi.login_id
+	</sql>
+	<sql id="lawAssistanceJoins">
+	LEFT JOIN sys_area a7 ON a7.id = a.area
+	LEFT JOIN sys_user_office_info suoi  ON suoi.info_id = a.id
+	</sql>
+    
+	<select id="get" resultType="LawAssistance">
+		SELECT 
+			<include refid="lawAssistanceColumns"/>
+		FROM info_law_assistance a
+		<include refid="lawAssistanceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="LawAssistance">
+		SELECT 
+			<include refid="lawAssistanceColumns"/>
+		FROM info_law_assistance a
+		LEFT JOIN sys_area a7 ON a7.id = a.area
+		left join sys_office o on o.name = a.name
+	    LEFT JOIN sys_user_office_info suoi  ON suoi.login_id = o.id
+		
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<!-- 数据范围过滤 -->
+		        ${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="LawAssistance">
+		SELECT 
+			<include refid="lawAssistanceColumns"/>
+		FROM info_law_assistance a
+		<include refid="lawAssistanceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+ <select id="getById"  resultMap="agencyResult">
+		SELECT 
+			<include refid="lawAssistanceColumns"/>
+		FROM info_law_assistance a
+		<include refid="lawAssistanceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+		<select id="findListForApi" resultMap="agencyResult">
+		SELECT (SELECT count(*) 
+		          FROM info_law_assitance_user i6 
+                 WHERE i6.del_flag = 0 
+                   AND i6.office_id = a.id) hasPerson,
+			<include refid="lawAssistanceColumns"/>
+		FROM info_law_assistance a
+		<include refid="lawAssistanceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area = #{area.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_law_assistance a
+		<include refid="lawAssistanceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area = #{area.id}
+			</if>
+		</where>
+	</select>
+	<insert id="insert">
+		INSERT INTO info_law_assistance(
+			id,
+			name,
+			mobile,
+			worktime,
+			zipcode,
+			phone,
+			address,
+			introduction,
+			img,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			area,
+			coordinate,
+			manager,
+			team_size
+		) VALUES (
+			#{id},
+			#{name},
+			#{mobile},
+			#{worktime},
+			#{zipcode},
+			#{phone},
+			#{address},
+			#{introduction},
+			#{img},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{area.id},
+			#{coordinate},
+			#{manager},
+			#{teamSize}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_law_assistance SET 	
+			name = #{name},
+			mobile = #{mobile},
+			worktime = #{worktime},
+			zipcode = #{zipcode},
+			phone = #{phone},
+			address = #{address},
+			introduction = #{introduction},
+			img = #{img},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			area=#{area.id},
+			coordinate=#{coordinate},
+			manager=#{manager},
+			team_size =#{teamSize}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_law_assistance SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<select id="areaName" resultType="String">
+		SELECT a.name FROM info_law_assistance a 
+		<where>
+			name = #{name}
+		</where>
+	</select>
+</mapper>

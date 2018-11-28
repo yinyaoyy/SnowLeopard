@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.cms.dao.ArticleDao">
+    
+	<sql id="cmsArticleColumns">
+		a.id AS "id",
+		a.category_id AS "category.id",
+		a.title AS "title",
+		a.link AS "link",
+		a.color AS "color",
+		a.image AS "image",
+		a.keywords AS "keywords",
+		a.description AS "description",
+		a.weight AS "weight",
+		a.weight_date AS "weightDate",
+		a.hits AS "hits",
+		a.posid AS "posid",
+		a.custom_content_view AS "customContentView",
+		a.view_config AS "viewConfig",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		c.name AS "category.name",
+		u.name AS "createBy.name",
+		a.company_id AS "company.id",
+		a.company_name AS "company.name",
+		a.office_id AS "office.id",
+		a.office_name AS "office.name",
+		a.site_id AS "siteId",
+		s.name AS "siteName",
+		a.files As "files",
+		a.type  AS "type",
+		a.thumbs_up_count as "thumbsUpCount",
+		d.content as "articleData.content",
+		d.allow_comment as "articleData.allowComment"
+	</sql>
+	<sql id="cmsArticleColumnsType">
+		a.id AS "id",
+		a.category_id AS "category.id",
+		a.title AS "title",
+		a.link AS "link",
+		a.color AS "color",
+		a.image AS "image",
+		a.keywords AS "keywords",
+		a.description AS "description",
+		a.weight AS "weight",
+		a.weight_date AS "weightDate",
+		a.hits AS "hits",
+		a.posid AS "posid",
+		a.custom_content_view AS "customContentView",
+		a.view_config AS "viewConfig",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		c.name AS "category.name",
+		u.name AS "createBy.name",
+		a.company_id AS "company.id",
+		a.company_name AS "company.name",
+		a.office_id AS "office.id",
+		a.office_name AS "office.name",
+		a.site_id AS "siteId",
+		s.name AS "siteName",
+		a.files As "files",
+		d1.label  AS "type"
+	</sql>
+	 <sql id="cmsArticleColumnsCategory">
+		a.id AS "id",
+		a.category_id AS "category.id",
+		a.title AS "title",
+		a.link AS "link",
+		a.image AS "image",
+		a.description AS "description",
+		a.custom_content_view AS "customContentView",
+		a.create_by AS "createBy.id",
+		b.name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		c.name AS "updateBy.name",
+		a.update_date AS "updateDate",
+		d.name AS "category.name",
+		a.site_id AS "siteId",
+		s.name AS "siteName",
+		a.files As "files",
+		a.type AS "type"
+	</sql>
+	<sql id="cmsArticleJoins">
+		LEFT JOIN cms_category c ON c.id = a.category_id
+		LEFT JOIN sys_office o ON o.id = c.office_id
+		LEFT JOIN sys_user u ON u.id = a.create_by
+		LEFT JOIN sys_office of ON of.id = a.office_id
+		LEFT join cms_site s on s.id=a.site_id
+		left join cms_article_data d on d.id=a.id
+	</sql>
+    
+	<select id="get" resultType="Article">
+		SELECT 
+			<include refid="cmsArticleColumns"/>
+		FROM cms_article a
+		<include refid="cmsArticleJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="getOldHost" resultType="Article">
+		SELECT 
+			<include refid="cmsArticleColumns"/>
+		FROM cms_article a
+		<include refid="cmsArticleJoins"/>
+		where  a.site_id=#{siteId}
+		and a.posid LIKE '%1%' ORDER BY a.update_date  limit 1
+	</select>
+	
+	<select id="findList" resultType="Article">
+		SELECT 
+			<include refid="cmsArticleColumnsType"/>
+		FROM cms_article a
+		<include refid="cmsArticleJoins"/>
+		LEFT JOIN  sys_dict d1 on a.type=d1.`value` and d1.type='cms_article_type'
+		<where>
+			a.del_flag = #{delFlag}
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{title}, '%')</if>
+			</if>
+			<if test="articleData != null and articleData != '' and articleData.content != null and articleData.content != ''">
+				AND d.content LIKE 
+					<if test="dbName == 'oracle'">'%'||#{articleData.content}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{articleData.content}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{articleData.content}, '%')</if>
+			</if>
+			<if test="type != null and type != ''">
+				AND a.type =#{type}
+			</if>
+			<if test="beginDate != null and beginDate != ''">
+			 <![CDATA[   and a.create_date>= DATE_FORMAT(#{beginDate}, '%Y-%m-%d %T')   ]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+			 <![CDATA[   and a.create_date<=  DATE_FORMAT(#{endDate}, '%Y-%m-%d %T')   ]]>
+			</if>
+			<if test="posid != null and posid != ''">
+				AND a.posid LIKE 
+					<if test="dbName == 'oracle'">'%'||#{posid}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{posid}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{posid}, '%')</if>
+			</if>
+			<if test="category.id != null and category.id != ''">
+				AND (a.category_id = #{category.id}
+				<if test="category.parentIds != null and category.parentIds != ''">
+					or c.parent_ids like 
+						<if test="dbName == 'oracle'">'%'||#{category.id}||'%'</if>
+						<if test="dbName == 'mssql'">'%,'+#{category.id}+',%'</if>
+						<if test="dbName == 'mysql'">CONCAT('%,', #{category.id}, ',%')</if>
+				</if>)
+			</if>
+			<if test="image != null and image != ''">
+				AND a.image  = #{image}
+			</if>
+			<if test="createBy != null and createBy.id != null and createBy.id != ''">
+				AND a.create_by  = #{createBy.id}
+			</if>
+			<!-- 添加根据旗县(科室所在旗县)、科室的查询条件 -->
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.office_id in (select s.id from sys_office s where s.del_flag=#{delFlag} and s.area_id = #{area.id})
+			</if>
+			<if test="office != null and office.id != null and office.id != ''">
+				AND a.office_id = #{office.id}
+			</if>
+			${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.posid,a.weight DESC, a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findAllList" resultType="Article">
+		SELECT 
+			<include refid="cmsArticleColumns"/>
+		FROM cms_article a
+		<include refid="cmsArticleJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.weight DESC, a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListByCategoryType" resultType="Article">
+		SELECT 
+			<include refid="cmsArticleColumnsCategory"/>
+		FROM cms_article a
+		JOIN sys_user b ON b.id = a.create_by
+		JOIN sys_user c ON c.id = a.update_by
+		JOIN cms_category d ON d.id = a.category_id
+		left join cms_site s on s.id=a.site_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}  
+			and a.posid like
+				<if test="dbName == 'oracle'">'%'||'1'||'%'</if>
+				<if test="dbName == 'mssql'">'%,'+'1'+',%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%,', '1', ',%')</if>
+			and  a.category_id in(select id from cms_category where name=#{category.name})
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY  a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="articleHotCount" resultType="java.lang.Integer">
+		SELECT  count(*)
+		FROM cms_article a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			and a.site_id=#{siteId}
+			and a.posid like
+				<if test="dbName == 'oracle'">'%'||'1'||'%'</if>
+				<if test="dbName == 'mssql'">'%,'+'1'+',%'</if>
+				<if test="dbName == 'mysql'">CONCAT('%,', '1', ',%')</if>
+		</where>		
+	</select>
+	<insert id="insert">
+		INSERT INTO cms_article(
+			id,
+			site_id,
+			category_id,
+			title,
+			link,
+			color,
+			image,
+			keywords,
+			description,
+			weight,
+			weight_date,
+			hits,
+			posid,
+			custom_content_view,
+			view_config,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			company_id,
+			company_name,
+			office_id,
+			office_name,
+			files,
+			type
+		) VALUES (
+			#{id},
+			#{siteId},
+			#{category.id},
+			#{title},
+			#{link},
+			#{color},
+			#{image},
+			#{keywords},
+			#{description},
+			#{weight},
+			#{weightDate},
+			#{hits},
+			#{posid},
+			#{customContentView},
+			#{viewConfig},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{company.id},
+			#{company.name},
+			#{office.id},
+			#{office.name},
+			#{files},
+			#{type}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cms_article SET 	
+			category_id = #{category.id},
+			title = #{title},
+			link = #{link},
+			color = #{color},
+			image = #{image},
+			keywords = #{keywords},
+			description = #{description},
+			weight = #{weight},
+			weight_date = #{weightDate},
+			hits = #{hits},
+			posid = #{posid},
+			custom_content_view = #{customContentView},
+			view_config = #{viewConfig},
+			create_date = #{createDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			del_flag = #{delFlag},
+			files=#{files},
+			type=#{type},
+			thumbs_up_count=#{thumbsUpCount}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cms_article SET 
+			del_flag =  #{delFlag}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findByIdIn" resultType="Article">
+		SELECT 
+			<include refid="cmsArticleColumns"/>
+		from cms_article a where 
+		<where>
+			id in (${id});
+		</where>		
+	</select>
+ 
+	<update id="updateExpiredWeight">
+		update cms_article SET
+			 weight = 0
+		WHERE weight &gt; 0 AND weight_date &lt; 
+			<if test="dbName == 'oracle'">sysdate</if>
+			<if test="dbName == 'mssql'">FLOOR(CONVERT(FLOAT,GETDATE()))</if>
+			<if test="dbName == 'mysql'">CURDATE()</if>
+	</update>
+	
+	<update id="updateHitsAddOne">
+		update cms_article set
+			 hits = hits+1
+		 WHERE id = #{id}
+	</update>
+	<select id="findStats" resultType="Category">
+		select max(c.id) AS "id",
+		       max(c.name) AS "name",
+		       max(cp.id) AS "parent.id",
+		       max(cp.name) AS "parent.name",
+		       count(*) AS "cnt",
+		       sum(a.hits) AS "hits",
+		       max(a.update_date) as "updateDate",
+		       max(o.id) AS "office.id",
+		       max(o.name) AS "office.name"
+		  FROM cms_article a
+		  RIGHT JOIN cms_category c ON c.id = a.category_id
+		  JOIN cms_category cp ON c.parent_id = cp.id
+		  JOIN sys_office o ON o.id = c.office_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} 
+			AND c.site_id = #{site.id}
+			<if test="office.id != null and office.id != ''">
+				AND (c.office_id = #{office.id} OR o.parent_ids like 
+					<if test="dbName == 'oracle'">'%'||#{office.id}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{office.id}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{office.id}, '%')</if>)
+			</if>
+			<if test="beginDate != null and beginDate != ''">
+				AND a.update_date <![CDATA[ >= #{beginDate} ]]>
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND a.update_date <![CDATA[ <= #{endDate} ]]>
+			</if>
+			<if test="id != null and id != ''">
+				AND (c.id = #{id} OR c.parent_ids LIKE 
+					<if test="dbName == 'oracle'">'%'||#{id}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{id}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{id}, '%')</if>)
+			</if>
+			group by cp.sort, cp.id, c.sort, c.id
+			order by cp.sort, cp.id, c.sort, c.id
+		</where>
+			<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+		</choose>
+	</select>
+	
+	<!-- 通过文章id查找所有的已通过的评论 -->
+	<select id="getCommentListByArticleId" resultType="Comment">
+		SELECT 
+		    c.id AS "id",
+			c.category_id AS "category.id",
+			c.content_id AS "contentId",
+			c.title AS "title",
+			c.content AS "content",
+			c.commentator as "commentator.id",
+			u.name as "commentator.name",
+			c.ip AS "ip",
+			u.login_name as "name",
+			c.create_date AS "createDate",
+			c.audit_user_id AS "auditUser.id",
+			c.audit_date AS "auditDate",
+			c.del_flag AS "delFlag",
+			c.company_id AS "company.id",
+			c.office_id AS "office.id",
+			u.photo as "photo"			
+		FROM 
+		 	cms_comment c
+		LEFT JOIN 
+			sys_user u
+		ON  u.id = c.commentator
+		WHERE c.content_id = #{id} and c.del_flag = 0
+	</select>
+	
+	<!-- 各旗县普法宣传文章统计图 -->
+	<select id="countArticle" parameterType="ArticleCount" resultType="ArticleCount">
+		SELECT 
+		    a.id 'area.id', a.name 'area.name', IFNULL(t.count, 0) count
+		    <if test="forTable == 'true'">
+		     ,t.countDate
+		    </if>
+		FROM
+		    sys_area a
+		        LEFT JOIN
+		    (SELECT 
+		        COUNT(*) count, o.area_id
+		    <if test="forTable == 'true'">
+		     ,DATE_FORMAT(a.create_date, #{datePattern}) countDate
+		    </if>
+		    FROM
+		        cms_article a
+		    INNER JOIN cms_site s ON a.site_id = s.id AND s.del_flag = 0
+		    INNER JOIN cms_category c ON a.category_id = c.id AND c.del_flag = 0
+		    LEFT JOIN sys_office o ON a.office_id = o.id
+		    WHERE
+		        a.del_flag = 0
+		        <![CDATA[ 
+		        AND date_format(a.create_date,#{datePattern}) >= #{startDate}
+		        AND date_format(a.create_date,#{datePattern}) <= #{endDate}
+		         ]]> 
+		    GROUP BY o.area_id
+		    <if test="forTable == 'true'">
+		     ,DATE_FORMAT(a.create_date, #{datePattern})
+		    </if> ) t ON a.id = t.area_id
+		WHERE
+		    a.del_flag = 0
+		        AND (a.id = 5 OR a.parent_id = 5)
+		        <if test="areaArr != null and areaArr.length > 0">
+		        AND a.id in 
+		          <foreach collection="areaArr" item="area" open="(" separator="," close=")">
+		          #{area}
+		          </foreach>
+		        </if>
+		ORDER BY a.code ASC
+	</select>
+</mapper>

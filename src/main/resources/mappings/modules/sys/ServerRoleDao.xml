@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.sys.dao.ServerRoleDao">
+    
+	<sql id="serverRoleColumns">
+		a.server_id AS "serverId",
+		a.role_id AS "roleId"
+	</sql>
+	
+	<sql id="serverRoleJoins">
+	</sql>
+    
+	<select id="get" resultType="ServerRole">
+		SELECT 
+			<include refid="serverRoleColumns"/>
+		FROM server_role a
+		<include refid="serverRoleJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ServerRole">
+		SELECT 
+			<include refid="serverRoleColumns"/>
+		FROM server_role a
+		<include refid="serverRoleJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ServerRole">
+		SELECT 
+			<include refid="serverRoleColumns"/>
+		FROM server_role a
+		<include refid="serverRoleJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO server_role(
+			server_id,
+			role_id
+		) VALUES (
+			#{serverId},
+			#{roleId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE server_role SET 	
+			server_id = #{serverId},
+			role_id = #{roleId}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM server_role
+		WHERE server_id = #{serverId}
+	</update>
+</mapper>

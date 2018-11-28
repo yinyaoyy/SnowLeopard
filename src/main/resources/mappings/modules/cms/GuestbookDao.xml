@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.cms.dao.GuestbookDao">
+    
+	<sql id="cmsGuestbookColumns">
+		a.id AS "id",
+		a.type AS "type",
+		a.title AS "title",
+		a.content AS "content",
+		c.name AS "name",
+		a.phone AS "phone",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag",
+		a.problem_type AS "problemType",
+		a.is_comment AS "isComment",
+		a.is_inquiries As "isInquiries",
+		a.statistic_num As "statisticNum",
+		b.*
+	</sql>
+	<sql id="cmsGuestbookListColumns">
+		a.id AS "id",
+		a.type AS "type",
+		d1.label AS "typeDesc",
+		a.title AS "title",
+		a.content AS "content",
+		a.user AS "user.id",
+		d3.name AS "user.name",
+		d3.photo AS "user.photo",
+		c.name AS "name",
+		a.phone AS "phone",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag",
+		a.problem_type AS "problemType",
+		d2.label AS "problemTypeDesc",
+		a.is_comment AS "isComment",
+		a.is_inquiries As "isInquiries",
+		a.statistic_num As "statisticNum",
+		b.*
+	</sql>
+	
+	<resultMap id="guestbookResult" type="com.thinkgem.jeesite.modules.cms.entity.Guestbook">
+			<id property="id" column="id" />
+		<result property="type" column="type" />
+		<result property="typeDesc" column="typeDesc" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="name" column="name" />
+		<result property="phone" column="phone" />
+		<result property="createBy.id" column="createBy.id" />
+		<result property="createBy.id" column="createBy.photo" />
+		<result property="createDate" column="createDate" />
+		<result property="delFlag" column="delFlag" />
+		<result property="problemType" column="problemType" />
+		<result property="problemTypeDesc" column="problemTypeDesc" />
+		<result property="isComment" column="isComment" />
+		<result property="isInquiries" column="isInquiries" />
+		<result property="statisticNum" column="statisticNum" />
+		<collection property="commentList" ofType="com.thinkgem.jeesite.modules.cms.entity.GuestbookComment" javaType="list">
+			<id property="id" column="commentId" />
+			<result property="createUser.id" column="commentCreate" />
+			<result property="createUser.name" column="create_name" />
+			<result property="createUser.userType" column="create_type" />
+			<result property="createUser.photo" column="create_photo" />
+			<result property="content" column="commentContent" />
+			<result property="delFlag" column="commentDelFlag" />
+			<result property="createDate" column="commentCreateDate" />
+			<result property="commentType" column="commentType" />
+			<result property="guestbookId" column="guestbookId" />
+			<result property="thumbsUpTrue" column="thumbsUpTrue" />
+			<result property="thumbsUpFalse" column="thumbsUpFalse" />
+			<result property="isEvaluate" column="isEvaluate" />
+			<result property="guestbookEvaluate.prescription" column="prescription" />
+			<result property="guestbookEvaluate.id" column="evaluate_id" />
+			<result property="guestbookEvaluate.proposal" column="evaluate_proposal" />
+			 <collection property="guestbookCommentReList" ofType="com.thinkgem.jeesite.modules.cms.entity.GuestbookCommentRe" javaType="list">
+				<id property="id" column="re_id" />
+				<result property="commentId" column="commentIds" />
+				<result property="createUser.id" column="re_commentCreate" />
+				<result property="createUser.name" column="re_create_name" />
+				<result property="createUser.photo" column="re_create_photo" />
+				<result property="content" column="re_commentContent" />
+				<result property="delFlag" column="re_commentDelFlag" />
+				<result property="createDate" column="re_commentCreateDate" />
+				<result property="commentType" column="re_commentType" />
+				<result property="guestbookId" column="complaintId" />
+			</collection> 
+		</collection>
+	</resultMap>
+	<sql id="cmsGuestbookJoins">
+		 left join   
+		 (select c.id as "commentId",c.is_evaluate as "isEvaluate",c.guestbook_id as "guestbookId",c.create_by as "commentCreate",c.content as "commentContent",
+			c.del_flag as "commentDelFlag",c.create_date as "commentCreateDate",c.comment_type as "commentType",
+			c.thumbs_up_true AS "thumbsUpTrue",c.thumbs_up_false As "thumbsUpFalse",d.photo As "create_photo",
+			d.name As "create_name",d.user_type as "create_type",r.id As "re_id",r.create_by as "re_commentCreate",e.name as "re_create_name" ,e.photo as "re_create_photo" ,
+			r.content as "re_commentContent",r.del_flag as "re_commentDelFlag",r.create_date as "re_commentCreateDate" ,r.comment_type as "re_commentType",
+			r.comment_id AS "commentIds" ,r.guestbook_id as "complaintId" ,s.prescription AS "prescription",s.id AS "evaluate_id",s.proposal AS "evaluate_proposal"
+			from  cms_guestbook_comment c left join 
+		  sys_user  d on c.create_by=d.id  LEFT JOIN  cms_guestbook_comment_re r  
+		  on c.id=r.comment_id LEFT JOIN  cms_guestbook_evaluate s  
+		  on c.id=s.comment_id
+		  LEFT JOIN sys_user e on e.id=r.create_by  
+		 ) b on b.guestbookId=a.id
+		 left join sys_user c on c.id=a.create_by 
+	</sql>
+	<select id="get" resultMap="guestbookResult">
+		SELECT 
+			<include refid="cmsGuestbookListColumns"/>
+		FROM cms_guestbook a
+		<include refid="cmsGuestbookJoins"/>
+		LEFT JOIN  sys_dict d1 on a.type=d1.`value` and d1.type='cms_guestbook_type'
+		LEFT JOIN  sys_dict d2 on a.problem_type=d2.`value` and d2.type='cms_guestbook_type'
+	    LEFT JOIN  sys_user d3 on a.user=d3.id 
+		WHERE a.id = #{id}  ORDER BY b.commentCreateDate,b.re_commentCreateDate asc
+	</select>
+	
+	<select id="getApi" resultMap="guestbookResult">
+		SELECT 
+			<include refid="cmsGuestbookListColumns"/>
+		FROM cms_guestbook a
+		<include refid="cmsGuestbookJoins"/>
+		LEFT JOIN  sys_dict d1 on a.type=d1.`value` and d1.type='cms_guestbook_type'
+		LEFT JOIN  sys_dict d2 on a.problem_type=d2.`value` and d2.type='cms_guestbook_type'
+	    LEFT JOIN  sys_user d3 on a.user=d3.id 
+		WHERE a.id = #{id}  ORDER BY b.commentCreateDate,b.re_commentCreateDate asc
+	</select>
+	
+	<select id="findList" resultType="Guestbook">
+		SELECT 
+			<include refid="cmsGuestbookListColumns"/>
+		FROM cms_guestbook a
+		<include refid="cmsGuestbookJoins"/>
+		LEFT JOIN  sys_dict d1 on a.type=d1.`value` and d1.type='cms_guestbook_type'
+		LEFT JOIN  sys_dict d2 on a.problem_type=d2.`value` and d2.type='cms_guestbook_type'
+	    LEFT JOIN  sys_user d3 on a.user=d3.id 
+		<where>
+			a.del_flag = #{delFlag}
+			<if test="type != null and type != ''">
+				AND a.type =#{type}
+			</if>
+			<if test="problemType != null and problemType != ''">
+				AND a.problem_type =#{problemType}
+			</if>
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{title}, '%')</if>
+			</if>
+			<if test="beginDate!= null and beginDate !=''">
+		and a. create_date<![CDATA[>=]]>  DATE_FORMAT(#{beginDate}, '%Y-%m-%d') 
+		 </if>
+		<if test="endDate!= null and endDate !=''">
+		and a.create_date<![CDATA[<=]]> DATE_FORMAT(#{endDate}, '%Y-%m-%d') 
+		 </if>
+		 <if test="user!=null and user.id!=null">
+		    AND(a.user =#{user.id} or a.user is null)
+		 </if>
+		  <if test="isComment!=null and isComment!=''"> 
+        		 and    is_comment = #{isComment}
+		     </if>
+		 
+		<!--  <if test="user==null">
+		    AND  a.user is null
+		 </if> -->
+		<!--    -->
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			GROUP BY a.id
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findUserList" resultMap="guestbookResult">
+		SELECT 
+			<include refid="cmsGuestbookListColumns"/>
+		FROM cms_guestbook a
+		LEFT JOIN  sys_dict d1 on a.type=d1.`value` and d1.type='cms_guestbook_type'
+		LEFT JOIN  sys_dict d2 on a.problem_type=d2.`value` and d2.type='cms_guestbook_type'
+		LEFT JOIN  sys_user d3 on a.user=d3.id 
+		<include refid="cmsGuestbookJoins"/>
+		<where>
+			a.del_flag =0
+			<if test="isComment != null and isComment != ''">
+				AND a.is_comment=#{isComment}
+			</if>
+			<if test="createBy != null and createBy != '' and createBy.id!=null and createBy.id!=''">
+				AND a.create_by=#{createBy.id}
+			</if>
+			<if test="beginDate!= null and beginDate !=''">
+				and a.create_date<![CDATA[>=]]>  DATE_FORMAT(#{beginDate}, '%Y-%m-%d') 
+			</if>
+			<if test="endDate!= null and endDate !=''">
+				and a.create_date<![CDATA[<=]]> DATE_FORMAT(#{endDate}, '%Y-%m-%d') 
+			</if>
+			<if test="title!= null and title !=''">
+				and a.title = #{title}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			GROUP BY a.id
+				ORDER BY a.create_date desc
+			</otherwise>
+		</choose>
+	</select>
+		<select id="findUserIsInquiriesList" resultMap="guestbookResult">
+		SELECT 
+			<include refid="cmsGuestbookColumns"/>
+		FROM cms_guestbook a
+		<include refid="cmsGuestbookJoins"/>
+		<where>
+			a.del_flag =0
+			<if test="createBy != null and createBy != '' and createBy.id!=null and createBy.id!=''">
+				AND b.re_commentCreate=#{createBy.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			GROUP BY a.id
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findAllList" resultType="Guestbook">
+		SELECT 
+			<include refid="cmsGuestbookColumns"/>
+		FROM cms_guestbook a
+		<include refid="cmsGuestbookJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cms_guestbook(
+			id,
+			<if test="type != null and type != ''">
+			type,
+			</if>
+			<if test="title != null and title != ''">
+			title,
+			</if>
+			<if test="content != null and content != ''">
+			content,
+			</if>
+			<if test="name != null and name != ''">
+			name,
+			</if>
+			<if test="problemType != null and problemType != ''">
+			problem_type,
+			</if>
+			<if test="phone != null and phone != ''">
+			phone,
+			</if>
+			<if test="area != null and area != '' and area.id!=null and  area.id!=''">
+			area,
+			</if>
+			 <if test="user != null and user != '' and user.id!=null and  user.id!=''">
+			user,
+			</if>
+			<if test="createBy != null and createBy != ''">
+			create_by,
+			</if>
+			<if test="createDate != null and createDate != ''">
+			create_date,
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+			del_flag
+			</if>
+		) VALUES (
+			#{id},
+			<if test="type != null and type != ''">
+			#{type},
+			</if>
+			<if test="title != null and title != ''">
+			#{title},
+			</if>
+			<if test="content != null and content != ''">
+			#{content},
+			</if>
+			<if test="name != null and name != ''">
+			#{name},
+			</if>
+			<if test="problemType != null and problemType != ''">
+			#{problemType},
+			</if>
+			<if test="phone != null and phone != ''">
+			#{phone},
+			</if>
+			<if test="area != null and area != '' and area.id!=null and  area.id!=''">
+			#{area.id},
+			</if>
+			<if test="user != null and user != '' and user.id!=null and  user.id!=''">
+			#{user.id},
+			</if>
+			<if test="createBy != null and createBy != ''">
+			#{createBy.id},
+			</if>
+			<if test="createDate != null and createDate != ''">
+			#{createDate},
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+			#{delFlag}
+			</if>
+		)
+	</insert>
+	<update id="update">
+			UPDATE cms_guestbook 
+		 <set> 
+		     <if test="delFlag!=null and delFlag!=''"> 
+		     del_flag = #{delFlag},
+		     </if>
+		     <if test="isInquiries!=null and isInquiries!=''"> 
+		     is_inquiries = #{isInquiries},
+		     </if>
+		     <if test="isComment!=null and isComment!=''"> 
+		     is_comment = #{isComment},
+		     </if>
+		 </set>
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cms_guestbook SET 
+			del_flag = #{delFlag}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findByIdIn" resultType="Guestbook">
+		SELECT 
+			<include refid="cmsGuestbookColumns"/>
+		from cms_guestbook a where 
+		<where>
+			id in ();
+		</where>		
+	</select>
+	
+	<!-- 统计接口访问数量 -->
+	<update id="statisticNum">
+		UPDATE cms_guestbook SET 
+			statistic_num = statistic_num+1
+		WHERE id = #{id}
+	</update>
+</mapper>

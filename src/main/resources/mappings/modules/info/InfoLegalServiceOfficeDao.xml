@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.InfoLegalServiceOfficeDao">
+    
+    <resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+    <resultMap type="Area" id="townMap">  
+        <id property="id" column="town.id" />  
+        <result property="name" column="town.name" />  
+    </resultMap>
+    <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="name" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="personName" column="personInCharge" />
+		<result property="zipCode" column="zipCode" />
+		<result property="no" column="no" />
+		<result property="licenseForm" column="licenseForm" />
+		<result property="businessExpertise" column="businessExpertise" />
+		<result property="introduction" column="introduction" />
+		<result property="id" column="login_id" />
+		<association property="area"  javaType="Area" resultMap="areaMap"/>
+		<association property="town"  javaType="Area" resultMap="townMap"/>
+    </resultMap>
+	<sql id="infoLegalServiceOfficeColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.person_in_charge AS "personInCharge",
+		a.practice_license AS "practiceLicense",
+		a.practice_license_num AS "practiceLicenseNum",
+		a.practice_license_expiry_time AS "practiceLicenseExpiryTime",
+		a.occupational_state AS "occupationalState",
+		a.license_number AS "licenseNumber",
+		a.license_herf AS "licenseHerf",
+		a.approval_number AS "approvalNumber",
+		a.approval_date AS "approvalDate",
+		a.competent_authorities_id AS "competentAuthoritiesId",
+		a.competent_authorities_name AS "competentAuthoritiesName",
+		a.address AS "address",
+		a.phone AS "phone",
+		a.fax AS "fax",
+		a.official_web_address AS "officialWebAddress",
+		a.worktime AS "worktime",
+		a.sort AS "sort",
+		a.introduction AS "introduction",
+		a.area_id AS "area.id",
+		a.logo AS "logo",
+		a.coordinate AS "coordinate",
+		a.sys_office_category AS "sysOfficeCategory",
+		a.site_id AS "siteId",
+		a.sys_service_id AS "sysServiceId",
+		a.app_menu_id AS "appMenuId",
+		a.is_show AS "isShow",
+		a.legal_person AS "legalPerson",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks",
+		a22.name AS "area.name",
+		a.license_form AS "licenseForm",
+		a.town_id AS "town.id",
+		a23.name AS "town.name",
+		a.certification_time AS "certificationTime",
+		a.administrative_division AS "administrativeDivision",
+		a.no AS "no",
+		a.business_expertise AS "businessExpertise",
+		a.zip_code AS "zipCode",
+		suoi.login_id 
+	</sql>
+	
+	<sql id="infoLegalServiceOfficeJoins">
+		LEFT JOIN sys_area a22 ON a22.id = a.area_id
+		LEFT JOIN sys_area a23 ON a23.id = a.town_id
+		LEFT JOIN sys_user_office_info suoi  ON suoi.info_id = a.id
+	</sql>
+    
+	<select id="get" resultType="InfoLegalServiceOffice">
+		SELECT 
+			<include refid="infoLegalServiceOfficeColumns"/>
+		FROM info_legal_service_office a
+		<include refid="infoLegalServiceOfficeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="getById" resultMap="agencyResult">
+		SELECT 
+			<include refid="infoLegalServiceOfficeColumns"/>
+		FROM info_legal_service_office a
+		<include refid="infoLegalServiceOfficeJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="InfoLegalServiceOffice">
+		SELECT 
+			<include refid="infoLegalServiceOfficeColumns"/>
+		FROM info_legal_service_office a
+	    LEFT JOIN sys_area a22 ON a22.id = a.area_id
+		LEFT JOIN sys_area a23 ON a23.id = a.town_id
+		left join sys_office o on o.name = a.name
+		LEFT JOIN sys_user_office_info suoi  ON suoi.login_id = o.id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="personInCharge != null and personInCharge != ''">
+				AND a.person_in_charge = #{personInCharge}
+			</if>
+			<if test="practiceLicenseNum != null and practiceLicenseNum != ''">
+				AND a.practice_license_num = #{practiceLicenseNum}
+			</if>
+			<if test="occupationalState != null and occupationalState != ''">
+				AND a.occupational_state = #{occupationalState}
+			</if>
+			<if test="licenseNumber != null and licenseNumber != ''">
+				AND a.license_number = #{licenseNumber}
+			</if>
+			<if test="approvalNumber != null and approvalNumber != ''">
+				AND a.approval_number = #{approvalNumber}
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+			<!-- 数据范围过滤 -->
+		        ${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="InfoLegalServiceOffice">
+		SELECT 
+			<include refid="infoLegalServiceOfficeColumns"/>
+		FROM info_legal_service_office a
+		<include refid="infoLegalServiceOfficeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO info_legal_service_office(
+			id,
+			name,
+			person_in_charge,
+			practice_license,
+			practice_license_num,
+			practice_license_expiry_time,
+			occupational_state,
+			license_number,
+			license_herf,
+			approval_number,
+			approval_date,
+			competent_authorities_id,
+			competent_authorities_name,
+			address,
+			phone,
+			fax,
+			official_web_address,
+			worktime,
+			sort,
+			introduction,
+			area_id,
+			logo,
+			coordinate,
+			sys_office_category,
+			site_id,
+			sys_service_id,
+			app_menu_id,
+			is_show,
+			legal_person,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			remarks,
+			license_form,
+			town_id,
+			certification_time,
+			administrative_division,
+			no,
+			business_expertise,
+			zip_code
+		) VALUES (
+			#{id},
+			#{name},
+			#{personInCharge},
+			#{practiceLicense},
+			#{practiceLicenseNum},
+			#{practiceLicenseExpiryTime},
+			#{occupationalState},
+			#{licenseNumber},
+			#{licenseHerf},
+			#{approvalNumber},
+			#{approvalDate},
+			#{competentAuthoritiesId},
+			#{competentAuthoritiesName},
+			#{address},
+			#{phone},
+			#{fax},
+			#{officialWebAddress},
+			#{worktime},
+			#{sort},
+			#{introduction},
+			#{area.id},
+			#{logo},
+			#{coordinate},
+			#{sysOfficeCategory},
+			#{siteId},
+			#{sysServiceId},
+			#{appMenuId},
+			#{isShow},
+			#{legalPerson},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{remarks},
+			#{licenseForm},
+			#{town.id},
+			#{certificationTime},
+			#{administrativeDivision},
+			#{no},
+			#{businessExpertise},
+			#{zipCode}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_legal_service_office SET 	
+			name = #{name},
+			person_in_charge = #{personInCharge},
+			practice_license = #{practiceLicense},
+			practice_license_num = #{practiceLicenseNum},
+			practice_license_expiry_time = #{practiceLicenseExpiryTime},
+			occupational_state = #{occupationalState},
+			license_number = #{licenseNumber},
+			license_herf = #{licenseHerf},
+			approval_number = #{approvalNumber},
+			approval_date = #{approvalDate},
+			competent_authorities_id = #{competentAuthoritiesId},
+			competent_authorities_name = #{competentAuthoritiesName},
+			address = #{address},
+			phone = #{phone},
+			fax = #{fax},
+			official_web_address = #{officialWebAddress},
+			worktime = #{worktime},
+			sort = #{sort},
+			introduction = #{introduction},
+			area_id = #{area.id},
+			logo = #{logo},
+			coordinate = #{coordinate},
+			sys_office_category = #{sysOfficeCategory},
+			site_id = #{siteId},
+			sys_service_id = #{sysServiceId},
+			app_menu_id = #{appMenuId},
+			is_show = #{isShow},
+			legal_person = #{legalPerson},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			license_form = #{licenseForm},
+			town_id = #{town.id},
+			certification_time = #{certificationTime},
+			administrative_division = #{administrativeDivision},
+			no = #{no},
+			business_expertise = #{businessExpertise},
+			zip_code = #{zipCode}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_legal_service_office SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="findListForApi" resultMap="agencyResult">
+		SELECT 0 hasPerson,
+			<include refid="infoLegalServiceOfficeColumns"/>
+		FROM info_legal_service_office a
+		<include refid="infoLegalServiceOfficeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+			</if>
+			<if test="town ==null or  town.id== null or town.id == ''">
+				<if test="area != null and area.id != null and area.id != ''">
+				   AND a.area_id  in (select  id from  sys_area where id=#{area.id} or parent_id=#{area.id}) 
+			    </if>
+			</if>
+			<if test="town != null and town.id != null and town.id != ''">
+				 AND a.town_id = #{town.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_legal_service_office a
+		<include refid="infoLegalServiceOfficeJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="area != null and area.id != null and area.id != ''">
+			   AND a.area_id  in (select  id from  sys_area where id=#{area.id} or parent_id=#{area.id}) 
+			</if>
+		</where>
+	</select>
+	<!-- 批量删除基层法律服务所-->
+    <update id="batchDelete" parameterType="String" >
+  		UPDATE info_legal_service_office SET del_flag = '1' where  id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+	
+	<select id="personInstitution" resultType="String">
+		SELECT name FROM info_legal_service_office a  
+		<where>
+			no = #{no}
+			<if test="areaId != null and areaId != ''">
+			   AND (a.area_id =#{areaId} 
+			   		or 
+			   		a.town_id = #{townId}
+			   	   )
+		    </if>
+		</where>
+	</select>
+</mapper>

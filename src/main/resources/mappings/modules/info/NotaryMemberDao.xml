@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.NotaryMemberDao">
+    
+    <resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+    <resultMap type="Office" id="notaryAgencyMap">  
+        <id property="id" column="notaryAgency.id" />  
+        <result property="name" column="notaryAgency.name" />  
+    </resultMap>
+    <resultMap id="notaryMemberResult" type="NotaryMember">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="sex" column="sex" />
+		<result property="birthday" column="birthday" />
+		<result property="ethnic" column="ethnic" />
+		<result property="politicalFace" column="politicalFace" />
+		<result property="education" column="education" />
+		<result property="practisingTime" column="practisingTime" />
+		<result property="expertise" column="expertise" />
+		<result property="licenseNumber" column="licenseNumber" />
+		<result property="idCard" column="idCard" />
+		<result property="evaluation" column="evaluation" />
+		<association property="notaryAgency"  javaType="Office" resultMap="notaryAgencyMap"/> 
+		<association property="office"  javaType="Office" resultMap="officeMap"/>
+		<association property="area"  javaType="Area" resultMap="areaMap"/>
+	</resultMap>
+    <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="personName" column="name" />
+		<result property="sex" column="sexDesc" />
+		<result property="ethnic" column="ethnicDesc" />
+		<result property="isMongolian" column="isMongolianDesc" />
+		<result property="businessExpertise" column="expertise" />
+		<result property="agencyName" column="notaryAgencyName" />
+		<result property="education" column="education" />
+		<result property="politicalFace" column="politicalFace" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="idCard" column="idCard" />
+		<!-- <result property="age" column="age" /> -->
+		<result property="no" column="licenseNumber" />
+		<result property="introduction" column="introduction" />
+		<result property="evaluation" column="evaluation" />
+		<result property="id" column="login_id" />
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	<sql id="notaryMemberColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.age AS "age",
+		a.image_url AS "imageUrl",
+		a.id_card AS "idCard",
+		a.birthday AS "birthday",
+		a.political_face AS "politicalFace",
+		a.education AS "education",
+		a.practising_time AS "practisingTime",
+		a.expertise AS "expertise",
+		a.notary_agency_id AS "notaryAgency.id",
+		a.license_number AS "licenseNumber",
+		a.office_id AS "office.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.phone AS "phone",
+		a.introduction AS "introduction",
+		a.evaluation AS "evaluation",
+		a.role AS role,
+		o.name AS "notaryAgencyName",
+		o.name AS "notaryAgency.name",
+		o13.name AS "office.name",
+		a.is_mongolian AS "isMongolian",
+		a.sex AS "sex",
+		a.ethnic AS "ethnic",
+		d2.label AS "isMongolianDesc",
+		d1.label AS "sexDesc",
+		d3.label AS "ethnicDesc",
+		sss.address AS "address",
+		d4.login_id As "login_id"
+	</sql>
+	
+	<sql id="notaryMemberJoins">
+		LEFT JOIN sys_office o ON o.id = a.notary_agency_id
+		LEFT JOIN sys_office o13 ON o13.id = a.office_id
+		LEFT JOIN info_notary_agency sss on sss.`name` = o.`name`
+		LEFT JOIN sys_area b on o13.area_id = b.id
+		LEFT JOIN sys_dict d1 on a.sex=d1.`value` and d1.type='sex' and d1.language_type='CN'
+        LEFT JOIN sys_dict d2 on a.is_mongolian=d2.`value` and d2.type='yes_no' and d2.language_type='CN'
+        LEFT JOIN  sys_dict d3 on a.ethnic=d3.`value` and d3.type='ethnic'  and d3.language_type='CN'
+		LEFT JOIN sys_user_office_info d4 on a.id=d4.info_id
+	</sql>
+    <select id="findListForApi" resultMap="agencyResult">
+		SELECT 
+			<include refid="notaryMemberColumns"/>
+		FROM info_notary_member a
+		<include refid="notaryMemberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND (a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or  o.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if> 
+					)
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.notary_agency_id in (
+				    select s.login_id from info_notary_agency ina left join sys_user_office_info s on s.info_id=ina.id
+				     where ina.del_flag='0' and ina.area_id = #{area.id }
+				)
+			</if>
+			<if test="isMongolian != null and isMongolian != ''  and isMongolian != '暂无'">
+				AND a.is_mongolian = #{isMongolian}
+			</if>
+			<if test="officeId != null and officeId != '' ">
+			    AND a.notary_agency_id = #{officeId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="get" resultType="NotaryMember">
+		SELECT 
+			<include refid="notaryMemberColumns"/>,b.name AS "area.name"
+		FROM info_notary_member a
+		<include refid="notaryMemberJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="getInfo" resultMap="agencyResult">
+		SELECT 
+			<include refid="notaryMemberColumns"/>,b.name AS "area.name"
+		FROM info_notary_member a
+		<include refid="notaryMemberJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="NotaryMember">
+		SELECT 
+			<include refid="notaryMemberColumns"/>
+		FROM info_notary_member a
+		<include refid="notaryMemberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="notaryAgency != null and notaryAgency.id != null and notaryAgency.id != ''">
+				AND a.notary_agency_id = #{notaryAgency.id}
+			</if>
+				<!-- 数据范围过滤 -->
+		${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="NotaryMember">
+		SELECT 
+			<include refid="notaryMemberColumns"/>
+		FROM info_notary_member a
+		<include refid="notaryMemberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO info_notary_member(
+			id,
+			name,
+			image_url,
+			sex,
+			birthday,
+			ethnic,
+			political_face,
+			education,
+			practising_time,
+			expertise,
+			notary_agency_id,
+			license_number,
+			office_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			is_mongolian,
+			phone,
+			id_card,
+			introduction,
+			role
+		) VALUES (
+			#{id},
+			#{name},
+			#{imageUrl},
+			#{sex},
+			#{birthday},
+			#{ethnic},
+			#{politicalFace},
+			#{education},
+			#{practisingTime},
+			#{expertise},
+			#{notaryAgency.id},
+			#{licenseNumber},
+			#{office.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{isMongolian},
+			#{phone},
+			#{idCard},
+			#{introduction},
+			#{role}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_notary_member SET 	
+			name = #{name},
+			image_url = #{imageUrl},
+			sex = #{sex},
+			birthday = #{birthday},
+			ethnic = #{ethnic},
+			political_face = #{politicalFace},
+			education = #{education},
+			practising_time = #{practisingTime},
+			expertise = #{expertise},
+			notary_agency_id = #{notaryAgency.id},
+			license_number = #{licenseNumber},
+			office_id = #{office.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			role=#{role}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_notary_member SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	
+	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_notary_member a
+		<include refid="notaryMemberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.notary_agency_id in (
+				    select s.login_id from info_notary_agency ina left join sys_user_office_info s on s.info_id=ina.id
+				     where ina.del_flag='0' and ina.area_id = #{area.id }
+				)
+			</if>
+		</where>
+	</select>
+	
+	<!-- 批量删除公证员信息 -->
+    <update id="batchDelete" parameterType="String" >
+  		UPDATE info_notary_member SET del_flag = '1' where  id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+	
+	<select id="personLicenseNumber" resultType="String">
+		SELECT license_number FROM info_notary_member a 
+		<where>
+			license_number = #{licenseNumber}
+		</where>
+	</select>
+	
+	<!-- 修改评价值 -->
+    <update id="evaluationUpdate">
+		UPDATE info_notary_member SET 
+			evaluation = #{evaluation}
+		WHERE id = (select info_id from sys_user_office_info where login_id = #{id}
+		<if test="remark!='' ">
+			and remark= #{remark}
+		</if>
+		)
+	</update>
+</mapper>

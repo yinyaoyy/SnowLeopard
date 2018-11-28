@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.PersonnelPrisonUserDao">
+    
+	<sql id="personnelPrisonUserColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.used_name AS "usedName",
+		a.sex AS "sex",
+		a.id_card AS "idCard",
+		a.birthday AS "birthday",
+		a.nation AS "nation",
+		a.education AS "education",
+		a.is_country AS "isCountry",
+		a.residence_address AS "residenceAddress",
+		a.release_time AS "releaseTime",
+		a.is_recidivism AS "isRecidivism",
+		a.drug_use AS "drugUse",
+	    a.is_train AS "istrain",
+		a.is_skill AS "isSkill",
+		a.is_mental_health AS "isMentalHealth",
+		a.family_ties AS "familyTies",
+		a.is_three_person AS "isThreePerson",
+		a.risk_assessment AS "riskAssessment",
+		a.reconstruction AS "reconstruction",
+		a.attitude AS "attitude",
+		a.circumstances AS "circumstances",
+		a.is_connect AS "isConnect",
+		a.area_id AS "area.id",
+		a.entry_time AS "entryTime",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a24.name AS "area.name"
+	</sql>
+	<resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+     <resultMap id="agencyResult" type="AgencyVo">
+        <result property="agencyId" column="id" />
+		<result property="agencyName" column="office.name" />
+		<result property="personName" column="name" />
+		<result property="sex" column="sexLabel" />
+		<result property="ethnic" column="ethnicLabel" />
+		<result property="agencyAddress" column="residence_address" />
+		<result property="birthday" column="birthday" />
+		<result property="education" column="education" />
+		<result property="idCard" column="id_card" />
+		
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+		
+         
+     </resultMap>
+	<sql id="personnelPrisonUserJoins">
+		LEFT JOIN sys_area a24 ON a24.id = a.area_id
+	</sql>
+    
+	<select id="get" resultType="PersonnelPrisonUser">
+		SELECT 
+			<include refid="personnelPrisonUserColumns"/>
+		FROM info_personnel_prison_user a
+		<include refid="personnelPrisonUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PersonnelPrisonUser">
+		SELECT 
+			<include refid="personnelPrisonUserColumns"/>
+		FROM info_personnel_prison_user a
+		<include refid="personnelPrisonUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PersonnelPrisonUser">
+		SELECT 
+			<include refid="personnelPrisonUserColumns"/>
+		FROM info_personnel_prison_user a
+		<include refid="personnelPrisonUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="getById" resultMap="agencyResult">
+		SELECT 
+			<include refid="personnelPrisonUserColumns"/>
+			,d1.label AS "sexLabel",d2.label AS "ethnicLabel"
+		FROM info_personnel_prison_user a
+		<include refid="personnelPrisonUserJoins"/>
+		LEFT JOIN  sys_dict d1 on a.sex=d1.`value` and d1.type='sex' and d1.language_type='CN'
+		LEFT JOIN  sys_dict d2 on a.ethnic=d2.`value` and d2.type='ethnic'  and d2.language_type='CN'
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findListForApi" resultMap="agencyResult">
+		SELECT 
+			<include refid="personnelPrisonUserColumns"/>
+			,d1.label AS "sexLabel",d2.label AS "ethnicLabel"
+		FROM info_personnel_prison_user a
+		<include refid="personnelPrisonUserJoins"/>
+		LEFT JOIN  sys_dict d1 on a.sex=d1.`value` and d1.type='sex'  and d1.language_type='CN'
+		LEFT JOIN  sys_dict d2 on a.ethnic=d2.`value` and d2.type='ethnic' and d2.language_type='CN'
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND( a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or  d2.label LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					)
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_personnel_prison_user a
+		<include refid="personnelPrisonUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="area != null and area.id != null and area.id != ''">
+				a.area_id=#{area.id}
+			</if>
+		</where>
+	</select> 
+	 <!-- 批量删除律师信息 -->
+    <update id="batchDelete" parameterType="String" >
+  		UPDATE info_personnel_prison_user SET del_flag = '1' where id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+	<insert id="insert">
+		INSERT INTO info_personnel_prison_user(
+			id,
+			name,
+			used_name,
+			sex,
+			id_card,
+			birthday,
+			nation,
+			education,
+			is_country,
+			residence_address,
+			release_time,
+			is_recidivism,
+			drug_use,
+			is_train,
+			is_skill,
+			is_mental_health,
+			family_ties,
+			is_three_person,
+			risk_assessment,
+			reconstruction,
+			attitude,
+			circumstances,
+			is_connect,
+			area_id,
+			entry_time,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{usedName},
+			#{sex},
+			#{idCard},
+			#{birthday},
+			#{nation},
+			#{education},
+			#{isCountry},
+			#{residenceAddress},
+			#{releaseTime},
+			#{isRecidivism},
+			#{drugUse},
+			#{istrain},
+			#{isSkill},
+			#{isMentalHealth},
+			#{familyTies},
+			#{isThreePerson},
+			#{riskAssessment},
+			#{reconstruction},
+			#{attitude},
+			#{circumstances},
+			#{isConnect},
+			#{area.id},
+			#{entryTime},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_personnel_prison_user SET 	
+			name = #{name},
+			used_name = #{usedName},
+			sex = #{sex},
+			id_card = #{idCard},
+			birthday = #{birthday},
+			nation = #{nation},
+			education = #{education},
+			is_country = #{isCountry},
+			residence_address = #{residenceAddress},
+			release_time = #{releaseTime},
+			is_recidivism = #{isRecidivism},
+			drug_use = #{drugUse},
+			is_train = #{istrain},
+			is_skill = #{isSkill},
+			is_mental_health = #{isMentalHealth},
+			family_ties = #{familyTies},
+			is_three_person = #{isThreePerson},
+			risk_assessment = #{riskAssessment},
+			reconstruction = #{reconstruction},
+			attitude = #{attitude},
+			circumstances = #{circumstances},
+			is_connect = #{isConnect},
+			area_id = #{area.id},
+			entry_time = #{entryTime},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_personnel_prison_user SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	 <select id="personIdCard" resultType="java.lang.String">
+		SELECT id_card FROM info_personnel_prison_user a 
+		<where>
+			id_card = #{idCard}
+		</where>
+	</select>
+	
+</mapper>

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.PrisonUserDao">
+    
+	<sql id="prisonUserColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.before_name AS "beforeName",
+		a.sex AS "sex",
+		a.id_card AS "idCard",
+		a.birthday AS "birthday",
+		a.ethnic AS "ethnic",
+		a.education AS "education",
+		a.area_id AS "area.id",
+		a.address AS "address",
+		a.rural_cadastre AS "ruralCadastre",
+		a.check_state AS "checkState",
+		a.remarks AS "remarks",
+		a.receipt AS "receipt",
+		a.prison_name AS "prisonName",
+		a.image AS "image",
+		a.entering_date AS "enteringDate",
+		a.check_date AS "checkDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a9.name AS "area.name"
+	</sql>
+	<resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+    <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="office.name" />
+		<result property="personName" column="name" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="sex" column="sexLabel" />
+		<result property="ethnic" column="ethnicLabel" />
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	<sql id="prisonUserJoins">
+		LEFT JOIN sys_area a9 ON a9.id = a.area_id
+	</sql>
+    
+	<select id="get" resultType="PrisonUser">
+		SELECT 
+			<include refid="prisonUserColumns"/>
+		FROM info_prison_user a
+		<include refid="prisonUserJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="PrisonUser">
+		SELECT 
+			<include refid="prisonUserColumns"/>
+		FROM info_prison_user a
+		<include refid="prisonUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="PrisonUser">
+		SELECT 
+			<include refid="prisonUserColumns"/>
+		FROM info_prison_user a
+		<include refid="prisonUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getById" resultMap="agencyResult">
+		SELECT 
+			<include refid="prisonUserColumns"/>
+			,d1.label AS "sexLabel",d2.label AS "ethnicLabel"
+		FROM info_prison_user a
+		<include refid="prisonUserJoins"/>
+		LEFT JOIN  sys_dict d1 on a.sex=d1.`value` and d1.type='sex' and d1.language_type='CN'
+		LEFT JOIN  sys_dict d2 on a.ethnic=d2.`value` and d2.type='ethnic'  and d2.language_type='CN'
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findListForApi" resultMap="agencyResult">
+		SELECT 
+			<include refid="prisonUserColumns"/>
+			,d1.label AS "sexLabel",d2.label AS "ethnicLabel"
+		FROM info_prison_user a
+		<include refid="prisonUserJoins"/>
+		LEFT JOIN  sys_dict d1 on a.sex=d1.`value` and d1.type='sex'  and d1.language_type='CN'
+		LEFT JOIN  sys_dict d2 on a.ethnic=d2.`value` and d2.type='ethnic' and d2.language_type='CN'
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND( a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					or  d2.label LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+					)
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+    <select id="count" resultType="int">
+		SELECT count(*)
+		FROM info_prison_user a
+		<include refid="prisonUserJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="area != null and area.id != null and area.id != ''">
+				   AND a.area_id = #{area.id}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO info_prison_user(
+			id,
+			name,
+			before_name,
+			sex,
+			id_card,
+			birthday,
+			ethnic,
+			education,
+			area_id,
+			address,
+			rural_cadastre,
+			check_state,
+			remarks,
+			receipt,
+			prison_name,
+			image,
+			entering_date,
+			check_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{beforeName},
+			#{sex},
+			#{idCard},
+			#{birthday},
+			#{ethnic},
+			#{education},
+			#{area.id},
+			#{address},
+			#{ruralCadastre},
+			#{checkState},
+			#{remarks},
+			#{receipt},
+			#{prisonName},
+			#{image},
+			#{enteringDate},
+			#{checkDate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_prison_user SET 	
+			name = #{name},
+			before_name = #{beforeName},
+			sex = #{sex},
+			id_card = #{idCard},
+			birthday = #{birthday},
+			ethnic = #{ethnic},
+			education = #{education},
+			area_id = #{area.id},
+			address = #{address},
+			rural_cadastre = #{ruralCadastre},
+			check_state = #{checkState},
+			remarks = #{remarks},
+			receipt = #{receipt},
+			prison_name = #{prisonName},
+			image = #{image},
+			entering_date = #{enteringDate},
+			check_date = #{checkDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_prison_user SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="batchDelete" parameterType="String" >
+  		UPDATE info_prison_user SET del_flag = '1' where  id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>
+	</update>
+	
+	<select id="personIdCard" resultType="String">
+		SELECT id_card FROM info_prison_user a 
+		<where>
+			id_card = #{idcard}
+		</where>
+	</select>
+</mapper>

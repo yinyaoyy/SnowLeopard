@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.oa.dao.act.OaFastLegalDao">
+    
+	<sql id="oaFastLegalColumns">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.accept_man AS "acceptMan.id",
+		a.accept_man_code AS "acceptManCode",
+		a.case_accept_code AS "caseAcceptCode",
+		a.accuser_name AS "accuserName",
+		a.accuser_sex AS "accuserSex",
+		a.accuser_ethnic AS "accuserEthnic",
+		a.accuser_birthday AS "accuserBirthday",
+		a.accuser_phone AS "accuserPhone",
+		a.accuser_id_card AS "accuserIdCard",
+		a.accuser_county AS "accuserCounty.id",
+		a.accuser_town AS "accuserTown.id",
+		a.case_classify AS "caseClassify",
+		a.case_type AS "caseType",
+		a.case_county AS "caseCounty.id",
+		a.case_town AS "caseTown.id",
+		a.case_title AS "caseTitle",
+		a.case_reason AS "caseReason",
+		a.case_time AS "caseTime",
+		a.case_involvecount AS "caseInvolvecount",
+		a.case_source AS "caseSource",
+		a.case_involve_money AS "caseInvolveMoney",
+		a.case_rank AS "caseRank",
+		a.office_id AS "office.id",
+		a.transactor AS "transactor.id",
+		a.handle_result AS "handleResult",
+		a.is_evaluate AS "isEvaluate",
+		a.overthreshold AS "overthreshold",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.case_file AS "caseFile",
+		a.qrcode AS "qrcode",
+		
+		o25.name AS "office.name",
+		u1.name as "transactor.name",
+		u2.name as "acceptMan.name",
+		a1.name as "accuserCounty.name",
+		a2.name as "accuserTown.name",
+		a3.name as "caseCounty.name",
+		a4.name as "caseTown.name"
+	</sql>
+	
+	<sql id="oaFastLegalJoins">
+		LEFT JOIN sys_office o25 ON o25.id = a.office_id
+		LEFT JOIN sys_user u1 ON u1.id = a.transactor
+		LEFT JOIN sys_user u2 ON u2.id = a.accept_man
+		LEFT JOIN sys_area a1 ON a1.id = a.accuser_county
+		LEFT JOIN sys_area a2 ON a2.id = a.accuser_town
+		LEFT JOIN sys_area a3 ON a3.id = a.case_county
+		LEFT JOIN sys_area a4 ON a4.id = a.case_town
+	</sql>
+    
+	<select id="get" resultType="OaFastLegal">
+		SELECT 
+			<include refid="oaFastLegalColumns"/>
+		FROM oa_fast_legal a
+		<include refid="oaFastLegalJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaFastLegal">
+		SELECT 
+			<include refid="oaFastLegalColumns"/>
+		FROM oa_fast_legal a
+		<include refid="oaFastLegalJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaFastLegal">
+		SELECT 
+			<include refid="oaFastLegalColumns"/>
+		FROM oa_fast_legal a
+		<include refid="oaFastLegalJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_fast_legal(
+			id,
+			proc_ins_id,
+			accept_man,
+			accept_man_code,
+			case_accept_code,
+			accuser_name,
+			accuser_sex,
+			accuser_ethnic,
+			accuser_birthday,
+			accuser_phone,
+			accuser_id_card,
+			accuser_county,
+			accuser_town,
+			case_classify,
+			case_type,
+			case_county,
+			case_town,
+			case_title,
+			case_reason,
+			case_time,
+			case_involvecount,
+			case_source,
+			case_involve_money,
+			case_rank,
+			office_id,
+			transactor,
+			handle_result,
+			is_evaluate,
+			overthreshold,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			case_file
+		) VALUES (
+			#{id},
+			#{procInsId},
+			#{acceptMan.id},
+			#{acceptManCode},
+			#{caseAcceptCode},
+			#{accuserName},
+			#{accuserSex},
+			#{accuserEthnic},
+			#{accuserBirthday},
+			#{accuserPhone},
+			#{accuserIdCard},
+			#{accuserCounty.id},
+			#{accuserTown.id},
+			#{caseClassify},
+			#{caseType},
+			#{caseCounty.id},
+			#{caseTown.id},
+			#{caseTitle},
+			#{caseReason},
+			#{caseTime},
+			#{caseInvolvecount},
+			#{caseSource},
+			#{caseInvolveMoney},
+			#{caseRank},
+			#{office.id},
+			#{transactor.id},
+			#{handleResult},
+			#{isEvaluate},
+			#{overthreshold},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{caseFile}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_fast_legal SET
+		<if test="acceptMan != null and acceptMan.id != null and acceptMan.id != ''">	
+			accept_man = #{acceptMan.id},
+		</if>
+		<if test="caseAcceptCode != null and caseAcceptCode != ''">	
+			case_accept_code = #{caseAcceptCode},
+		</if> 	
+			accuser_name = #{accuserName},
+			accuser_sex = #{accuserSex},
+			accuser_ethnic = #{accuserEthnic},
+			accuser_birthday = #{accuserBirthday},
+			accuser_phone = #{accuserPhone},
+			accuser_id_card = #{accuserIdCard},
+			accuser_county = #{accuserCounty.id},
+			accuser_town = #{accuserTown.id},
+			case_classify = #{caseClassify},
+			case_type = #{caseType},
+			case_county = #{caseCounty.id},
+			case_town = #{caseTown.id},
+			case_title = #{caseTitle},
+			case_reason = #{caseReason},
+			case_time = #{caseTime},
+			case_involvecount = #{caseInvolvecount},
+			case_source = #{caseSource},
+			case_involve_money = #{caseInvolveMoney},
+			case_rank = #{caseRank},
+			office_id = #{office.id},
+			transactor = #{transactor.id},
+			handle_result = #{handleResult},
+			is_evaluate = #{isEvaluate},
+			overthreshold = #{overthreshold},
+			status = #{status},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			case_file = #{caseFile},
+			qrcode = #{qrcode}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_fast_legal SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 获取目前年份最大的序号并加1 -->
+	<select id="selectAcceptCode" resultType="int">
+		select ifnull(max(case_accept_code),0)+1 from oa_fast_legal where DATE_FORMAT(create_date, '%Y-%m') = DATE_FORMAT(now(),'%Y-%m')
+	</select>
+	
+	<!-- 全盟法律服务平台接待数量走势图 -->
+	<select id="countFastLegal" parameterType="FastLegalCount" resultType="FastLegalCount">
+		SELECT 
+		    a.id 'area.id', a.name 'area.name', IFNULL(t.count, 0) count
+		    <if test="forTable == 'true'">
+		     ,t.countDate
+		    </if>
+		FROM
+		    sys_area a
+		        LEFT JOIN
+		    (SELECT 
+		        COUNT(*) count, a.case_county
+		    <if test="forTable == 'true'">
+		     ,DATE_FORMAT(a.create_date, #{datePattern}) countDate
+		    </if>
+		    FROM
+		        oa_fast_legal a
+		    WHERE
+		        a.del_flag = 0
+		        <![CDATA[ 
+		        AND date_format(a.create_date,#{datePattern}) >= #{startDate}
+		        AND date_format(a.create_date,#{datePattern}) <= #{endDate}
+		         ]]> 
+		    GROUP BY a.case_county
+		    <if test="forTable == 'true'">
+		     ,DATE_FORMAT(a.create_date, #{datePattern})
+		    </if> ) t ON a.id = t.case_county
+		WHERE
+		    a.del_flag = 0
+		        AND (a.id = 5 OR a.parent_id = 5)
+		        <if test="areaArr != null and areaArr.length > 0">
+		        AND a.id in 
+		          <foreach collection="areaArr" item="area" open="(" separator="," close=")">
+		          #{area}
+		          </foreach>
+		        </if>
+		ORDER BY a.code ASC
+	</select>
+	
+	<select id="getApi" resultType="OaFastLegal">
+		SELECT 
+			<include refid="oaFastLegalColumns"/>,u10.prescription AS "guestbookEvaluate.prescription",u10.id AS "guestbookEvaluate.id",u10.proposal AS "guestbookEvaluate.proposal"
+		FROM oa_fast_legal a
+		<include refid="oaFastLegalJoins"/>
+		LEFT JOIN  cms_guestbook_evaluate u10 ON u10.comment_id = a.id
+		WHERE a.id = #{id}
+	</select>
+	
+	<!-- 人员评价，直通车的 -->
+	<update id="isEvaluate">
+		UPDATE oa_fast_legal SET 
+			is_evaluate = '1'
+		WHERE  id= #{id}
+	</update>
+	
+</mapper>

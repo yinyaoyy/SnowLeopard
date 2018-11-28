@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.appmange.dao.SysServiceDao">
+    
+	<sql id="sysServiceColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.site_id AS "siteId",
+		a.office_id AS "officeId",
+		a.oa_id AS "oaId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.sort AS "sort"
+	</sql>
+	
+	<sql id="sysServiceJoins">
+	</sql>
+    
+	<select id="get" resultType="SysService">
+		SELECT 
+			<include refid="sysServiceColumns"/>
+		FROM sys_service a
+		<include refid="sysServiceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="SysService">
+		SELECT 
+			<include refid="sysServiceColumns"/>
+		FROM sys_service a
+		<include refid="sysServiceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="SysService">
+		SELECT 
+			<include refid="sysServiceColumns"/>
+		FROM sys_service a
+		<include refid="sysServiceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.sort
+			</otherwise>
+		</choose>
+	</select>
+		<select id="findListByType" resultType="SysService">
+		SELECT 
+			<include refid="sysServiceColumns"/>
+		FROM sys_service a
+		<include refid="sysServiceJoins"/>
+		<where>
+			a.del_flag = 0 and a.id!=#{id}
+			<if test="type != null and type != '' and type==1">
+				    AND a.site_id LIKE 
+			</if>
+			<if test="type != null and type != '' and type==2">
+				    AND a.office_id LIKE 
+			</if>
+			<if test="type != null and type != '' and type==3">
+				    AND a.oa_id LIKE 
+			</if>
+				concat('%',#{queryId},'%')
+		</where>
+	</select>
+	<select id="findByOfficeId" resultType="SysService">
+		SELECT 
+			<include refid="sysServiceColumns"/>
+		FROM sys_service a
+		<include refid="sysServiceJoins"/>
+		<where>
+			a.del_flag = 0 AND a.office_id LIKE 
+			concat('%',#{officeId},'%')
+		</where>
+	</select>
+	<select id="findBySiteIds" resultType="SysService">
+		SELECT 
+			<include refid="sysServiceColumns"/>
+		FROM sys_service a
+		<include refid="sysServiceJoins"/>
+		<where>
+			a.del_flag = 0  and site_id  in 
+			<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+              #{item}       
+          </foreach> 
+		</where>
+	</select>
+	<insert id="insert">
+		INSERT INTO sys_service(
+			id,
+			name,
+			site_id,
+			office_id,
+			oa_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			sort
+		) VALUES (
+			#{id},
+			#{name},
+			#{siteId},
+			#{officeId},
+			#{oaId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{sort}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_service SET 	
+			name = #{name},
+			site_id = #{siteId},
+			office_id = #{officeId},
+			oa_id = #{oaId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			sort=#{sort}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sys_service SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+<update id="batchUpdate" parameterType="java.util.List">
+  update sys_service SET
+    name=
+  <foreach collection="list" item="item" index="index" separator=" " open="case ID" close="end">
+      when #{item.id,jdbcType=DECIMAL} then #{item.name,jdbcType=VARCHAR}
+  </foreach>
+  ,site_id=
+  <foreach collection="list" item="item" index="index" separator=" " open="case ID" close="end">
+      when #{item.id,jdbcType=DECIMAL} then #{item.siteId,jdbcType=VARCHAR}
+  </foreach>
+    ,office_id=
+  <foreach collection="list" item="item" index="index" separator=" " open="case ID" close="end">
+      when #{item.id,jdbcType=DECIMAL} then #{item.officeId,jdbcType=VARCHAR}
+  </foreach>
+      ,oa_id=
+  <foreach collection="list" item="item" index="index" separator=" " open="case ID" close="end">
+      when #{item.id,jdbcType=DECIMAL} then #{item.oaId,jdbcType=VARCHAR}
+  </foreach>
+  where ID in
+  <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+      #{item.id,jdbcType=DECIMAL}
+  </foreach>
+</update>
+</mapper>

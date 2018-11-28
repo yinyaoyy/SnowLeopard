@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.info.dao.InfoForensicPersonnelDao">
+    
+    <resultMap type="Area" id="areaMap">  
+        <id property="id" column="area.id" />  
+        <result property="name" column="area.name" />  
+    </resultMap>
+    <resultMap id="agencyResult" type="AgencyVo">
+		<result property="agencyId" column="id" />
+		<result property="agencyName" column="agencyName" />
+		<result property="personName" column="name" />
+		<result property="id" column="login_id" />
+		<result property="sex" column="sexDesc" />
+		<result property="no" column="licenseNumber" />
+		<result property="ethnic" column="ethnicDesc" />
+		<result property="isMongolian" column="isMongolianDesc" />
+		<result property="agencyAddress" column="address" />
+		<result property="agencyPhone" column="phone" />
+		<result property="imageUrl" column="imageUrl" />
+		<result property="coordinate" column="coordinate" />
+		<result property="scopeOfBussess" column="expertise" />
+		<result property="idCard" column="idCard" />
+		<result property="education" column="education" />
+		<result property="politicalFace" column="politicalFace" />
+		<result property="practisingYear" column="politicalFace" />
+		<result property="practisingTime" column="practisingTime" />
+		<result property="evaluation" column="evaluation" />
+		<result property="id" column="login_id" />
+		<result property="roleId" column="roleName" />
+		<association property="area"  javaType="Area" resultMap="areaMap"/> 
+	</resultMap>
+	
+	<sql id="infoForensicPersonnelColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.image_url AS "imageUrl",
+		a.birthday AS "birthday",
+		a.sys_office_category AS "sysOfficeCategory",
+		a.site_id AS "siteId",
+		a.sys_service_id AS "sysServiceId",
+		a.app_menu_id AS "appMenuId",
+		a.political_face AS "politicalFace",
+		a.education AS "education",
+		a.practising_time AS "practisingTime",
+		a.expertise AS "expertise",
+		a.judicial_authentication_id AS "judicialAuthentication.id",
+		a.area_id AS "area.id",
+		a16.name AS 'area.name',
+		a.license_number AS "licenseNumber",
+		a.license_herf AS "licenseHerf",
+		a.license_expiry_time AS "licenseExpiryTime",
+		a.competent_authorities_id AS "competentAuthoritiesId",
+		a.competent_authorities_name AS "competentAuthoritiesName",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks",
+		a.is_show AS "isShow",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.phone AS "phone",
+		a.id_card AS "idCard",
+		a.scope_of_business AS "scopeOfBussess",
+		a.evaluation AS "evaluation",
+		o.name AS "judicialAuthentication.name",
+		a.is_mongolian AS "isMongolian",
+		a.sex AS "sex",
+		a.ethnic AS "ethnic",
+		a.role AS "role",
+		d2.label AS "isMongolianDesc",
+		d1.label AS "sexDesc",
+		d3.label AS "ethnicDesc",
+		d4.login_id AS "login_id",
+		d5.label AS "roleName",
+		ccc.address AS "address"
+	</sql>
+	<sql id="infoForensicPersonnelJoins">
+		LEFT JOIN sys_area a16 ON a16.id = a.area_id
+		LEFT JOIN sys_office o on a.judicial_authentication_id = o.id
+		LEFT JOIN info_judicial_authentication ccc on o.name = ccc.name
+		LEFT JOIN sys_dict d1 on a.sex=d1.`value` and d1.type='sex' and d1.language_type='CN'
+        LEFT JOIN sys_dict d2 on a.is_mongolian=d2.`value` and d2.type='yes_no' and d2.language_type='CN'
+        LEFT JOIN  sys_dict d3 on a.ethnic=d3.`value` and d3.type='ethnic'  and d3.language_type='CN'
+        LEFT JOIN  sys_dict d5 on a.role=d5.`value` and d5.type='info_role_type'  and d5.language_type='CN'
+        LEFT JOIN  sys_user_office_info d4 on a.id=d4.info_id 
+	</sql>
+    <select id="getInfo" resultMap="agencyResult">
+		SELECT 
+			<include refid="infoForensicPersonnelColumns"/>
+		FROM info_forensic_personnel a
+		<include refid="infoForensicPersonnelJoins"/>
+		WHERE a.id = #{id}
+	</select>
+    <select id="findListForApi" resultMap="agencyResult">
+		SELECT 
+			<include refid="infoForensicPersonnelColumns"/>
+		FROM info_forensic_personnel a
+		<include refid="infoForensicPersonnelJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="agencyName != null and agencyName != ''">
+				AND (a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>
+				or  o.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{agencyName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{agencyName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{agencyName},'%')</if>	
+					)
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+			<if test="isMongolian != null and isMongolian != '' and isMongolian != '暂无'">
+			    AND a.is_mongolian = #{isMongolian}
+			</if>
+			<if test="evaluation != null and evaluation != '' and evaluation != '暂无'">
+			    AND a.evaluation = #{evaluation}
+			</if>
+			<if test="officeId != null and officeId != '' ">
+			    AND a.judicial_authentication_id = #{officeId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="get" resultType="InfoForensicPersonnel">
+		SELECT 
+			<include refid="infoForensicPersonnelColumns"/>
+		FROM info_forensic_personnel a
+		<include refid="infoForensicPersonnelJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="InfoForensicPersonnel">
+		SELECT 
+			<include refid="infoForensicPersonnelColumns"/>
+		FROM info_forensic_personnel a
+		<include refid="infoForensicPersonnelJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="sex != null and sex != ''">
+				AND a.sex = #{sex}
+			</if>
+			<if test="area != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+			<if test="judicialAuthentication != null and judicialAuthentication.id != null and judicialAuthentication.id != ''">
+				AND a.judicial_authentication_id = #{judicialAuthentication.id}
+			</if>
+			<!-- 数据范围过滤 -->
+		        ${sqlMap.dsf}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="InfoForensicPersonnel">
+		SELECT 
+			<include refid="infoForensicPersonnelColumns"/>
+		FROM info_forensic_personnel a
+		<include refid="infoForensicPersonnelJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO info_forensic_personnel(
+			id,
+			name,
+			image_url,
+			sex,
+			birthday,
+			sys_office_category,
+			ethnic,
+			political_face,
+			education,
+			practising_time,
+			expertise,
+			judicial_authentication_id,
+			area_id,
+			license_number,
+			license_herf,
+			license_expiry_time,
+			competent_authorities_id,
+			competent_authorities_name,
+			del_flag,
+			remarks,
+			is_show,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			scope_of_business,
+			is_mongolian,
+			id_card,
+			phone,
+			role
+		) VALUES (
+			#{id},
+			#{name},
+			#{imageUrl},
+			#{sex},
+			#{birthday},
+			#{sysOfficeCategory},
+			#{ethnic},
+			#{politicalFace},
+			#{education},
+			#{practisingTime},
+			#{expertise},
+			#{judicialAuthentication.id},
+			#{area.id},
+			#{licenseNumber},
+			#{licenseHerf},
+			#{licenseExpiryTime},
+			#{competentAuthoritiesId},
+			#{competentAuthoritiesName},
+			#{delFlag},
+			#{remarks},
+			#{isShow},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{scopeOfBussess},
+			#{isMongolian},
+			#{idCard},
+			#{phone},
+			#{role}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE info_forensic_personnel SET 	
+			name = #{name},
+			image_url = #{imageUrl},
+			sex = #{sex},
+			birthday = #{birthday},
+			sys_office_category = #{sysOfficeCategory},
+			ethnic = #{ethnic},
+			political_face = #{politicalFace},
+			education = #{education},
+			practising_time = #{practisingTime},
+			expertise = #{expertise},
+			judicial_authentication_id = #{judicialAuthentication.id},
+			area_id = #{area.id},
+			license_number = #{licenseNumber},
+			license_herf = #{licenseHerf},
+			license_expiry_time = #{licenseExpiryTime},
+			competent_authorities_id = #{competentAuthoritiesId},
+			competent_authorities_name = #{competentAuthoritiesName},
+			remarks = #{remarks},
+			is_show = #{isShow},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			scope_of_business = #{scopeOfBussess},
+			is_mongolian = #{isMongolian},
+			id_card = #{idCard},
+			phone=#{phone},
+			role=#{role}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE info_forensic_personnel SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<!--通过区域id查找-->
+<select id="countByAreaId" parameterType="string" resultType="java.lang.Integer">
+	SELECT COUNT(*) FROM info_forensic_personnel
+	WHERE area_id = #{areaId}
+	  and del_flag = 0
+</select>
+
+	
+	
+	<!-- 接口:大屏查询鉴定员信息 -->
+	<select id="findListForApiBigScreen" parameterType="com.thinkgem.jeesite.api.chart.entity.ForensicPersonnelVo"
+		resultType="com.thinkgem.jeesite.api.chart.entity.ForensicPersonnelVo">
+		SELECT 
+			<include refid="infoForensicPersonnelColumns"/>
+		FROM info_forensic_personnel a
+		<include refid="infoForensicPersonnelJoins"/>
+		
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			
+			<if test="area !=null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id }
+				
+			</if>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 修改评价值 -->
+    <update id="evaluationUpdate">
+		UPDATE info_forensic_personnel SET 
+			evaluation = #{evaluation}
+		WHERE id = (select info_id from sys_user_office_info where login_id = #{id} 
+		<if test="remark!='' ">
+			and remark= #{remark}
+		</if>
+		)
+	</update>
+</mapper>

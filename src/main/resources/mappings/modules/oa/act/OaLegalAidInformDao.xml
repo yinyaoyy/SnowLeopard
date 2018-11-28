@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.oa.dao.act.OaLegalAidInformDao">
+    
+	<sql id="oaLegalAidInformColumns">
+		a.id AS "id",
+		a.proc_ins_id AS "procInsId",
+		a.year AS "year",
+		a.year_no AS "yearNo",
+		a.name AS "name",
+		a.sex AS "sex",
+		a.birthday AS "birthday",
+		a.ethnic AS "ethnic",
+		a.hasmongol AS "hasmongol",
+		a.id_card AS "idCard",
+		a.domicile AS "domicile",
+		a.address AS "address",
+		a.phone AS "phone",
+		a.proxy_name AS "proxyName",
+		a.case_title AS "caseTitle",
+		a.case_reason AS "caseReason",
+		a.case_file AS "caseFile",
+		a.law_office_id AS "lawOffice.id",
+		a.lawyer_id AS "lawyer.id",
+		a.legal_office_id AS "legalOffice.id",
+		a.legal_person_id AS "legalPerson.id",
+		a.third_party_score AS "thirdPartyScore",
+		a.third_party_evaluation AS "thirdPartyEvaluation",
+		a.receive_subsidy AS "receiveSubsidy",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.legal_aid_type AS "legalAidType",
+		a.archiving AS "archiving",
+		a.source AS "source",
+		a.aid_category AS "aidCategory",
+		a.case_file2 AS "caseFile2",
+		a.is_evaluate AS "isEvaluate",
+		a.case_handle_process AS "caseHandleProcess",
+		a.education AS "education",
+		a.renyuantype AS "renyuantype",
+		a.officetype AS "officetype",
+		a.jgphone AS "jgphone",
+		a.casetelevancy AS "casetelevancy",
+		a.caseguilt AS "caseguilt",
+		a.caseinform AS "caseinform",
+		a.informreson AS "informreson",
+		a.cumname AS "cumname",
+		a.dom AS "dom.id",
+		a.internation AS "internation",
+		a.officename AS "officenamee",
+		a.jgperson AS "jgperson",
+		a.sldate AS "sldate",
+		a.casesstage AS "casesstage",
+		a.casesum AS "casesum",
+		a.modality as "modality",
+		a.scdate as "scdate",
+		a.approvecom as "approveCom",
+		a.fyzhurencom as "fyzhurenCom",
+		a5.name AS "dom.name",
+		o6.name AS "lawOffice.name",
+		u7.name AS "lawyer.name",
+		o8.name AS "legalOffice.name",
+		u9.name AS "legalPerson.name"
+	</sql>
+	
+	
+	<sql id="oaLegalAidJoins">
+	
+	</sql>
+	<sql id="oaLegalAidInformJoins">
+		LEFT JOIN sys_area a5 ON a5.id = a.dom
+		LEFT JOIN sys_office o6 ON o6.id = a.law_office_id
+		LEFT JOIN sys_user u7 ON u7.id = a.lawyer_id
+		LEFT JOIN sys_office o8 ON o8.id = a.legal_office_id
+		LEFT JOIN sys_user u9 ON u9.id = a.legal_person_id
+	</sql>
+    
+	<select id="get" resultType="OaLegalAidInform">
+		SELECT 
+			<include refid="oaLegalAidInformColumns"/>
+		FROM oa_legal_aid_inform a
+		<include refid="oaLegalAidInformJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaLegalAidInform">
+		SELECT 
+			<include refid="oaLegalAidInformColumns"/>
+		FROM oa_legal_aid_inform a
+		<include refid="oaLegalAidInformJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaLegalAidInform">
+		SELECT 
+			<include refid="oaLegalAidInformColumns"/>
+		FROM oa_legal_aid_inform a
+		<include refid="oaLegalAidInformJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_legal_aid_inform(
+			id,
+			proc_ins_id,
+			year,
+			year_no,
+			name,
+			sex,
+			birthday,
+			ethnic,
+			hasmongol,
+			id_card,
+			domicile,
+			address,
+			phone,
+			proxy_name,
+			case_title,
+			case_reason,
+			case_file,
+			law_office_id,
+			lawyer_id,
+			legal_office_id,
+			legal_person_id,
+			third_party_score,
+			third_party_evaluation,
+			receive_subsidy,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			legal_aid_type,
+			archiving,
+			source,
+			aid_category,
+			case_file2,
+			is_evaluate,
+			case_handle_process,
+			education,
+			renyuantype,
+			officetype,
+			jgphone,
+			casetelevancy,
+			caseguilt,
+			caseinform,
+			informreson,
+			cumname,
+			dom,
+			internation,
+			officename,
+			jgperson,
+			sldate,
+			casesstage,
+			casesum,
+			modality,
+			approvecom,
+			fyzhurencom
+		) VALUES (
+			#{id},
+			#{procInsId},
+			#{year},
+			#{yearNo},
+			#{name},
+			#{sex},
+			#{birthday},
+			#{ethnic},
+			#{hasmongol},
+			#{idCard},
+			#{domicile},
+			#{address},
+			#{phone},
+			#{proxyName},
+			#{caseTitle},
+			#{caseReason},
+			#{caseFile},
+			#{lawOffice.id},
+			#{lawyer.id},
+			#{legalOffice.id},
+			#{legalPerson.id},
+			#{thirdPartyScore},
+			#{thirdPartyEvaluation},
+			#{receiveSubsidy},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{legalAidType},
+			#{archiving},
+			#{source},
+			#{aidCategory},
+			#{caseFile2},
+			#{isEvaluate},
+			#{caseHandleProcess},
+			#{education},
+			#{renyuanType},
+			#{officeType},
+			#{jgphone},
+			#{caseTelevancy},
+			#{caseGuilt},
+			#{caseInform},
+			#{informReson},
+			#{cumName},
+			#{dom.id},
+			#{internation},
+			#{officeNamee},
+			#{jgPerson},
+			#{sldate},
+			#{casesStage},
+			#{casesum},
+			#{modality},
+			#{approveCom},
+			#{fyzhurenCom}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_legal_aid_inform SET 	
+			year = #{year},
+			year_no = #{yearNo},
+			name = #{name},
+			sex = #{sex},
+			birthday = #{birthday},
+			ethnic = #{ethnic},
+			hasmongol = #{hasmongol},
+			id_card = #{idCard},
+			domicile = #{domicile},
+			address = #{address},
+			phone = #{phone},
+			proxy_name = #{proxyName},
+			case_title = #{caseTitle},
+			case_reason = #{caseReason},
+			case_file = #{caseFile},
+			law_office_id = #{lawOffice.id},
+			lawyer_id = #{lawyer.id},
+			legal_office_id = #{legalOffice.id},
+			legal_person_id = #{legalPerson.id},
+			third_party_score = #{thirdPartyScore},
+			third_party_evaluation = #{thirdPartyEvaluation},
+			receive_subsidy = #{receiveSubsidy},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			legal_aid_type = #{legalAidType},
+			archiving = #{archiving},
+			source = #{source},
+			aid_category = #{aidCategory},
+			case_file2 = #{caseFile2},
+			is_evaluate = #{isEvaluate},
+			case_handle_process = #{caseHandleProcess},
+			education = #{education},
+			renyuantype = #{renyuanType},
+			officetype = #{officeType},
+			jgphone = #{jgphone},
+			casetelevancy = #{caseTelevancy},
+			caseguilt = #{caseGuilt},
+			caseinform = #{caseInform},
+			informreson = #{informReson},
+			cumname = #{cumName},
+			dom = #{dom.id},
+			internation = #{internation},
+			officename = #{officeNamee},
+			jgperson = #{jgPerson},
+			sldate = #{sldate},
+			casesstage = #{casesStage},
+			casesum = #{casesum}
+		WHERE id = #{id}
+	</update>
+	<update id="updateSelective">
+		UPDATE oa_legal_aid_inform SET
+		<if test="lawOffice != null and lawOffice.id != null and lawOffice.id != ''">
+			law_office_id = #{lawOffice.id}	,
+		</if>
+		<if test="modality != null  and modality != ''">
+			modality = #{modality},
+		</if>
+		<if test="scdate != null  and scdate != ''">
+			scdate = #{scdate},
+		</if>
+		<if test="lawyer != null and lawyer.id != null and lawyer.id != ''">
+			lawyer_id = #{lawyer.id},
+		</if>
+		<if test="legalOffice != null and legalOffice.id != null and legalOffice.id != ''">
+			legal_office_id = #{legalOffice.id}	,
+		</if>
+		<if test="legalPerson != null and legalPerson.id != null and legalPerson.id != ''">
+			legal_person_id = #{legalPerson.id}	,
+		</if>
+		<if test="thirdPartyScore != null and thirdPartyScore != ''">
+			third_party_score = #{thirdPartyScore}	,
+		</if>
+		<if test="thirdPartyEvaluation != null and thirdPartyEvaluation != ''">
+			third_party_evaluation = #{thirdPartyEvaluation}	,
+		</if>
+		<if test="receiveSubsidy != null and receiveSubsidy != ''">
+			receive_subsidy = #{receiveSubsidy}	,
+		</if>
+		<if test="caseHandleProcess != null and caseHandleProcess != ''">
+			case_handle_process = #{caseHandleProcess},
+		</if>
+		<if test="aidCategory != null and aidCategory != ''">
+			aid_category = #{aidCategory}	,
+		</if>
+		<if test="caseFile2 != null and caseFile2 != ''">
+			case_file2 = #{caseFile2}	,
+		</if>
+		<if test="approveCom != null and approveCom != ''">
+			approvecom = #{approveCom}	,
+		</if>
+		<if test="fyzhurenCom != null and fyzhurenCom != ''">
+			fyzhurencom = #{fyzhurenCom}	,
+		</if>
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	<update id="delete">
+		UPDATE oa_legal_aid_inform SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	
+	<!-- 查询草稿箱 -->
+	<select id="findDraftListForApi" resultType="OaLegalAidInform">
+		SELECT a.*
+		FROM oa_legal_aid_draft a
+		<where>
+			a.del_flag = 0
+			AND a.create_by = #{createBy.id}
+			<!-- 支持根据案件标题查询草稿 -->
+			<if test="caseTitle != null and caseTitle != ''">
+				AND a.case_title LIKE concat('%',#{caseTitle},'%')
+			</if>
+			<if test="legalAidType!=null and legalAidType!=''">
+			and legal_aid_type=#{legalAidType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 保存草稿 -->
+	<insert id="insertDraft">
+		INSERT INTO oa_legal_aid_draft(
+				id,
+			year,
+			year_no,
+			name,
+			sex,
+			birthday,
+			ethnic,
+			hasmongol,
+			id_card,
+			domicile,
+			address,
+			phone,
+			proxy_name,
+			case_title,
+			case_reason,
+			legal_office_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			legal_aid_type,
+			education,
+			renyuantype,
+			officetype,
+			jgphone,
+			casetelevancy,
+			caseguilt,
+			caseinform,
+			informreson,
+			cumname,
+			dom,
+			internation,
+			officename,
+			jgperson,
+			casesstage,
+			casesum,
+			case_file
+		) VALUES (
+			#{id},
+			#{year},
+			#{yearNo},
+			#{name},
+			#{sex},
+			#{birthday},
+			#{ethnic},
+			#{hasmongol},
+			#{idCard},
+			#{domicile},
+			#{address},
+			#{phone},
+			#{proxyName},
+			#{caseTitle},
+			#{caseReason},
+			#{legalOffice.id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{legalAidType},
+			#{education},
+			#{renyuanType},
+			#{officeType},
+			#{jgphone},
+			#{caseTelevancy},
+			#{caseGuilt},
+			#{caseInform},
+			#{informReson},
+			#{cumName},
+			#{dom.id},
+			#{internation},
+			#{officeNamee},
+			#{jgPerson},
+			#{casesStage},
+			#{casesum},
+			#{caseFile}
+		)
+	</insert>
+	<!-- 修改草稿 -->
+	<update id="updateDraft">
+		UPDATE oa_legal_aid_draft SET 	
+			year = #{year},
+			year_no = #{yearNo},
+			name = #{name},
+			sex = #{sex},
+			birthday = #{birthday},
+			ethnic = #{ethnic},
+			hasmongol = #{hasmongol},
+			id_card = #{idCard},
+			domicile = #{domicile},
+			address = #{address},
+			phone = #{phone},
+			proxy_name = #{proxyName},
+			case_title = #{caseTitle},
+			case_reason = #{caseReason},
+			case_file = #{caseFile},
+			legal_office_id = #{legalOffice.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			legal_aid_type = #{legalAidType},
+			education = #{education},
+			renyuantype = #{renyuanType},
+			officetype = #{officeType},
+			jgphone = #{jgphone},
+			casetelevancy = #{caseTelevancy},
+			caseguilt = #{caseGuilt},
+			caseinform = #{caseInform},
+			informreson = #{informReson},
+			cumname = #{cumName},
+			dom = #{dom.id},
+			internation = #{internation},
+			officename = #{officeNamee},
+			jgperson = #{jgPerson},
+			casesstage = #{casesStage},
+			casesum = #{casesum}
+		WHERE id = #{id}
+	</update>
+	<!-- 删除草稿箱，支持批量 -->
+	<update id="deleteDraft">
+		DELETE FROM oa_legal_aid_draft 
+		WHERE id in 
+		<foreach collection="array" item="id" open="(" separator="," close=")" >
+			#{id}
+		</foreach>
+	</update>
+	
+</mapper>

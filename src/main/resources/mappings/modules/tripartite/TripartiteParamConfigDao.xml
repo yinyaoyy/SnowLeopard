@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.tripartite.dao.TripartiteParamConfigDao">
+    
+	<sql id="tripartiteParamConfigColumns">
+		a.id AS "id",
+		a.type AS "type",
+		a.parent_id AS "parent.id",
+		a.name AS "name",
+		a.description AS "description",
+		a.value_type AS "valueType",
+		a.default_value AS "defaultValue",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		p.description AS 'parent.description'
+	</sql>
+	
+	<sql id="tripartiteParamConfigJoins">
+		LEFT JOIN sys_tripartite_system_config p
+			   ON p.del_flag = '0'
+		      AND a.parent_id = p.id
+	</sql>
+    
+	<select id="get" resultType="TripartiteParamConfig">
+		SELECT 
+			<include refid="tripartiteParamConfigColumns"/>
+		FROM sys_tripartite_param_config a
+		<include refid="tripartiteParamConfigJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="TripartiteParamConfig">
+		SELECT 
+			<include refid="tripartiteParamConfigColumns"/>
+		FROM sys_tripartite_param_config a
+		<include refid="tripartiteParamConfigJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="parent != null and parent.id != null and parent.id != ''">
+				AND a.parent_id = #{parent.id}
+			</if>
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="description != null and description != ''">
+				AND a.description LIKE 
+					<if test="dbName == 'oracle'">'%'||#{description}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{description}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{description},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="TripartiteParamConfig">
+		SELECT 
+			<include refid="tripartiteParamConfigColumns"/>
+		FROM sys_tripartite_param_config a
+		<include refid="tripartiteParamConfigJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO sys_tripartite_param_config(
+			id,
+			type,
+			parent_id,
+			name,
+			description,
+			value_type,
+			default_value,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{type},
+			#{parent.id},
+			#{name},
+			#{description},
+			#{valueType},
+			#{defaultValue},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_tripartite_param_config SET 	
+			type = #{type},
+			parent_id = #{parent.id},
+			name = #{name},
+			description = #{description},
+			value_type = #{valueType},
+			default_value = #{defaultValue},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sys_tripartite_param_config SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

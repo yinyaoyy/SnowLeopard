@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.cms.dao.SysUserPushDao">
+    
+	<sql id="sysUserPushColumns">
+		a.id AS "id",
+		a.receive_user_id AS "receiveUserId",
+		a.title AS "pushMessage.title",
+		a.content AS "pushMessage.msgContent",
+		a.send_time AS "sendTime",
+		a.status AS "status",
+		a.url AS "url",
+		a.update_date AS "updateDate",
+		a.is_read AS "isRead"
+	</sql>
+	
+		<delete id="deleteById">
+		 delete  from  sys_user_push where  id = #{id}
+		</delete>
+	
+	<select id="get" resultType="SysUserPush">
+		SELECT 
+			<include refid="sysUserPushColumns"/>
+		FROM sys_user_push a
+		
+		WHERE a.id = #{id}
+	</select>
+	
+	<update id="changeReadStatusById">
+		update  sys_user_push  set is_read = '1'
+		WHERE id = #{id}
+	</update>
+	<select id="getByReceivedId" resultType="SysUserPush">
+		SELECT 
+			<include refid="sysUserPushColumns"/>
+		FROM sys_user_push a
+		
+		WHERE a.receive_user_id = #{id} and a.status='0' and a.is_read='0'
+	</select>
+	
+	
+	<select id="findList" resultType="SysUserPush">
+		SELECT 
+			<include refid="sysUserPushColumns"/>
+		FROM sys_user_push a 
+		<where>
+		del_flag = #{DEL_FLAG_NORMAL} 
+			<if test="receiveUserId != null and receiveUserId != ''">
+				AND a.receive_user_id = #{receiveUserId}
+			</if>
+			<if test="pushMessage != null and pushMessage.title != null and pushMessage.title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{pushMessage.title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{pushMessage.title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{pushMessage.title},'%')</if>
+			</if>
+			<if test="pushMessage != null and pushMessage.msgContent != '' and pushMessage.msgContent != null">
+				AND a.content like concat('%',#{pushMessage.msgContent},'%')
+			</if>
+			<if test="isRead == 2">
+				AND a.is_read = '0' or a.is_read = '1'
+			</if>
+			<if test="isRead == 0">
+				AND a.is_read = '0'
+			</if>
+			<if test="isRead ==1">
+				AND a.is_read = '1'
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			    order by a.is_read 
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findMesList" resultType="SysUserPush">
+		SELECT 
+			<include refid="sysUserPushColumns"/>
+		FROM sys_user_push a 
+		<where>
+		del_flag = #{DEL_FLAG_NORMAL}
+			<if test="receiveUserId != null and receiveUserId != ''">
+				AND a.receive_user_id = #{receiveUserId}
+			</if>
+			<if test="pushMessage != null and pushMessage.title != null and pushMessage.title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{pushMessage.title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{pushMessage.title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{pushMessage.title},'%')</if>
+			</if>
+			<if test="pushMessage != null and pushMessage.msgContent != '' and pushMessage.msgContent != null">
+				AND a.content like concat('%',#{pushMessage.msgContent},'%')
+			</if>
+			<if test="isRead != null and isRead != ''">
+				AND a.is_read = #{isRead}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY a.is_read,${page.orderBy}
+			</when>
+			<otherwise>
+			ORDER BY a.is_read
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findAllList" resultType="SysUserPush">
+		SELECT 
+			<include refid="sysUserPushColumns"/>
+		FROM sys_user_push a
+		<where>
+			del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+<insert id="insertList" parameterType="java.util.List">
+INSERT INTO sys_user_push(
+			id,
+			receive_user_id,
+			title,
+			content,
+			send_time,
+			status,
+			url
+		) VALUES 
+		<foreach collection="list" item="l" index= "index" separator =",">
+		(
+		    #{l.id},
+			#{l.receiveUserId},
+			#{l.title},
+			#{l.content},
+			#{l.sendTime},
+			#{l.status},
+			#{l.url}
+		)
+		
+		</foreach>
+</insert>
+	<insert id="insert">
+		INSERT INTO sys_user_push(
+			id,
+			receive_user_id,
+			title,
+			content,
+			send_time,
+			status,
+			url
+		) VALUES (
+			#{id},
+			#{receiveUserId},
+			#{pushMessage.title},
+			#{pushMessage.msgContent},
+			#{sendTime},
+			#{status},
+			#{url}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_user_push SET 	
+			receive_user_id = #{receiveUserId},
+			title = #{title},
+			content = #{content},
+			send_time = #{sendTime},
+			status = #{status},
+			url = #{url},
+			is_read = #{isRead}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="changeReadToAll">
+		UPDATE sys_user_push SET 	
+			is_read = '1'
+		WHERE receive_user_id = #{userId}
+	</update>
+	<update id="updateByReceiveId">
+		UPDATE sys_user_push SET 	
+			title = #{pushMessage.title},
+			content = #{pushMessage.msgContent},
+			update_date = #{updateDate},
+			status = #{status}
+		WHERE receive_user_id = #{receiveUserId}
+	</update>
+	<update id="delete">
+		delete from  sys_user_push  where id = #{id}
+	</update>
+	<update id="updateStatusById">
+		update  sys_user_push set status = '1'  where id = #{id} 
+	</update>
+	
+	
+	<!--查询未读消息  -->
+	<select id="findNoReadList" resultType="int">
+		SELECT 
+			count(*)
+		FROM sys_user_push a 
+		<where>
+		del_flag = '0'  and a.is_read = '0'
+			<if test="userId != null and userId != ''">
+				AND a.receive_user_id = #{userId}
+			</if>
+		</where>
+	</select>
+</mapper>
