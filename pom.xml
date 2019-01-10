@@ -87,6 +87,8 @@
     <artifactId>jpush-client</artifactId>
     <version>3.3.7</version>
 </dependency>
+
+
 <dependency>
         <groupId>cn.jpush.api</groupId>
         <artifactId>jiguang-common</artifactId>
@@ -149,6 +151,7 @@
 			<artifactId>spring-context</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.baidu.ueditor/ueditor -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>

@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.hibernate.validator.constraints.Length;
 
-import com.sun.tools.javac.util.List;
+
 import com.thinkgem.jeesite.common.persistence.DataEntity;
 import com.thinkgem.jeesite.modules.sys.entity.User;
 

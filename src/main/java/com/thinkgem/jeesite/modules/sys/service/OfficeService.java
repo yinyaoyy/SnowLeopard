@@ -26,12 +26,10 @@ import com.thinkgem.jeesite.modules.info.entity.Judiciary;
 import com.thinkgem.jeesite.modules.info.entity.LawAssistance;
 import com.thinkgem.jeesite.modules.info.entity.LowOffice;
 import com.thinkgem.jeesite.modules.info.entity.NotaryAgency;
-import com.thinkgem.jeesite.modules.info.entity.PeopleMediation;
 import com.thinkgem.jeesite.modules.info.entity.PeopleMediationCommittee;
 import com.thinkgem.jeesite.modules.sys.dao.OfficeDao;
 import com.thinkgem.jeesite.modules.sys.dao.UserDao;
 import com.thinkgem.jeesite.modules.sys.entity.Office;
-import com.thinkgem.jeesite.modules.sys.entity.User;
 import com.thinkgem.jeesite.modules.sys.entity.UserAndInfoData;
 import com.thinkgem.jeesite.modules.sys.utils.UserUtils;
 
